@@ -1,0 +1,53 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          REPO_DIR: ${{ secrets.REPO_DIR }}
+        run: |
+          ssh -i ~/.ssh/id_ed25519 ${VPS_USER}@${VPS_HOST} \
+            "cd ${REPO_DIR} && bash infra/scripts/deploy.sh"
+
+      - name: Health check
+        env:
+          PUBLIC_HOST: ${{ secrets.PUBLIC_HOST }}
+        run: |
+          for i in 1 2 3 4 5; do
+            if curl -fsS --max-time 10 "https://${PUBLIC_HOST}/health" >/dev/null; then
+              echo "Healthy"
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying..."
+            sleep 10
+          done
+          echo "Health check failed"
+          exit 1
