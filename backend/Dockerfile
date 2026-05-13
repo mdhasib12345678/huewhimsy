@@ -9,7 +9,7 @@ COPY package.json package-lock.json* yarn.lock* pnpm-lock.yaml* ./
 RUN \
   if [ -f pnpm-lock.yaml ]; then corepack enable && pnpm install --frozen-lockfile; \
   elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
-  else npm ci; \
+  else npm ci --legacy-peer-deps; \
   fi
 
 # ===== build =====
@@ -39,7 +39,7 @@ RUN addgroup -S medusa -g 1001 && adduser -S medusa -u 1001 -G medusa
 COPY --from=build --chown=medusa:medusa /app/.medusa/server ./
 RUN if [ -f pnpm-lock.yaml ]; then corepack enable && pnpm install --prod --frozen-lockfile; \
     elif [ -f yarn.lock ]; then yarn install --production --frozen-lockfile; \
-    else npm ci --omit=dev; \
+    else npm ci --omit=dev --legacy-peer-deps; \
     fi && \
     npm cache clean --force && \
     chown -R medusa:medusa /app

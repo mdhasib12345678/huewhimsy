@@ -129,6 +129,9 @@ services:
       dockerfile: Dockerfile
       args:
         NODE_VERSION: "20"
+        VITE_MEDUSA_BACKEND_URL: ${MEDUSA_BACKEND_URL}
+        VITE_MEDUSA_PUBLISHABLE_KEY: ${VITE_MEDUSA_PUBLISHABLE_KEY}
+        VITE_DEFAULT_REGION_ID: ${VITE_DEFAULT_REGION_ID}
     image: huewhimsy/storefront:latest
     container_name: huewhimsy-storefront
     restart: unless-stopped

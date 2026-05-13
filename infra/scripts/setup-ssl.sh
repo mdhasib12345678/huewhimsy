@@ -14,13 +14,18 @@ step() { printf '\n\033[1;36m>> %s\033[0m\n' "$*"; }
 
 step "Pre-flight: domain $DOMAIN must resolve to this VPS"
 THIS_IP="$(curl -fsS https://api.ipify.org)"
-RESOLVED="$(dig +short A "$DOMAIN" | tail -1 || true)"
+# Query against an external public resolver to avoid /etc/hosts shadowing
+RESOLVED="$(dig +short A "$DOMAIN" @1.1.1.1 | grep -E '^[0-9.]+$' | tail -1 || true)"
 echo "  this VPS public IP : $THIS_IP"
 echo "  $DOMAIN  resolves to: ${RESOLVED:-<no A record>}"
-if [ "$RESOLVED" != "$THIS_IP" ]; then
-    echo "WARNING: $DOMAIN does not resolve to $THIS_IP — Let's Encrypt HTTP-01 will fail." >&2
-    echo "Set the A record and re-run." >&2
-    exit 1
+if [ -z "$RESOLVED" ] || [ "$RESOLVED" != "$THIS_IP" ]; then
+    if [ "${SKIP_DNS_CHECK:-0}" = "1" ]; then
+        echo "  (SKIP_DNS_CHECK=1 set, proceeding anyway)"
+    else
+        echo "WARNING: $DOMAIN does not resolve to $THIS_IP — Let's Encrypt HTTP-01 will fail." >&2
+        echo "Set the A record and re-run, or rerun with SKIP_DNS_CHECK=1 if you've already verified." >&2
+        exit 1
+    fi
 fi
 
 step "Ensure webroot volume + nginx is serving /.well-known/acme-challenge/"

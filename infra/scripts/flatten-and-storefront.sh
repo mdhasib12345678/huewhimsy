@@ -36,7 +36,8 @@ if [ -d "backend/apps/backend" ] && [ ! -f "backend/medusa-config.ts" ]; then
     rm -f .env
 
     step "Install Medusa deps for flat backend"
-    npm install --no-audit --no-fund --progress=false
+    # Medusa scaffold ships React 18 dev dep but newer @medusajs/icons peers React 19
+    npm install --legacy-peer-deps --no-audit --no-fund --progress=false
 
     cd "$REPO_DIR"
     echo "  Flat backend ready"

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { useRainbow } from '@/components/RainbowContext';
 import { ShoppingCart, Heart, Eye, Star, Filter, Search } from 'lucide-react';
@@ -14,14 +14,38 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { NavLink } from 'react-router-dom';
+import {
+  listProducts,
+  productPrice,
+  formatPrice,
+  type MedusaProduct,
+} from '@/lib/medusa';
+import { cn } from '@/lib/utils';
 
-const products = [
-  { id: 'p1', title: 'Creative Watercolor Set', price: 24.99, category: 'Coloring Supplies', rating: 4.8, status: 'Best Seller', color: '#FF5F6D', desc: 'Premium 24-color watercolor set for little artists.' },
-  { id: 'p2', title: 'Eco-Friendly Writing Pad', price: 12.50, category: 'Writing Supplies', rating: 4.5, status: 'Popular', color: '#4DA8FF', desc: 'Sustainable paper and recycled cover.' },
-  { id: 'p3', title: 'Alphabet Letter Blocks', price: 34.99, category: 'Educational Toys', rating: 4.9, status: 'New', color: '#FFD93D', desc: 'Handcrafted wooden blocks for early learning.' },
-  { id: 'p4', title: 'Giant Floor Coloring Map', price: 19.99, category: 'Coloring Supplies', rating: 4.7, status: 'Best Seller', color: '#5BE37D', desc: '5-foot wide interactive world map coloring sheet.' },
-  { id: 'p5', title: 'Rilo Plush Explorer', price: 29.00, category: 'Educational Toys', rating: 5.0, status: 'Limited', color: '#FF9A3C', desc: 'Soft and cuddly Rilo the Rabbit companion.' },
-  { id: 'p6', title: 'Magic Erasable Pens', price: 15.99, category: 'Writing Supplies', rating: 4.6, status: 'New', color: '#B067FF', desc: 'Pack of 12 vibrant pens that erase with a swipe.' },
+// Local UI shape — kept identical to the original mock data so the card render is unchanged.
+type UiProduct = {
+  id: string;
+  title: string;
+  price: number;
+  category: string;
+  rating: number;
+  status: string;
+  color: string;
+  desc: string;
+  thumbnail?: string | null;
+  handle: string;
+};
+
+const PALETTE = ['#FF5F6D', '#4DA8FF', '#FFD93D', '#5BE37D', '#FF9A3C', '#B067FF'];
+const STATUSES = ['New', 'Best Seller', 'Popular', 'Limited'];
+
+const FALLBACK: UiProduct[] = [
+  { id: 'p1', handle: 'creative-watercolor-set', title: 'Creative Watercolor Set', price: 24.99, category: 'Coloring Supplies', rating: 4.8, status: 'Best Seller', color: '#FF5F6D', desc: 'Premium 24-color watercolor set for little artists.' },
+  { id: 'p2', handle: 'eco-friendly-writing-pad', title: 'Eco-Friendly Writing Pad', price: 12.50, category: 'Writing Supplies', rating: 4.5, status: 'Popular', color: '#4DA8FF', desc: 'Sustainable paper and recycled cover.' },
+  { id: 'p3', handle: 'alphabet-letter-blocks', title: 'Alphabet Letter Blocks', price: 34.99, category: 'Educational Toys', rating: 4.9, status: 'New', color: '#FFD93D', desc: 'Handcrafted wooden blocks for early learning.' },
+  { id: 'p4', handle: 'giant-floor-coloring-map', title: 'Giant Floor Coloring Map', price: 19.99, category: 'Coloring Supplies', rating: 4.7, status: 'Best Seller', color: '#5BE37D', desc: '5-foot wide interactive world map coloring sheet.' },
+  { id: 'p5', handle: 'rilo-plush-explorer', title: 'Rilo Plush Explorer', price: 29.00, category: 'Educational Toys', rating: 5.0, status: 'Limited', color: '#FF9A3C', desc: 'Soft and cuddly Rilo the Rabbit companion.' },
+  { id: 'p6', handle: 'magic-erasable-pens', title: 'Magic Erasable Pens', price: 15.99, category: 'Writing Supplies', rating: 4.6, status: 'New', color: '#B067FF', desc: 'Pack of 12 vibrant pens that erase with a swipe.' },
 ];
 
 const categories = [
@@ -36,36 +60,87 @@ const categories = [
   'Family Favorites',
 ];
 
+function mapMedusaToUi(p: MedusaProduct, idx: number): UiProduct {
+  const category =
+    (p.type?.value as string | undefined) ??
+    (p.collection?.title as string | undefined) ??
+    (p.tags?.[0]?.value as string | undefined) ??
+    'Educational Toys';
+  return {
+    id: p.id,
+    handle: p.handle,
+    title: p.title,
+    price: productPrice(p),
+    category,
+    rating: 4.7,
+    status: STATUSES[idx % STATUSES.length],
+    color: PALETTE[idx % PALETTE.length],
+    desc: p.description ?? '',
+    thumbnail: p.thumbnail,
+  };
+}
+
 export const Shop: React.FC = () => {
   const { setIntensity, addToCart, toggleWishlist, wishlistItems } = useRainbow();
   const [filter, setFilter] = useState('All Products');
   const [search, setSearch] = useState('');
+  const [products, setProducts] = useState<UiProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setIntensity(0.5); // 45%–55% rainbow intensity for Shop
   }, []);
 
-  const filteredProducts = products.filter(p => {
-    const matchesFilter = filter === 'All Products' || p.category === filter;
-    const matchesSearch = p.title.toLowerCase().includes(search.toLowerCase());
-    return matchesFilter && matchesSearch;
-  });
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    listProducts({ limit: 50 })
+      .then((res) => {
+        if (cancelled) return;
+        const mapped = res.products.map(mapMedusaToUi);
+        setProducts(mapped.length > 0 ? mapped : FALLBACK);
+      })
+      .catch((e: unknown) => {
+        if (cancelled) return;
+        console.warn('Medusa products fetch failed, using fallback:', e);
+        setError(e instanceof Error ? e.message : String(e));
+        setProducts(FALLBACK);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const filteredProducts = useMemo(
+    () =>
+      products.filter((p) => {
+        const matchesFilter = filter === 'All Products' || p.category === filter;
+        const matchesSearch = p.title.toLowerCase().includes(search.toLowerCase());
+        return matchesFilter && matchesSearch;
+      }),
+    [products, filter, search],
+  );
 
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.1 }
-    }
+      transition: { staggerChildren: 0.1 },
+    },
   };
 
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
-    visible: { y: 0, opacity: 1 }
+    visible: { y: 0, opacity: 1 },
   };
 
   return (
-    <motion.div 
+    <motion.div
       initial="hidden"
       animate="visible"
       variants={containerVariants}
@@ -93,14 +168,14 @@ export const Shop: React.FC = () => {
       <div className="flex flex-col md:flex-row gap-4 mb-12 items-center justify-between bg-white/5 p-4 rounded-[2rem] border border-white/10 backdrop-blur-xl">
         <div className="relative w-full md:w-96">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#B8BEC6]" />
-          <Input 
-            placeholder="Search products..." 
+          <Input
+            placeholder="Search products..."
             className="pl-12 bg-white/5 border-white/10 rounded-full h-12 text-white focus:ring-[#FFD93D]"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        
+
         <div className="flex gap-4 w-full md:w-auto">
           <Select value={filter} onValueChange={setFilter}>
             <SelectTrigger className="w-full md:w-64 bg-white/5 border-white/10 rounded-full h-12 text-white">
@@ -118,71 +193,93 @@ export const Shop: React.FC = () => {
         </div>
       </div>
 
+      {/* Loading shimmer (kept minimal so layout doesn't shift) */}
+      {loading && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-[420px] rounded-[2rem] bg-white/5 border border-white/10 animate-pulse" />
+          ))}
+        </div>
+      )}
+
       {/* Product Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {filteredProducts.map((p) => (
-          <motion.div key={p.id} variants={itemVariants} whileHover={{ y: -10 }}>
-            <Card className="h-full border-white/10 bg-white/5 overflow-hidden flex flex-col group cursor-pointer border-b-2 hover:border-[#FFD93D]/50 transition-all">
-              <CardContent className="p-0 flex flex-col h-full">
-                {/* Product Image Area */}
-                <div className="aspect-square relative bg-white/5 overflow-hidden flex items-center justify-center">
-                  <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity" style={{ backgroundColor: p.color }} />
-                  <div className="relative z-10 w-32 h-32 rounded-3xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:scale-110 transition-transform duration-500">
-                     <span className="text-white/20 font-bold text-4xl">Image</span>
-                  </div>
-                  
-                  {/* Overlay Actions */}
-                  <div className="absolute top-4 right-4 flex flex-col gap-2 translate-x-12 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
-                    <Button 
-                      variant="secondary" 
-                      size="icon" 
-                      onClick={(e) => { e.preventDefault(); toggleWishlist(p.id); }}
-                      className={cn("rounded-full shadow-lg", wishlistItems.includes(p.id) ? "text-[#FF5F6D]" : "text-black")}
-                    >
-                      <Heart className={cn("w-4 h-4", wishlistItems.includes(p.id) && "fill-current")} />
-                    </Button>
-                    <Button variant="secondary" size="icon" className="rounded-full shadow-lg text-black">
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                  </div>
+      {!loading && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {filteredProducts.map((p) => (
+            <motion.div key={p.id} variants={itemVariants} whileHover={{ y: -10 }}>
+              <NavLink to={`/shop/${p.handle}`} className="block h-full">
+                <Card className="h-full border-white/10 bg-white/5 overflow-hidden flex flex-col group cursor-pointer border-b-2 hover:border-[#FFD93D]/50 transition-all">
+                  <CardContent className="p-0 flex flex-col h-full">
+                    {/* Product Image Area */}
+                    <div className="aspect-square relative bg-white/5 overflow-hidden flex items-center justify-center">
+                      <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity" style={{ backgroundColor: p.color }} />
+                      {p.thumbnail ? (
+                        <img
+                          src={p.thumbnail}
+                          alt={p.title}
+                          loading="lazy"
+                          className="relative z-10 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="relative z-10 w-32 h-32 rounded-3xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:scale-110 transition-transform duration-500">
+                          <span className="text-white/20 font-bold text-4xl">Image</span>
+                        </div>
+                      )}
 
-                  {p.status && (
-                    <Badge className="absolute top-4 left-4 bg-white/10 backdrop-blur-md text-white border-white/20">
-                      {p.status}
-                    </Badge>
-                  )}
-                </div>
+                      {/* Overlay Actions */}
+                      <div className="absolute top-4 right-4 flex flex-col gap-2 translate-x-12 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
+                        <Button
+                          variant="secondary"
+                          size="icon"
+                          onClick={(e) => { e.preventDefault(); toggleWishlist(p.id); }}
+                          className={cn("rounded-full shadow-lg", wishlistItems.includes(p.id) ? "text-[#FF5F6D]" : "text-black")}
+                        >
+                          <Heart className={cn("w-4 h-4", wishlistItems.includes(p.id) && "fill-current")} />
+                        </Button>
+                        <Button variant="secondary" size="icon" className="rounded-full shadow-lg text-black">
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                      </div>
 
-                {/* Info Area */}
-                <div className="p-6 space-y-3 flex-grow flex flex-col">
-                  <div className="flex justify-between items-start">
-                    <div className="text-xs font-bold text-[#FFD93D] uppercase tracking-widest">{p.category}</div>
-                    <div className="flex items-center gap-1">
-                      <Star className="w-3 h-3 fill-[#FFD93D] text-[#FFD93D]" />
-                      <span className="text-xs text-white font-bold">{p.rating}</span>
+                      {p.status && (
+                        <Badge className="absolute top-4 left-4 bg-white/10 backdrop-blur-md text-white border-white/20">
+                          {p.status}
+                        </Badge>
+                      )}
                     </div>
-                  </div>
-                  
-                  <h3 className="text-xl font-bold text-white transition-colors">{p.title}</h3>
-                  <p className="text-[#B8BEC6] text-sm line-clamp-2">{p.desc}</p>
-                  
-                  <div className="mt-auto pt-4 flex items-center justify-between">
-                    <span className="text-2xl font-bold text-white">${p.price}</span>
-                    <Button 
-                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart({ ...p, type: 'product' }); }}
-                      className="rounded-full bg-white text-black hover:bg-[#F5F5F5] font-bold"
-                    >
-                      <ShoppingCart className="w-4 h-4 mr-2" /> Add
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
 
-      {filteredProducts.length === 0 && (
+                    {/* Info Area */}
+                    <div className="p-6 space-y-3 flex-grow flex flex-col">
+                      <div className="flex justify-between items-start">
+                        <div className="text-xs font-bold text-[#FFD93D] uppercase tracking-widest">{p.category}</div>
+                        <div className="flex items-center gap-1">
+                          <Star className="w-3 h-3 fill-[#FFD93D] text-[#FFD93D]" />
+                          <span className="text-xs text-white font-bold">{p.rating}</span>
+                        </div>
+                      </div>
+
+                      <h3 className="text-xl font-bold text-white transition-colors">{p.title}</h3>
+                      <p className="text-[#B8BEC6] text-sm line-clamp-2">{p.desc}</p>
+
+                      <div className="mt-auto pt-4 flex items-center justify-between">
+                        <span className="text-2xl font-bold text-white">{formatPrice(p.price)}</span>
+                        <Button
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart({ ...p, type: 'product' }); }}
+                          className="rounded-full bg-white text-black hover:bg-[#F5F5F5] font-bold"
+                        >
+                          <ShoppingCart className="w-4 h-4 mr-2" /> Add
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </NavLink>
+            </motion.div>
+          ))}
+        </div>
+      )}
+
+      {!loading && filteredProducts.length === 0 && (
         <div className="py-32 text-center">
           <p className="text-[#B8BEC6] text-xl">No products found for "{search}"</p>
           <Button variant="link" className="text-[#FFD93D]" onClick={() => { setSearch(''); setFilter('All Products'); }}>
@@ -190,7 +287,12 @@ export const Shop: React.FC = () => {
           </Button>
         </div>
       )}
+
+      {error && (
+        <div className="mt-8 text-center text-xs text-[#B8BEC6]/60">
+          showing fallback catalog (API: {error})
+        </div>
+      )}
     </motion.div>
   );
 };
-import { cn } from '@/lib/utils';

@@ -9,6 +9,13 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci --no-audit --no-fund --progress=false
 COPY . .
+# Vite build-time public config (baked into the bundle — only publishable, non-secret values)
+ARG VITE_MEDUSA_BACKEND_URL
+ARG VITE_MEDUSA_PUBLISHABLE_KEY
+ARG VITE_DEFAULT_REGION_ID
+ENV VITE_MEDUSA_BACKEND_URL=$VITE_MEDUSA_BACKEND_URL
+ENV VITE_MEDUSA_PUBLISHABLE_KEY=$VITE_MEDUSA_PUBLISHABLE_KEY
+ENV VITE_DEFAULT_REGION_ID=$VITE_DEFAULT_REGION_ID
 ENV NODE_ENV=production
 ENV NODE_OPTIONS="--max-old-space-size=1024"
 RUN npm run build
