@@ -1,0 +1,66 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Custom UI Colors */
+  --color-brand-red: #FF5F6D;
+  --color-brand-orange: #FF9A3C;
+  --color-brand-yellow: #FFD93D;
+  --color-brand-green: #5BE37D;
+  --color-brand-blue: #4DA8FF;
+  --color-brand-indigo: #6C63FF;
+  --color-brand-violet: #B067FF;
+
+  /* shadcn UI variables (Dark Mode by default for this app) */
+  --color-background: #0a0a0a;
+  --color-foreground: #F5F5F5;
+  --color-card: #1a1a1a;
+  --color-card-foreground: #F5F5F5;
+  --color-popover: #1a1a1a;
+  --color-popover-foreground: #F5F5F5;
+  --color-primary: #F5F5F5;
+  --color-primary-foreground: #0a0a0a;
+  --color-secondary: #262626;
+  --color-secondary-foreground: #F5F5F5;
+  --color-muted: #262626;
+  --color-muted-foreground: #B8BEC6;
+  --color-accent: #262626;
+  --color-accent-foreground: #F5F5F5;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #F5F5F5;
+  --color-border: #262626;
+  --color-input: #262626;
+  --color-ring: #F5F5F5;
+  --radius: 0.75rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    color: #F5F5F5;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-tight;
+  }
+
+  .text-secondary {
+    color: #D6D9DD;
+  }
+
+  .text-muted {
+    color: #B8BEC6;
+  }
+
+  /* Glass Effects */
+  .glass {
+    @apply bg-white/5 backdrop-blur-md border border-white/10;
+  }
+}

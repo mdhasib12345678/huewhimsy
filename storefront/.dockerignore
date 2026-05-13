@@ -1,13 +1,10 @@
 node_modules
-.next
-out
 dist
-build
-coverage
 .git
 .gitignore
-.env*
-!.env.example
+.env
+.env.local
+.env.*.local
 Dockerfile
 .dockerignore
 *.log
@@ -15,5 +12,8 @@ Dockerfile
 .vscode
 .idea
 README.md
-.turbo
 .cache
+.turbo
+.next
+out
+build

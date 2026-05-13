@@ -1,51 +1,72 @@
 # syntax=docker/dockerfile:1.7
+# HueWhimsy storefront — Vite 6 + React 19 SPA, served by a small nginx.
 ARG NODE_VERSION=20
-
-# ===== deps =====
-FROM node:${NODE_VERSION}-alpine AS deps
-RUN apk add --no-cache libc6-compat
-WORKDIR /app
-COPY package.json package-lock.json* yarn.lock* pnpm-lock.yaml* ./
-RUN \
-  if [ -f pnpm-lock.yaml ]; then corepack enable && pnpm install --frozen-lockfile; \
-  elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
-  else npm ci; \
-  fi
 
 # ===== build =====
 FROM node:${NODE_VERSION}-alpine AS build
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+COPY package.json package-lock.json* ./
+RUN npm ci --no-audit --no-fund --progress=false
 COPY . .
-ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
-ENV NEXT_PUBLIC_MEDUSA_BACKEND_URL=PLACEHOLDER_BUILD_TIME
-RUN \
-  if [ -f pnpm-lock.yaml ]; then corepack enable && pnpm run build; \
-  elif [ -f yarn.lock ]; then yarn build; \
-  else npm run build; \
-  fi
+ENV NODE_OPTIONS="--max-old-space-size=1024"
+RUN npm run build
 
-# ===== runtime =====
-FROM node:${NODE_VERSION}-alpine AS runtime
+# ===== runtime (nginx serving static dist) =====
+FROM nginx:1.27-alpine AS runtime
 RUN apk add --no-cache tini wget
-WORKDIR /app
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-ENV PORT=3000
-ENV HOSTNAME=0.0.0.0
+RUN rm -f /etc/nginx/conf.d/default.conf
+COPY --from=build /app/dist /usr/share/nginx/html
 
-RUN addgroup -S nextjs -g 1001 && adduser -S nextjs -u 1001 -G nextjs
+# Self-contained nginx config for the SPA
+RUN cat > /etc/nginx/conf.d/spa.conf <<'EOF'
+server {
+    listen 3000;
+    listen [::]:3000;
+    server_name _;
+    server_tokens off;
 
-# Next.js standalone output (requires output: 'standalone' in next.config)
-COPY --from=build --chown=nextjs:nextjs /app/public ./public
-COPY --from=build --chown=nextjs:nextjs /app/.next/standalone ./
-COPY --from=build --chown=nextjs:nextjs /app/.next/static ./.next/static
+    root /usr/share/nginx/html;
+    index index.html;
 
-USER nextjs
+    # Health check
+    location = /health {
+        access_log off;
+        return 200 "ok\n";
+        add_header Content-Type text/plain;
+    }
+
+    # Long cache for hashed assets
+    location /assets/ {
+        access_log off;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        try_files $uri =404;
+    }
+
+    # Other static files (favicon, robots, etc.)
+    location ~* \.(?:ico|css|js|gif|jpe?g|png|webp|avif|svg|woff2?|ttf|eot|otf)$ {
+        access_log off;
+        expires 30d;
+        add_header Cache-Control "public";
+        try_files $uri =404;
+    }
+
+    # SPA fallback — every other path returns index.html
+    location / {
+        try_files $uri $uri/ /index.html;
+        add_header Cache-Control "no-cache" always;
+    }
+
+    # Gzip is enabled by parent nginx upstream — keep it off here to avoid double compression
+    gzip off;
+}
+EOF
+
 EXPOSE 3000
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD wget --quiet --tries=1 --spider http://127.0.0.1:3000/ || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD wget --quiet --tries=1 --spider http://127.0.0.1:3000/health || exit 1
 
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["node", "server.js"]
+CMD ["nginx", "-g", "daemon off;"]

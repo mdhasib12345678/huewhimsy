@@ -122,6 +122,8 @@ services:
         max-file: "3"
 
   storefront:
+    # Vite 6 + React 19 SPA built into a tiny nginx image (port 3000).
+    # Static; calls the Medusa backend at /store/* via the parent nginx.
     build:
       context: ./storefront
       dockerfile: Dockerfile
@@ -130,35 +132,21 @@ services:
     image: huewhimsy/storefront:latest
     container_name: huewhimsy-storefront
     restart: unless-stopped
-    environment:
-      NODE_ENV: production
-      PORT: "3000"
-      HOSTNAME: "0.0.0.0"
-      NEXT_TELEMETRY_DISABLED: "1"
-      NEXT_PUBLIC_MEDUSA_BACKEND_URL: ${NEXT_PUBLIC_MEDUSA_BACKEND_URL}
-      NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL}
-      NEXT_PUBLIC_DEFAULT_REGION: ${NEXT_PUBLIC_DEFAULT_REGION}
-      NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY}
-      REVALIDATE_SECRET: ${REVALIDATE_SECRET}
-      NODE_OPTIONS: "--max-old-space-size=768"
-    depends_on:
-      backend:
-        condition: service_healthy
     networks:
       - net
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:3000/"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:3000/health"]
       interval: 30s
-      timeout: 10s
+      timeout: 5s
       retries: 3
-      start_period: 60s
+      start_period: 10s
     deploy:
       resources:
         limits:
-          memory: 1024M
-          cpus: "1.0"
+          memory: 64M
+          cpus: "0.3"
         reservations:
-          memory: 256M
+          memory: 16M
     logging:
       driver: json-file
       options:
