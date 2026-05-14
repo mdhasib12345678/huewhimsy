@@ -28,11 +28,12 @@ jobs:
           probe_url() {
             local label="$1" url="$2" want="$3"
             local code
-            code=$(curl -sf -o /dev/null -w '%{http_code}' --max-time 15 \
-                   --connect-timeout 10 "$url" 2>/dev/null || echo 000)
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 \
+                   --connect-timeout 10 "$url" 2>/dev/null)
+            code="${code:-000}"
             if [ "$code" = "$want" ] || \
                { [ "$want" = "2xx" ] && [ "${code:0:1}" = "2" ]; } || \
-               { [ "$want" = "any" ] && [ "${code:0:1}" != "0" ]; }; then
+               { [ "$want" = "any" ] && [ "$code" != "000" ]; }; then
               printf '  ✓ %-12s %-45s -> HTTP %s\n' "$label" "$url" "$code"
               return 0
             fi
