@@ -24,11 +24,14 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Setup SSH key
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+
+      - name: Trust VPS host key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.VPS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
 
       - name: Snapshot env on VPS (safety)
@@ -37,7 +40,7 @@ jobs:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           REPO_DIR: ${{ secrets.VPS_DEPLOY_PATH }}
         run: |
-          ssh -i ~/.ssh/id_ed25519 "${VPS_USER}@${VPS_HOST}" \
+          ssh "${VPS_USER}@${VPS_HOST}" \
             "cd \"${REPO_DIR}\" && cp -a .env.production .env.production.predeploy.\$(date +%Y%m%d-%H%M%S) || true"
 
       - name: rsync repo to VPS
@@ -47,7 +50,7 @@ jobs:
           REPO_DIR: ${{ secrets.VPS_DEPLOY_PATH }}
         run: |
           rsync -az --delete \
-            -e "ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new" \
+            -e "ssh -o StrictHostKeyChecking=accept-new" \
             --exclude '.git/' \
             --exclude '.github/' \
             --exclude 'node_modules/' \
@@ -70,7 +73,7 @@ jobs:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           REPO_DIR: ${{ secrets.VPS_DEPLOY_PATH }}
         run: |
-          ssh -i ~/.ssh/id_ed25519 "${VPS_USER}@${VPS_HOST}" \
+          ssh "${VPS_USER}@${VPS_HOST}" \
             "cd \"${REPO_DIR}\" && REPO_DIR=\"${REPO_DIR}\" bash infra/scripts/deploy.sh"
 
       - name: Public health probe
