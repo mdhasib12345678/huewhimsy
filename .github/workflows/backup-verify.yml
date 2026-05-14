@@ -1,0 +1,180 @@
+name: Backup Verification
+
+on:
+  schedule:
+    - cron: '30 5 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: backup-verify
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: SSH to VPS + verify latest backup
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+
+      - name: Trust VPS host key
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Verify latest backup
+        id: verify
+        env:
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+        run: |
+          set +e
+          out=$(ssh "${VPS_USER}@${VPS_HOST}" bash <<'REMOTE'
+            set -u
+            BACKUP_DIR=/var/backups/huewhimsy
+            now=$(date +%s)
+            max_age_hours=30
+            min_postgres_kb=50
+            min_redis_kb=1
+
+            latest=$(find "$BACKUP_DIR" -mindepth 1 -maxdepth 1 -type d -printf '%T@ %p\n' 2>/dev/null \
+                | sort -rn | head -1 | awk '{print $2}')
+            if [ -z "$latest" ]; then
+              echo "ERROR: no backups found in $BACKUP_DIR"
+              exit 11
+            fi
+
+            mtime=$(stat -c %Y "$latest")
+            age_hours=$(( (now - mtime) / 3600 ))
+            echo "Latest backup: $latest"
+            echo "Age: ${age_hours}h"
+
+            if [ "$age_hours" -gt "$max_age_hours" ]; then
+              echo "ERROR: latest backup is ${age_hours}h old (threshold ${max_age_hours}h)"
+              exit 12
+            fi
+
+            pg_dump_size=$(du -k "$latest"/postgres-*.dump 2>/dev/null | awk '{s+=$1} END {print s+0}')
+            redis_size=$(du -k "$latest"/redis-*.rdb 2>/dev/null | awk '{s+=$1} END {print s+0}')
+            echo "Postgres dump: ${pg_dump_size} KB"
+            echo "Redis dump:    ${redis_size} KB"
+
+            if [ "$pg_dump_size" -lt "$min_postgres_kb" ]; then
+              echo "ERROR: postgres dump too small ($pg_dump_size KB < $min_postgres_kb KB)"
+              exit 13
+            fi
+            if [ "$redis_size" -lt "$min_redis_kb" ]; then
+              echo "ERROR: redis dump too small ($redis_size KB < $min_redis_kb KB)"
+              exit 14
+            fi
+
+            if [ -f "$latest/SHA256SUMS" ]; then
+              echo "Verifying SHA256 checksums..."
+              cd "$latest" && sha256sum -c SHA256SUMS --quiet 2>&1 || { echo "ERROR: checksum verification failed"; exit 15; }
+              echo "Checksums OK"
+            else
+              echo "WARN: no SHA256SUMS file (older backup format)"
+            fi
+
+            df_root=$(df -h / | awk 'NR==2 {print $5}' | tr -d '%')
+            echo "Root disk usage: ${df_root}%"
+            if [ "$df_root" -gt 90 ]; then
+              echo "ERROR: root disk usage at ${df_root}% (>90)"
+              exit 16
+            fi
+
+            echo "OK: backup verified"
+          REMOTE
+          )
+          rc=$?
+          echo "$out"
+          {
+            echo "rc=$rc"
+            {
+              echo 'output<<EOF'
+              echo "$out"
+              echo EOF
+            }
+          } >> "$GITHUB_OUTPUT"
+          if [ "$rc" -ne 0 ]; then
+            exit "$rc"
+          fi
+
+      - name: Open / append to backup incident issue on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const now = new Date().toISOString();
+            const title = '[backup] verification failed';
+            const out = `${{ steps.verify.outputs.output }}`;
+            const rc = `${{ steps.verify.outputs.rc }}`;
+            const body = [
+              `**rc:** \`${rc}\``,
+              `**Probed at:** ${now}`,
+              ``,
+              '```',
+              out,
+              '```',
+              ``,
+              `Workflow run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            ].join('\n');
+
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'backup',
+              per_page: 5,
+            });
+            if (existing.data.length > 0) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.data[0].number,
+                body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                labels: ['backup', 'incident'],
+                body,
+              });
+            }
+
+      - name: Auto-close backup incidents on recovery
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const open = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'backup',
+              per_page: 10,
+            });
+            for (const issue of open.data) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `Backup verification passed as of ${new Date().toISOString()}. Auto-closing.`,
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed',
+                state_reason: 'completed',
+              });
+            }
