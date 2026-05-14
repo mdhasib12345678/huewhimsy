@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# HueWhimsy deploy — pull latest, build, restart, prune
+# HueWhimsy deploy — build, restart, prune
+# Code is rsync'd in by GitHub Actions BEFORE this script runs.
+# Manual invocation (no rsync) just rebuilds whatever is in REPO_DIR.
 set -euo pipefail
 
 readonly REPO_DIR="${REPO_DIR:-/opt/huewhimsy}"
@@ -12,19 +14,22 @@ step() { printf '\n\033[1;36m>> %s\033[0m\n' "$*"; }
 
 [ -f "$ENV_FILE" ] || { echo "Missing $ENV_FILE" >&2; exit 1; }
 
-step "Pull latest code"
-git fetch --all --prune
-git reset --hard origin/main
-
 step "Build images"
 docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" build --pull
 
 step "Start / update stack"
 docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --remove-orphans
 
-step "Wait for health"
-sleep 5
+step "Wait for health (60s)"
+sleep 60
 docker compose -f "$COMPOSE_FILE" ps
+
+step "Verify no unhealthy containers"
+if docker compose -f "$COMPOSE_FILE" ps --format json 2>/dev/null | grep -qi '"Health":"unhealthy"'; then
+    echo "ERROR: one or more containers are unhealthy" >&2
+    docker compose -f "$COMPOSE_FILE" ps
+    exit 1
+fi
 
 step "Prune dangling images / build cache (>3 days)"
 docker image prune -f

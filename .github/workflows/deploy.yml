@@ -3,6 +3,9 @@ name: Deploy to VPS
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - '**/*.md'
+      - 'LICENSE'
   workflow_dispatch:
 
 concurrency:
@@ -11,9 +14,9 @@ concurrency:
 
 jobs:
   deploy:
-    name: Deploy
+    name: rsync + docker compose up
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
@@ -26,28 +29,60 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
 
-      - name: Deploy
+      - name: Snapshot env on VPS (safety)
         env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_USER: ${{ secrets.VPS_USER }}
-          REPO_DIR: ${{ secrets.REPO_DIR }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          REPO_DIR: ${{ secrets.VPS_DEPLOY_PATH }}
         run: |
-          ssh -i ~/.ssh/id_ed25519 ${VPS_USER}@${VPS_HOST} \
-            "cd ${REPO_DIR} && bash infra/scripts/deploy.sh"
+          ssh -i ~/.ssh/id_ed25519 "${VPS_USER}@${VPS_HOST}" \
+            "cd \"${REPO_DIR}\" && cp -a .env.production .env.production.predeploy.\$(date +%Y%m%d-%H%M%S) || true"
 
-      - name: Health check
+      - name: rsync repo to VPS
         env:
-          PUBLIC_HOST: ${{ secrets.PUBLIC_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          REPO_DIR: ${{ secrets.VPS_DEPLOY_PATH }}
+        run: |
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=accept-new" \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude 'node_modules/' \
+            --exclude 'dist/' \
+            --exclude 'build/' \
+            --exclude '.next/' \
+            --exclude '.medusa/' \
+            --exclude '.cache/' \
+            --exclude '.turbo/' \
+            --exclude '.env' \
+            --exclude '.env.*' \
+            --exclude '*.log' \
+            --exclude 'backups/' \
+            --exclude '.claude/' \
+            ./ "${VPS_USER}@${VPS_HOST}:${REPO_DIR}/"
+
+      - name: Build + restart stack
+        env:
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          REPO_DIR: ${{ secrets.VPS_DEPLOY_PATH }}
+        run: |
+          ssh -i ~/.ssh/id_ed25519 "${VPS_USER}@${VPS_HOST}" \
+            "cd \"${REPO_DIR}\" && REPO_DIR=\"${REPO_DIR}\" bash infra/scripts/deploy.sh"
+
+      - name: Public health probe
         run: |
           for i in 1 2 3 4 5; do
-            if curl -fsS --max-time 10 "https://${PUBLIC_HOST}/health" >/dev/null; then
-              echo "Healthy"
+            code=$(curl -sf -o /dev/null -w '%{http_code}' --max-time 10 https://huewhimsy.com/health || echo 000)
+            if [ "$code" = "200" ]; then
+              echo "Healthy ($code)"
               exit 0
             fi
-            echo "Attempt $i failed, retrying..."
+            echo "Attempt $i: HTTP $code — retry in 10s"
             sleep 10
           done
-          echo "Health check failed"
+          echo "::error::Public health check failed after 5 attempts"
           exit 1
