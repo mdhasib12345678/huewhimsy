@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   deploy:
-    name: rsync + docker compose up
+    name: tar-pipe + docker compose up
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -34,54 +34,60 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
 
-      - name: Snapshot env on VPS (safety)
+      - name: Deploy (snapshot + tar-pipe + build)
         env:
           VPS_USER: ${{ secrets.VPS_USER }}
           VPS_HOST: ${{ secrets.VPS_HOST }}
           REPO_DIR: ${{ secrets.VPS_DEPLOY_PATH }}
         run: |
-          ssh "${VPS_USER}@${VPS_HOST}" \
-            "cd \"${REPO_DIR}\" && cp -a .env.production .env.production.predeploy.\$(date +%Y%m%d-%H%M%S) || true"
+          set -euo pipefail
+          echo "::group::Build deploy tarball"
+          tar -czf /tmp/huewhimsy.tar.gz \
+            --exclude='./.git' \
+            --exclude='./.github' \
+            --exclude='./node_modules' \
+            --exclude='./*/node_modules' \
+            --exclude='./*/*/node_modules' \
+            --exclude='./dist' \
+            --exclude='./*/dist' \
+            --exclude='./build' \
+            --exclude='./*/build' \
+            --exclude='./.next' \
+            --exclude='./*/.next' \
+            --exclude='./.medusa' \
+            --exclude='./*/.medusa' \
+            --exclude='./.cache' \
+            --exclude='./.turbo' \
+            --exclude='./.env' \
+            --exclude='./.env.*' \
+            --exclude='*.log' \
+            --exclude='./backups' \
+            --exclude='./.claude' \
+            .
+          ls -lh /tmp/huewhimsy.tar.gz
+          echo "::endgroup::"
 
-      - name: rsync repo to VPS
-        env:
-          VPS_USER: ${{ secrets.VPS_USER }}
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          REPO_DIR: ${{ secrets.VPS_DEPLOY_PATH }}
-        run: |
-          rsync -az --delete \
-            -e "ssh -o StrictHostKeyChecking=accept-new" \
-            --exclude '.git/' \
-            --exclude '.github/' \
-            --exclude 'node_modules/' \
-            --exclude 'dist/' \
-            --exclude 'build/' \
-            --exclude '.next/' \
-            --exclude '.medusa/' \
-            --exclude '.cache/' \
-            --exclude '.turbo/' \
-            --exclude '.env' \
-            --exclude '.env.*' \
-            --exclude '*.log' \
-            --exclude 'backups/' \
-            --exclude '.claude/' \
-            ./ "${VPS_USER}@${VPS_HOST}:${REPO_DIR}/"
-
-      - name: Build + restart stack
-        env:
-          VPS_USER: ${{ secrets.VPS_USER }}
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          REPO_DIR: ${{ secrets.VPS_DEPLOY_PATH }}
-        run: |
-          ssh "${VPS_USER}@${VPS_HOST}" \
-            "cd \"${REPO_DIR}\" && REPO_DIR=\"${REPO_DIR}\" bash infra/scripts/deploy.sh"
+          echo "::group::Stream tarball to VPS + extract + snapshot env + deploy"
+          # Single SSH connection: receive tarball over stdin, extract, snapshot, deploy.
+          cat /tmp/huewhimsy.tar.gz | ssh \
+            -o ConnectTimeout=30 \
+            -o ServerAliveInterval=30 \
+            -o ServerAliveCountMax=10 \
+            "${VPS_USER}@${VPS_HOST}" \
+            "set -euo pipefail; \
+             cd \"${REPO_DIR}\"; \
+             cp -a .env.production .env.production.predeploy.\$(date +%Y%m%d-%H%M%S) 2>/dev/null || true; \
+             tar -xzf - --no-same-owner; \
+             chmod +x infra/scripts/*.sh 2>/dev/null || true; \
+             REPO_DIR=\"${REPO_DIR}\" bash infra/scripts/deploy.sh"
+          echo "::endgroup::"
 
       - name: Public health probe
         run: |
           for i in 1 2 3 4 5; do
             code=$(curl -sf -o /dev/null -w '%{http_code}' --max-time 10 https://huewhimsy.com/health || echo 000)
             if [ "$code" = "200" ]; then
-              echo "Healthy ($code)"
+              echo "Healthy (HTTP $code)"
               exit 0
             fi
             echo "Attempt $i: HTTP $code — retry in 10s"
