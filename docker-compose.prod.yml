@@ -167,6 +167,8 @@ services:
       - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./infra/nginx/conf.d:/etc/nginx/conf.d:ro
       - ./infra/nginx/snippets:/etc/nginx/snippets:ro
+      - ./infra/nginx/.htpasswd:/etc/nginx/.htpasswd:ro
+      - ./infra/console:/usr/share/nginx/html/console:ro
       - certbot_certs:/etc/letsencrypt:ro
       - certbot_www:/var/www/certbot:ro
       - nginx_cache:/var/cache/nginx

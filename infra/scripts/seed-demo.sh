@@ -74,13 +74,14 @@ fi
 
 step "Seed 4 demo products"
 seed_product() {
-    local title=$1 handle=$2 desc=$3 price_cents=$4 thumb=$5
+    local title=$1 handle=$2 desc=$3 price=$4 thumb=$5
     local exists
     exists=$(api GET "/admin/products?handle=${handle}" | python3 -c "import sys,json; d=json.load(sys.stdin); print(len(d.get('products',[])))")
     if [ "$exists" != "0" ]; then
         echo "  - $title: already exists"
         return
     fi
+    # Medusa v2 stores prices as decimal majors (USD dollars).
     api POST "/admin/products" "$(cat <<JSON
 {
   "title": "${title}",
@@ -94,20 +95,20 @@ seed_product() {
     {
       "title": "Hardcover",
       "manage_inventory": false,
-      "prices": [{"amount": ${price_cents}, "currency_code": "usd"}],
+      "prices": [{"amount": ${price}, "currency_code": "usd"}],
       "options": {"Format": "Hardcover"}
     }
   ]
 }
 JSON
     )" >/dev/null
-    echo "  + $title (\$$(echo "scale=2; $price_cents/100" | bc))"
+    echo "  + $title (\$${price})"
 }
 
-seed_product "A is for Alligator"       "a-is-for-alligator"       "A whimsical alphabet adventure with friendly creatures." 1499 "https://placehold.co/600x600/ff9ec7/ffffff?text=A+is+for+Alligator"
-seed_product "Dinosaur Dance Party"     "dinosaur-dance-party"     "Join the dancing dinos for a prehistoric jubilee." 1799 "https://placehold.co/600x600/06d6a0/ffffff?text=Dinosaur+Dance"
-seed_product "Whiskers and Wonders"     "whiskers-and-wonders"     "Twelve curious cats explore twelve curious worlds." 1599 "https://placehold.co/600x600/ffd166/000000?text=Whiskers"
-seed_product "Around the World in 26 Pages" "around-the-world-26"  "A landmark journey for tiny travelers, A to Z." 1899 "https://placehold.co/600x600/118ab2/ffffff?text=Around+the+World"
+seed_product "A is for Alligator"       "a-is-for-alligator"       "A whimsical alphabet adventure with friendly creatures." 14.99 "https://placehold.co/600x600/ff9ec7/ffffff?text=A+is+for+Alligator"
+seed_product "Dinosaur Dance Party"     "dinosaur-dance-party"     "Join the dancing dinos for a prehistoric jubilee." 17.99 "https://placehold.co/600x600/06d6a0/ffffff?text=Dinosaur+Dance"
+seed_product "Whiskers and Wonders"     "whiskers-and-wonders"     "Twelve curious cats explore twelve curious worlds." 15.99 "https://placehold.co/600x600/ffd166/000000?text=Whiskers"
+seed_product "Around the World in 26 Pages" "around-the-world-26"  "A landmark journey for tiny travelers, A to Z." 18.99 "https://placehold.co/600x600/118ab2/ffffff?text=Around+the+World"
 
 step "Summary"
 PRODUCTS=$(api GET "/admin/products" | python3 -c "import sys,json; print(len(json.load(sys.stdin).get('products',[])))")

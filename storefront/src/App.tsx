@@ -9,7 +9,6 @@ import { Blog } from './pages/Blog';
 import { FreeActivities } from './pages/FreeActivities';
 import { About } from './pages/About';
 import { Contact } from './pages/Contact';
-import { BookDetails } from './pages/BookDetails';
 import { Cart } from './pages/Cart';
 import { Checkout } from './pages/Checkout';
 import { Account } from './pages/Account';
@@ -26,7 +25,7 @@ export default function App() {
           <Route element={<Layout />}>
             <Route path="/" element={<Home />} />
             <Route path="/library" element={<Library />} />
-            <Route path="/library/:id" element={<BookDetails />} />
+            <Route path="/library/:id" element={<ProductDetails />} />
             <Route path="/shop" element={<Shop />} />
             <Route path="/shop/:id" element={<ProductDetails />} />
             <Route path="/wishlist" element={<Wishlist />} />

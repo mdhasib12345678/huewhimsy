@@ -117,3 +117,341 @@ export function formatPrice(amount: number, currency = 'USD'): string {
     return `$${amount.toFixed(2)}`;
   }
 }
+
+// ---- Cart ----
+export interface MedusaLineItem {
+  id: string;
+  variant_id: string;
+  product_id: string;
+  product_title: string;
+  variant_title?: string;
+  product_handle?: string;
+  thumbnail?: string | null;
+  quantity: number;
+  unit_price: number;
+  total?: number;
+  subtotal?: number;
+}
+
+export interface MedusaCart {
+  id: string;
+  region_id?: string;
+  email?: string | null;
+  currency_code: string;
+  items?: MedusaLineItem[];
+  total?: number;
+  subtotal?: number;
+  shipping_total?: number;
+  tax_total?: number;
+  item_total?: number;
+}
+
+const CART_KEY = 'huewhimsy_cart_id';
+export const getStoredCartId = (): string | null => {
+  try {
+    return localStorage.getItem(CART_KEY);
+  } catch {
+    return null;
+  }
+};
+export const storeCartId = (id: string): void => {
+  try {
+    localStorage.setItem(CART_KEY, id);
+  } catch {}
+};
+export const clearStoredCartId = (): void => {
+  try {
+    localStorage.removeItem(CART_KEY);
+  } catch {}
+};
+
+const CART_FIELDS =
+  'id,region_id,email,currency_code,total,subtotal,shipping_total,tax_total,item_total,' +
+  '*items,*items.variant,*items.product';
+
+export async function createCart(regionId?: string): Promise<MedusaCart> {
+  const res = await storeFetch<{ cart: MedusaCart }>(
+    `/store/carts?fields=${encodeURIComponent(CART_FIELDS)}`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ region_id: regionId ?? DEFAULT_REGION_ID }),
+    },
+  );
+  return res.cart;
+}
+
+export async function getCart(cartId: string): Promise<MedusaCart | null> {
+  try {
+    const res = await storeFetch<{ cart: MedusaCart }>(
+      `/store/carts/${cartId}?fields=${encodeURIComponent(CART_FIELDS)}`,
+    );
+    return res.cart;
+  } catch (e) {
+    console.warn('getCart failed:', e);
+    return null;
+  }
+}
+
+export async function addLineItem(
+  cartId: string,
+  variantId: string,
+  quantity = 1,
+): Promise<MedusaCart> {
+  const res = await storeFetch<{ cart: MedusaCart }>(
+    `/store/carts/${cartId}/line-items?fields=${encodeURIComponent(CART_FIELDS)}`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ variant_id: variantId, quantity }),
+    },
+  );
+  return res.cart;
+}
+
+export async function updateLineItem(
+  cartId: string,
+  lineId: string,
+  quantity: number,
+): Promise<MedusaCart> {
+  const res = await storeFetch<{ cart: MedusaCart }>(
+    `/store/carts/${cartId}/line-items/${lineId}?fields=${encodeURIComponent(CART_FIELDS)}`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ quantity }),
+    },
+  );
+  return res.cart;
+}
+
+export async function removeLineItem(
+  cartId: string,
+  lineId: string,
+): Promise<MedusaCart> {
+  // Medusa v2 DELETE returns either {cart} or {parent} (the updated cart).
+  // After deletion, re-fetch the cart to get the canonical state with totals.
+  await storeFetch<unknown>(
+    `/store/carts/${cartId}/line-items/${lineId}`,
+    {
+      method: 'DELETE',
+    },
+  );
+  const fresh = await getCart(cartId);
+  if (!fresh) throw new Error('Cart vanished after line item removal');
+  return fresh;
+}
+
+export async function ensureCart(): Promise<MedusaCart> {
+  const stored = getStoredCartId();
+  if (stored) {
+    const c = await getCart(stored);
+    if (c) return c;
+    clearStoredCartId();
+  }
+  const c = await createCart();
+  storeCartId(c.id);
+  return c;
+}
+
+// ---- Customer auth ----
+const AUTH_KEY = 'huewhimsy_auth_token';
+export const getAuthToken = (): string | null => {
+  try {
+    return localStorage.getItem(AUTH_KEY);
+  } catch {
+    return null;
+  }
+};
+export const setAuthToken = (token: string): void => {
+  try {
+    localStorage.setItem(AUTH_KEY, token);
+  } catch {}
+};
+export const clearAuthToken = (): void => {
+  try {
+    localStorage.removeItem(AUTH_KEY);
+  } catch {}
+};
+
+export interface MedusaCustomer {
+  id: string;
+  email: string;
+  first_name?: string | null;
+  last_name?: string | null;
+  phone?: string | null;
+  has_account?: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface MedusaOrder {
+  id: string;
+  display_id?: number;
+  status: string;
+  fulfillment_status?: string;
+  payment_status?: string;
+  total: number;
+  subtotal?: number;
+  currency_code: string;
+  created_at: string;
+  items?: MedusaLineItem[];
+}
+
+async function authFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const token = getAuthToken();
+  const url = `${BASE_URL.replace(/\/$/, '')}${path}`;
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'x-publishable-api-key': PUBLISHABLE_KEY,
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(init.headers as Record<string, string> | undefined),
+  };
+  const res = await fetch(url, { ...init, headers, credentials: 'include' });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Medusa ${res.status} ${res.statusText}: ${text.slice(0, 300)}`);
+  }
+  return res.json() as Promise<T>;
+}
+
+/** Step 1 of register: obtain pre-auth token, then call createCustomer with that token. */
+export async function registerAuth(email: string, password: string): Promise<string> {
+  const url = `${BASE_URL.replace(/\/$/, '')}/auth/customer/emailpass/register`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-publishable-api-key': PUBLISHABLE_KEY },
+    body: JSON.stringify({ email, password }),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Register failed (${res.status}): ${text.slice(0, 200)}`);
+  }
+  const data: { token: string } = await res.json();
+  return data.token;
+}
+
+/** Step 2 of register: create the customer profile using the pre-auth token. */
+export async function createCustomer(
+  preAuthToken: string,
+  payload: { email: string; first_name?: string; last_name?: string; phone?: string },
+): Promise<MedusaCustomer> {
+  const url = `${BASE_URL.replace(/\/$/, '')}/store/customers`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-publishable-api-key': PUBLISHABLE_KEY,
+      Authorization: `Bearer ${preAuthToken}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Create customer failed (${res.status}): ${text.slice(0, 200)}`);
+  }
+  const data: { customer: MedusaCustomer } = await res.json();
+  return data.customer;
+}
+
+/** Register + create customer + login in one go. Returns the auth token (already stored). */
+export async function registerCustomer(payload: {
+  email: string;
+  password: string;
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+}): Promise<{ customer: MedusaCustomer; token: string }> {
+  const { email, password, first_name, last_name, phone } = payload;
+  const preToken = await registerAuth(email, password);
+  const customer = await createCustomer(preToken, { email, first_name, last_name, phone });
+  // After /store/customers the pre-auth token is the customer token.
+  setAuthToken(preToken);
+  return { customer, token: preToken };
+}
+
+export async function loginCustomer(email: string, password: string): Promise<string> {
+  const url = `${BASE_URL.replace(/\/$/, '')}/auth/customer/emailpass`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-publishable-api-key': PUBLISHABLE_KEY },
+    body: JSON.stringify({ email, password }),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Login failed (${res.status}): ${text.slice(0, 200)}`);
+  }
+  const data: { token: string } = await res.json();
+  setAuthToken(data.token);
+  return data.token;
+}
+
+export async function getCurrentCustomer(): Promise<MedusaCustomer | null> {
+  const token = getAuthToken();
+  if (!token) return null;
+  try {
+    const res = await authFetch<{ customer: MedusaCustomer }>('/store/customers/me');
+    return res.customer;
+  } catch (e) {
+    console.warn('getCurrentCustomer failed:', e);
+    return null;
+  }
+}
+
+export async function logoutCustomer(): Promise<void> {
+  try {
+    await authFetch<unknown>('/auth/session', { method: 'DELETE' });
+  } catch {}
+  clearAuthToken();
+}
+
+export interface CartAddress {
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+  address_1: string;
+  address_2?: string;
+  city: string;
+  postal_code: string;
+  province?: string;
+  country_code: string;
+  company?: string;
+}
+
+export async function updateCart(
+  cartId: string,
+  payload: {
+    email?: string;
+    shipping_address?: CartAddress;
+    billing_address?: CartAddress;
+  },
+): Promise<MedusaCart> {
+  const res = await authFetch<{ cart: MedusaCart }>(
+    `/store/carts/${cartId}?fields=${encodeURIComponent(CART_FIELDS)}`,
+    {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    },
+  );
+  return res.cart;
+}
+
+export async function attachCustomerToCart(cartId: string): Promise<MedusaCart> {
+  const res = await authFetch<{ cart: MedusaCart }>(
+    `/store/carts/${cartId}/customer?fields=${encodeURIComponent(CART_FIELDS)}`,
+    {
+      method: 'POST',
+      body: JSON.stringify({}),
+    },
+  );
+  return res.cart;
+}
+
+export async function listCustomerOrders(limit = 20): Promise<MedusaOrder[]> {
+  try {
+    const res = await authFetch<{ orders: MedusaOrder[] }>(
+      `/store/orders?limit=${limit}&fields=id,display_id,status,fulfillment_status,payment_status,total,currency_code,created_at`,
+    );
+    return res.orders ?? [];
+  } catch (e) {
+    console.warn('listCustomerOrders failed:', e);
+    return [];
+  }
+}

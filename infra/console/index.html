@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>HueWhimsy — Control Console</title>
+<style>
+  :root {
+    --bg-0: #0c0c10;
+    --bg-1: #15161c;
+    --bg-2: #1c1d26;
+    --fg-0: #f4f5f8;
+    --fg-1: #b5b8c4;
+    --fg-2: #7c8092;
+    --accent: #ffd166;
+    --good: #2ecc71;
+    --bad: #ef4444;
+    --warn: #f59e0b;
+    --rad: 16px;
+    --gap: 16px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg-0); color: var(--fg-0);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased; }
+  body { min-height: 100vh; background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(255,209,102,.10), transparent 50%),
+    radial-gradient(900px 500px at 0% 100%, rgba(80,160,255,.10), transparent 55%),
+    var(--bg-0); }
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px 32px; border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  header h1 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: .5px; }
+  header .brand { display: flex; align-items: center; gap: 12px; }
+  header .logo {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: linear-gradient(135deg, #ff6b9d, #ffd166 33%, #06d6a0 66%, #118ab2);
+    color: #fff; display: grid; place-items: center; font-weight: 800;
+  }
+  header .meta { color: var(--fg-2); font-size: 13px; }
+  main { padding: 32px; max-width: 1200px; margin: 0 auto; }
+  .row { display: grid; gap: var(--gap); }
+  .hero {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    margin-bottom: 28px;
+  }
+  .quick {
+    background: linear-gradient(160deg, var(--bg-2), var(--bg-1));
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: var(--rad); padding: 22px;
+    display: flex; flex-direction: column; gap: 14px; min-height: 168px;
+  }
+  .quick .label { font-size: 13px; color: var(--fg-2); text-transform: uppercase; letter-spacing: 1.2px; }
+  .quick .title { font-size: 22px; font-weight: 700; }
+  .quick .desc { color: var(--fg-1); font-size: 14px; line-height: 1.5; }
+  .quick a.cta {
+    margin-top: auto; align-self: flex-start;
+    text-decoration: none; padding: 10px 16px;
+    border-radius: 999px; background: var(--fg-0); color: #000;
+    font-weight: 700; font-size: 14px; transition: transform .12s;
+  }
+  .quick a.cta:hover { transform: translateY(-1px); }
+  .quick.alt a.cta { background: transparent; color: var(--fg-0); border: 1px solid rgba(255,255,255,.16); }
+
+  section h2 { margin: 28px 0 12px; font-size: 14px; text-transform: uppercase;
+    letter-spacing: 1.2px; color: var(--fg-2); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: var(--gap); }
+  .card { background: var(--bg-1); border: 1px solid rgba(255,255,255,.06);
+    border-radius: var(--rad); padding: 18px; display: flex; flex-direction: column; gap: 8px; }
+  .card .name { font-size: 12px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--fg-2); }
+  .card .value { font-size: 22px; font-weight: 700; }
+  .card .sub { color: var(--fg-1); font-size: 13px; }
+  .card .pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600;
+    border: 1px solid rgba(255,255,255,.08);
+  }
+  .pill .dot { width: 8px; height: 8px; border-radius: 999px; background: var(--fg-2); }
+  .pill.ok { color: var(--good); }
+  .pill.ok .dot { background: var(--good); box-shadow: 0 0 12px rgba(46,204,113,.7); }
+  .pill.bad { color: var(--bad); }
+  .pill.bad .dot { background: var(--bad); }
+  .pill.warn { color: var(--warn); }
+  .pill.warn .dot { background: var(--warn); }
+  .footer { color: var(--fg-2); font-size: 12px; padding: 24px 0; text-align: center; }
+  code { background: rgba(255,255,255,.06); padding: 2px 6px; border-radius: 6px; font-size: 12px; }
+  @media (max-width: 640px) {
+    header { padding: 16px; }
+    main { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo">H</div>
+    <h1>HueWhimsy &middot; Control Console</h1>
+  </div>
+  <div class="meta">
+    Last refresh <span id="lastRefresh">just now</span>
+  </div>
+</header>
+<main>
+  <div class="row hero">
+    <div class="quick">
+      <div class="label">Storefront</div>
+      <div class="title">Visit website</div>
+      <div class="desc">Browse the live customer-facing shop with all products and pages.</div>
+      <a class="cta" id="link-store" href="/" target="_blank" rel="noopener">Open Storefront →</a>
+    </div>
+    <div class="quick alt">
+      <div class="label">Admin</div>
+      <div class="title">Studio dashboard</div>
+      <div class="desc">Manage products, orders, customers, settings, and more.</div>
+      <a class="cta" id="link-admin" href="/studio" target="_blank" rel="noopener">Open Studio →</a>
+    </div>
+  </div>
+
+  <section>
+    <h2>System health</h2>
+    <div class="grid" id="services">
+      <div class="card" data-svc="storefront">
+        <span class="name">Storefront</span>
+        <span class="value" data-field="status">…</span>
+        <span class="sub" data-field="detail">checking</span>
+      </div>
+      <div class="card" data-svc="studio">
+        <span class="name">Studio (admin)</span>
+        <span class="value" data-field="status">…</span>
+        <span class="sub" data-field="detail">checking</span>
+      </div>
+      <div class="card" data-svc="store-api">
+        <span class="name">Store API</span>
+        <span class="value" data-field="status">…</span>
+        <span class="sub" data-field="detail">checking</span>
+      </div>
+      <div class="card" data-svc="edge">
+        <span class="name">Edge / nginx</span>
+        <span class="value" data-field="status">…</span>
+        <span class="sub" data-field="detail">checking</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Quick links</h2>
+    <div class="grid">
+      <div class="card">
+        <span class="name">Store products API</span>
+        <span class="sub"><code>/store/products</code></span>
+      </div>
+      <div class="card">
+        <span class="name">Health probe</span>
+        <span class="sub"><code>/health</code></span>
+      </div>
+      <div class="card">
+        <span class="name">VPS</span>
+        <span class="sub">Hostinger KVM 2 — 2 vCPU / 8 GB / 100 GB</span>
+      </div>
+      <div class="card">
+        <span class="name">SSL</span>
+        <span class="sub">Let's Encrypt, auto-renew</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">
+    HueWhimsy Control Console &middot; private admin tool
+  </div>
+</main>
+<script>
+(function(){
+  function pill(klass, text){
+    return '<span class="pill ' + klass + '"><span class="dot"></span>' + text + '</span>';
+  }
+  function setCard(svc, ok, detail){
+    var el = document.querySelector('[data-svc="' + svc + '"]');
+    if (!el) return;
+    el.querySelector('[data-field="status"]').innerHTML =
+        ok === true  ? pill('ok',   'Online')
+      : ok === false ? pill('bad',  'Offline')
+      :                pill('warn', 'Unknown');
+    el.querySelector('[data-field="detail"]').textContent = detail || '';
+  }
+  async function probe(url){
+    var t0 = performance.now();
+    try {
+      var r = await fetch(url, {cache: 'no-store', credentials: 'include'});
+      return {ok: r.ok, status: r.status, ms: Math.round(performance.now() - t0)};
+    } catch (e) {
+      return {ok: false, status: 0, ms: Math.round(performance.now() - t0), err: String(e)};
+    }
+  }
+  async function tick(){
+    document.getElementById('lastRefresh').textContent = new Date().toLocaleTimeString();
+    var s   = await probe('/health');
+    setCard('edge', s.ok, s.ok ? (s.ms + ' ms · HTTP ' + s.status) : (s.err || 'fail'));
+    var sf  = await probe('/');
+    setCard('storefront', sf.ok, sf.ok ? (sf.ms + ' ms · HTTP ' + sf.status) : 'offline');
+    var st  = await probe('/studio');
+    setCard('studio', st.ok, st.ok ? (st.ms + ' ms · HTTP ' + st.status) : 'offline');
+    var sa  = await probe('/store/regions');
+    // Store API returns 400/401 without publishable key — that proves it's alive.
+    var saOk = sa.status > 0 && sa.status < 500;
+    setCard('store-api', saOk, saOk ? (sa.ms + ' ms · HTTP ' + sa.status) : 'offline');
+  }
+  tick();
+  setInterval(tick, 15000);
+})();
+</script>
+</body>
+</html>

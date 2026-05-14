@@ -34,6 +34,8 @@ type UiProduct = {
   desc: string;
   thumbnail?: string | null;
   handle: string;
+  productId?: string;
+  variantId?: string;
 };
 
 const PALETTE = ['#FF5F6D', '#4DA8FF', '#FFD93D', '#5BE37D', '#FF9A3C', '#B067FF'];
@@ -77,6 +79,8 @@ function mapMedusaToUi(p: MedusaProduct, idx: number): UiProduct {
     color: PALETTE[idx % PALETTE.length],
     desc: p.description ?? '',
     thumbnail: p.thumbnail,
+    productId: p.id,
+    variantId: p.variants?.[0]?.id,
   };
 }
 

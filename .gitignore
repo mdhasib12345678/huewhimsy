@@ -66,3 +66,6 @@ dump.rdb
 next-env.d.ts
 .tmp/
 tmp/
+
+# Local tooling
+.claude/
