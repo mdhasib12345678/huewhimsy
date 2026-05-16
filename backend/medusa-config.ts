@@ -69,5 +69,8 @@ module.exports = defineConfig({
     {
       resolve: './src/modules/newsletter',
     },
+    {
+      resolve: './src/modules/contact',
+    },
   ],
 })
