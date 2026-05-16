@@ -1,0 +1,87 @@
+{
+  "nav": {
+    "home": "Home",
+    "library": "Library",
+    "shop": "Shop",
+    "freeActivities": "Free Activities",
+    "blog": "Blog",
+    "about": "About",
+    "services": "Services",
+    "contact": "Contact",
+    "wishlist": "Wishlist",
+    "cart": "Cart",
+    "account": "My Account",
+    "orders": "Orders",
+    "downloads": "Downloads",
+    "signIn": "Sign In",
+    "register": "Register",
+    "logout": "Logout",
+    "search": "Search",
+    "getFreePack": "Get Free Pack",
+    "languageSettings": "Language"
+  },
+  "footer": {
+    "company": "Explore",
+    "shopPlay": "Shop & Play",
+    "subscribeTitle": "Join the Adventure",
+    "subscribeBlurb": "Subscribe to get free activity packs and updates.",
+    "emailPlaceholder": "Email address",
+    "subscribedConfirm": "You're subscribed!",
+    "subscribeError": "Something went wrong. Try again.",
+    "rights": "All rights reserved.",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "refund": "Refund Policy"
+  },
+  "common": {
+    "loading": "Loading...",
+    "empty": "Nothing here yet.",
+    "tryAgain": "Try again",
+    "viewAll": "View all",
+    "readMore": "Read more",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous"
+  },
+  "newsletter": {
+    "title": "Get free activities by email",
+    "blurb": "One email a week. Brand new coloring pages, flashcards, and seasonal printables — never spam.",
+    "ctaSend": "Send My Pack",
+    "ctaSending": "Joining...",
+    "successTitle": "You're in!",
+    "successBody": "Check your inbox — we'll send the welcome pack and new activities as they go live."
+  },
+  "contact": {
+    "title": "Get in Touch",
+    "blurb": "Questions, custom projects, partnerships — we'd love to hear from you.",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "subject": "Subject",
+    "message": "Message",
+    "send": "Send Message",
+    "sending": "Sending...",
+    "successTitle": "Message received!",
+    "successBody": "Thanks for reaching out. We'll reply within 1-2 business days.",
+    "sendAnother": "Send another message"
+  },
+  "shop": {
+    "exploreShop": "Explore Shop",
+    "featuredFavorites": "Featured Favorites",
+    "addToCart": "Add to Cart",
+    "exploreBook": "Explore Book",
+    "outOfStock": "Out of Stock"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "shippingAddress": "Shipping address",
+    "billingAddress": "Billing address",
+    "payment": "Payment",
+    "placeOrder": "Place order",
+    "processing": "Processing..."
+  }
+}

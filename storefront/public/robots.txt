@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+Disallow: /studio
+Disallow: /admin
+Disallow: /account
+Disallow: /cart
+Disallow: /checkout
+Disallow: /api
+
+# AI crawlers — explicitly allow content crawling
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://huewhimsy.com/sitemap.xml
