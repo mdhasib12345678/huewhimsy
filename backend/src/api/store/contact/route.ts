@@ -105,7 +105,7 @@ export async function POST(
         subject: `New contact submission from ${name}`,
         name,
         email,
-        subject,
+        form_subject: subject,
         message,
         page_url,
       })

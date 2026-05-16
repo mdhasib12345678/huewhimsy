@@ -73,7 +73,7 @@ class ResendNotificationProviderService extends AbstractNotificationProviderServ
         subject,
         html: rendered.html,
         text: rendered.text,
-        reply_to: replyTo,
+        replyTo,
       })
       return { id: result.data?.id ?? `resend_${Date.now()}` }
     } catch (e: any) {

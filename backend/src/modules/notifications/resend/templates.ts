@@ -125,7 +125,7 @@ const templates: Record<string, (data: Record<string, any>) => Rendered> = {
     const html = wrap(
       "New contact form submission",
       `<p><strong>From:</strong> ${escape(data.name)} &lt;${escape(data.email)}&gt;</p>
-       ${data.subject ? `<p><strong>Subject:</strong> ${escape(data.subject)}</p>` : ""}
+       ${data.form_subject ? `<p><strong>Subject:</strong> ${escape(data.form_subject)}</p>` : ""}
        <div style="margin-top:16px;padding:12px 16px;background:#f5f5f5;border-radius:8px;white-space:pre-wrap;">${escape(data.message)}</div>
        <p style="margin-top:16px;font-size:13px;color:#525252;">Page: ${escape(data.page_url ?? "—")}</p>`,
       button("Open inbox", `${STORE_URL}/studio/contact`),
