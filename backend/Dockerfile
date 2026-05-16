@@ -9,7 +9,7 @@ COPY package.json package-lock.json* yarn.lock* pnpm-lock.yaml* ./
 RUN \
   if [ -f pnpm-lock.yaml ]; then corepack enable && pnpm install --frozen-lockfile; \
   elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
-  else npm ci --legacy-peer-deps; \
+  else npm install --no-audit --no-fund --legacy-peer-deps; \
   fi
 
 # ===== build =====

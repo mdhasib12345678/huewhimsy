@@ -1,9 +1,38 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { Modules } from "@medusajs/framework/utils"
+import { INotificationModuleService } from "@medusajs/framework/types"
 import { NEWSLETTER_MODULE } from "../../../modules/newsletter"
 import NewsletterModuleService from "../../../modules/newsletter/service"
 
 function isValidEmail(s: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s) && s.length <= 320
+}
+
+async function tryNotify(
+  req: MedusaRequest,
+  to: string,
+  template: string,
+  data: Record<string, any>,
+) {
+  try {
+    const notification = req.scope.resolve(
+      Modules.NOTIFICATION,
+    ) as INotificationModuleService
+    await notification.createNotifications({
+      to,
+      channel: "email",
+      template,
+      data,
+    } as any)
+  } catch (e) {
+    try {
+      ;(req.scope.resolve("logger") as any).warn(
+        `[notify:${template}] failed: ${(e as Error).message}`,
+      )
+    } catch {
+      /* noop */
+    }
+  }
 }
 
 export async function POST(
@@ -62,6 +91,11 @@ export async function POST(
     ip_address: ip,
     user_agent: ua,
   } as any)
+
+  void tryNotify(req, email, "newsletter-confirmation", {
+    subject: "You're on the list — HueWhimsy",
+    name,
+  })
 
   res.status(201).json({ subscriber: sub })
 }

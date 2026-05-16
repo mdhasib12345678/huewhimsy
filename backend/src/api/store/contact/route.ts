@@ -1,6 +1,35 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { Modules } from "@medusajs/framework/utils"
+import { INotificationModuleService } from "@medusajs/framework/types"
 import { CONTACT_MODULE } from "../../../modules/contact"
 import ContactModuleService from "../../../modules/contact/service"
+
+async function tryNotify(
+  req: MedusaRequest,
+  to: string,
+  template: string,
+  data: Record<string, any>,
+) {
+  try {
+    const notification = req.scope.resolve(
+      Modules.NOTIFICATION,
+    ) as INotificationModuleService
+    await notification.createNotifications({
+      to,
+      channel: "email",
+      template,
+      data,
+    } as any)
+  } catch (e) {
+    try {
+      ;(req.scope.resolve("logger") as any).warn(
+        `[notify:${template}] failed: ${(e as Error).message}`,
+      )
+    } catch {
+      /* noop */
+    }
+  }
+}
 
 function isValidEmail(s: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s) && s.length <= 320
@@ -62,6 +91,26 @@ export async function POST(
     user_agent: ua,
     status: looksLikeSpam ? "spam" : "new",
   } as any)
+
+  // Notify the visitor and the admin (don't block the response on email failures).
+  if (!looksLikeSpam) {
+    void tryNotify(req, email, "contact-form-receipt", {
+      subject: "We got your message — HueWhimsy",
+      name,
+      message,
+    })
+    const adminEmail = process.env.CONTACT_ADMIN_EMAIL
+    if (adminEmail) {
+      void tryNotify(req, adminEmail, "contact-form-admin-alert", {
+        subject: `New contact submission from ${name}`,
+        name,
+        email,
+        subject,
+        message,
+        page_url,
+      })
+    }
+  }
 
   res.status(201).json({ submission, received: true })
 }
