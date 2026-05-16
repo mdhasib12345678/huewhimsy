@@ -66,5 +66,8 @@ module.exports = defineConfig({
     {
       resolve: './src/modules/activities',
     },
+    {
+      resolve: './src/modules/newsletter',
+    },
   ],
 })
