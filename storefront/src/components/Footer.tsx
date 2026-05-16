@@ -71,7 +71,7 @@ export const Footer: React.FC = () => {
                   href={social.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-[#525252] hover:text-black transition-colors"
+                  className="text-[#404040] hover:text-black transition-colors"
                 >
                   <social.icon className="w-5 h-5" />
                 </a>
@@ -85,7 +85,7 @@ export const Footer: React.FC = () => {
             <ul className="flex flex-col gap-4">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
-                  <NavLink to={link.path} className="text-[#525252] hover:text-black text-sm">
+                  <NavLink to={link.path} className="text-[#404040] hover:text-black text-sm">
                     {link.name}
                   </NavLink>
                 </li>
@@ -99,7 +99,7 @@ export const Footer: React.FC = () => {
             <ul className="flex flex-col gap-4">
               {footerLinks.shop.map((link) => (
                 <li key={link.name}>
-                  <NavLink to={link.path} className="text-[#525252] hover:text-black text-sm">
+                  <NavLink to={link.path} className="text-[#404040] hover:text-black text-sm">
                     {link.name}
                   </NavLink>
                 </li>
@@ -149,7 +149,7 @@ export const Footer: React.FC = () => {
           </p>
           <div className="flex items-center gap-6">
             {footerLinks.support.map((link) => (
-              <NavLink key={link.name} to={link.path} className="text-[#525252] hover:text-black text-[11px] uppercase tracking-widest">
+              <NavLink key={link.name} to={link.path} className="text-[#404040] hover:text-black text-[11px] uppercase tracking-widest">
                 {link.name}
               </NavLink>
             ))}

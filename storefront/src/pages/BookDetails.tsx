@@ -64,7 +64,7 @@ export const BookDetails: React.FC = () => {
       className="container mx-auto px-4 py-8 md:py-16"
     >
       {/* Breadcrumbs */}
-      <NavLink to="/library" className="inline-flex items-center text-sm text-[#525252] hover:text-black mb-8 transition-colors group">
+      <NavLink to="/library" className="inline-flex items-center text-sm text-[#404040] hover:text-black mb-8 transition-colors group">
         <ChevronLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" /> Back to Library
       </NavLink>
 
@@ -195,7 +195,7 @@ export const BookDetails: React.FC = () => {
               onClick={() => setActiveTab(t)}
               className={cn(
                 "px-8 py-4 text-sm font-bold uppercase tracking-widest transition-all whitespace-nowrap",
-                activeTab === t ? "text-[#0a0a0a] border-b-2 border-[#FFD93D]" : "text-[#525252] hover:text-black"
+                activeTab === t ? "text-[#0a0a0a] border-b-2 border-[#FFD93D]" : "text-[#404040] hover:text-black"
               )}
             >
               {t.replace(/-/g, ' ')}

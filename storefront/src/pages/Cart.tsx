@@ -84,7 +84,7 @@ export const Cart: React.FC = () => {
               </Card>
             ))}
             
-            <NavLink to="/shop" className={cn(buttonVariants({ variant: "ghost" }), "text-[#525252] hover:text-black group")}>
+            <NavLink to="/shop" className={cn(buttonVariants({ variant: "ghost" }), "text-[#404040] hover:text-black group")}>
               <ArrowLeft className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1" /> Continue Shopping
             </NavLink>
           </div>

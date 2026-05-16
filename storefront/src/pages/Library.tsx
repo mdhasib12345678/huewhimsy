@@ -302,7 +302,7 @@ export const Library: React.FC = () => {
 
       <div className="mt-20 flex justify-center">
         <NavLink to="/shop">
-          <Button variant="outline" className="rounded-full border-black/20 text-[#525252] hover:text-black px-8 h-12">
+          <Button variant="outline" className="rounded-full border-black/20 text-[#404040] hover:text-black px-8 h-12">
             Browse the full shop →
           </Button>
         </NavLink>

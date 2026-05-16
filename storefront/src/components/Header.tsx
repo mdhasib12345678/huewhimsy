@@ -102,14 +102,14 @@ export const Header: React.FC = () => {
 
         {/* Right Actions */}
         <div className="flex items-center gap-2 md:gap-4">
-          <NavLink to="/search" className="p-2 text-[#525252] hover:text-black hover:bg-black/5 rounded-full transition-colors">
+          <NavLink to="/search" className="p-2 text-[#404040] hover:text-black hover:bg-black/5 rounded-full transition-colors">
             <Search className="w-5 h-5" />
           </NavLink>
 
-          <NavLink to="/wishlist" className="relative p-2 text-[#525252] hover:text-black hover:bg-black/5 rounded-full transition-colors">
+          <NavLink to="/wishlist" className="relative p-2 text-[#404040] hover:text-black hover:bg-black/5 rounded-full transition-colors">
             <Heart className="w-5 h-5" />
             {wishlistCount > 0 && (
-              <Badge className="absolute top-0 right-0 w-4 h-4 p-0 flex items-center justify-center bg-[#FF5F6D] text-[#0a0a0a] border-none text-[8px] scale-90 translate-x-1 -translate-y-1">
+              <Badge className="absolute top-0 right-0 w-4 h-4 p-0 flex items-center justify-center bg-[#FF5F6D] text-white border-none text-[8px] scale-90 translate-x-1 -translate-y-1">
                 {wishlistCount}
               </Badge>
             )}
@@ -117,7 +117,7 @@ export const Header: React.FC = () => {
 
           {/* Account Dropdown */}
           <DropdownMenu>
-            <DropdownMenuTrigger className="flex items-center justify-center w-10 h-10 text-[#525252] hover:text-black hover:bg-black/5 rounded-full transition-colors cursor-pointer outline-none">
+            <DropdownMenuTrigger className="flex items-center justify-center w-10 h-10 text-[#404040] hover:text-black hover:bg-black/5 rounded-full transition-colors cursor-pointer outline-none">
               <User className="w-5 h-5" />
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-64 bg-white border-black/10 text-[#0a0a0a] mt-2 backdrop-blur-xl">
@@ -131,32 +131,32 @@ export const Header: React.FC = () => {
               </div>
               {!user ? (
                 <>
-                  <DropdownMenuItem className="focus:bg-black/5 cursor-pointer">
+                  <DropdownMenuItem className="focus:bg-gray-100 cursor-pointer">
                     <LogIn className="w-4 h-4 mr-2" /> Sign In
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="focus:bg-black/5 cursor-pointer">
+                  <DropdownMenuItem className="focus:bg-gray-100 cursor-pointer">
                     <UserPlus className="w-4 h-4 mr-2" /> Register
                   </DropdownMenuItem>
                 </>
               ) : (
-                <DropdownMenuItem className="focus:bg-black/5 cursor-pointer">
+                <DropdownMenuItem className="focus:bg-gray-100 cursor-pointer">
                   <NavLink to="/account" className="flex items-center w-full h-full">
                     <LayoutDashboard className="w-4 h-4 mr-2" /> My Dashboard
                   </NavLink>
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator className="bg-black/5" />
-              <DropdownMenuItem className="focus:bg-black/5 cursor-pointer">
+              <DropdownMenuItem className="focus:bg-gray-100 cursor-pointer">
                 <NavLink to="/account/orders" className="flex items-center w-full h-full">
                   <Package className="w-4 h-4 mr-2" /> Orders
                 </NavLink>
               </DropdownMenuItem>
-              <DropdownMenuItem className="focus:bg-black/5 cursor-pointer">
+              <DropdownMenuItem className="focus:bg-gray-100 cursor-pointer">
                 <NavLink to="/account/downloads" className="flex items-center w-full h-full">
                   <Download className="w-4 h-4 mr-2" /> Downloads
                 </NavLink>
               </DropdownMenuItem>
-              <DropdownMenuItem className="focus:bg-black/5 cursor-pointer">
+              <DropdownMenuItem className="focus:bg-gray-100 cursor-pointer">
                 <NavLink to="/wishlist" className="flex items-center w-full h-full">
                   <Heart className="w-4 h-4 mr-2" /> Wishlist
                 </NavLink>
@@ -165,7 +165,7 @@ export const Header: React.FC = () => {
               
               {/* Language Settings Submenu */}
               <DropdownMenuSub>
-                <DropdownMenuSubTrigger className="focus:bg-black/5 cursor-pointer">
+                <DropdownMenuSubTrigger className="focus:bg-gray-100 cursor-pointer">
                   <Globe className="w-4 h-4 mr-2" /> Language Settings
                 </DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
@@ -174,7 +174,7 @@ export const Header: React.FC = () => {
                       <DropdownMenuItem 
                         key={l.code} 
                         onClick={() => setLang(l.code)}
-                        className={cn("focus:bg-black/5 cursor-pointer", lang === l.code && "bg-black/5")}
+                        className={cn("focus:bg-gray-100 cursor-pointer", lang === l.code && "bg-black/5")}
                       >
                         {l.name}
                       </DropdownMenuItem>
@@ -183,18 +183,18 @@ export const Header: React.FC = () => {
                 </DropdownMenuPortal>
               </DropdownMenuSub>
 
-              <DropdownMenuItem className="focus:bg-black/5 cursor-pointer">
+              <DropdownMenuItem className="focus:bg-gray-100 cursor-pointer">
                 <Settings className="w-4 h-4 mr-2" /> Account Settings
               </DropdownMenuItem>
-              <DropdownMenuItem className="focus:bg-black/5 cursor-pointer">
+              <DropdownMenuItem className="focus:bg-gray-100 cursor-pointer">
                 <Bell className="w-4 h-4 mr-2" /> Notifications
               </DropdownMenuItem>
-              <DropdownMenuItem className="focus:bg-black/5 cursor-pointer">
+              <DropdownMenuItem className="focus:bg-gray-100 cursor-pointer">
                 <LifeBuoy className="w-4 h-4 mr-2" /> Support
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-black/5" />
               {user && (
-                <DropdownMenuItem onClick={logout} className="focus:bg-black/5 cursor-pointer text-red-500 hover:text-red-400">
+                <DropdownMenuItem onClick={logout} className="focus:bg-gray-100 cursor-pointer text-red-500 hover:text-red-400">
                   <LogOut className="w-4 h-4 mr-2" /> Logout
                 </DropdownMenuItem>
               )}
@@ -202,10 +202,10 @@ export const Header: React.FC = () => {
           </DropdownMenu>
 
           {/* Cart Icon */}
-          <NavLink to="/cart" className="relative p-2 text-[#525252] hover:text-black hover:bg-black/5 rounded-full transition-colors">
+          <NavLink to="/cart" className="relative p-2 text-[#404040] hover:text-black hover:bg-black/5 rounded-full transition-colors">
             <ShoppingCart className="w-5 h-5" />
             {cartCount > 0 && (
-              <Badge className="absolute top-0 right-0 w-5 h-5 p-0 flex items-center justify-center bg-gradient-to-tr from-[#FF5F6D] to-[#B067FF] text-[#0a0a0a] border-none text-[10px] scale-90 translate-x-1 -translate-y-1">
+              <Badge className="absolute top-0 right-0 w-5 h-5 p-0 flex items-center justify-center bg-gradient-to-tr from-[#FF5F6D] to-[#B067FF] text-white border-none text-[10px] scale-90 translate-x-1 -translate-y-1">
                 {cartCount}
               </Badge>
             )}
@@ -229,13 +229,13 @@ export const Header: React.FC = () => {
                   <NavLink
                     key={link.path}
                     to={link.path}
-                    className="text-lg font-medium text-[#525252] hover:text-black"
+                    className="text-lg font-medium text-[#404040] hover:text-black"
                   >
                     {link.name}
                   </NavLink>
                 ))}
                 <div className="mt-4 pt-4 border-t border-black/10">
-                  <Button className="w-full rounded-full bg-gradient-to-r from-[#FF5F6D] to-[#B067FF] text-[#0a0a0a]">
+                  <Button className="w-full rounded-full bg-gradient-to-r from-[#FF5F6D] to-[#B067FF] text-white">
                     Get Free Pack
                   </Button>
                 </div>

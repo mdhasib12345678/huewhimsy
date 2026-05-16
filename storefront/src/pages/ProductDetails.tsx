@@ -172,7 +172,7 @@ export const ProductDetails: React.FC = () => {
       <Button
         variant="ghost"
         onClick={() => navigate(-1)}
-        className="mb-8 text-[#525252] hover:text-black group"
+        className="mb-8 text-[#404040] hover:text-black group"
       >
         <ArrowLeft className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1" /> Back to Shop
       </Button>

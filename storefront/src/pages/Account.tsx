@@ -382,7 +382,7 @@ const SignedInDashboard: React.FC<{
 
       {/* Security Banner */}
       <section className="mt-20">
-        <Card className="border-black/10 bg-white/95 backdrop-blur-3xl p-12 rounded-[3rem] flex flex-col md:flex-row items-center justify-between gap-8">
+        <Card className="border-black/10 bg-white shadow-sm p-12 rounded-[3rem] flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex items-center gap-8">
             <div className="w-20 h-20 rounded-full bg-[#5BE37D]/10 flex items-center justify-center">
               <ShieldCheck className="w-10 h-10 text-[#5BE37D]" />
