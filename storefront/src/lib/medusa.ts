@@ -455,3 +455,318 @@ export async function listCustomerOrders(limit = 20): Promise<MedusaOrder[]> {
     return [];
   }
 }
+
+// =============================================================================
+// Phase 3 — CMS module fetchers (Blog, Endorsements, FAQ, Hero, Services,
+// Activities, Newsletter, Contact, Wishlist, Reviews, Pages)
+// =============================================================================
+
+export interface BlogPost {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string | null;
+  body: string;
+  cover_image: string | null;
+  author_name: string | null;
+  author_avatar: string | null;
+  category: string | null;
+  tags: string[] | null;
+  read_time_minutes: number | null;
+  status: string;
+  published_at: string | null;
+  meta_title: string | null;
+  meta_description: string | null;
+  og_image: string | null;
+  created_at: string;
+}
+
+export async function listBlogPosts(params: { limit?: number; offset?: number; category?: string; locale?: string; q?: string } = {}) {
+  const qs = new URLSearchParams();
+  qs.set('limit', String(params.limit ?? 20));
+  if (params.offset) qs.set('offset', String(params.offset));
+  if (params.category) qs.set('category', params.category);
+  if (params.locale) qs.set('locale', params.locale);
+  if (params.q) qs.set('q', params.q);
+  return storeFetch<{ posts: BlogPost[]; count: number; limit: number; offset: number }>(`/store/blog?${qs}`);
+}
+
+export async function getBlogPost(slug: string, locale?: string): Promise<BlogPost | null> {
+  try {
+    const qs = locale ? `?locale=${locale}` : '';
+    const res = await storeFetch<{ post: BlogPost }>(`/store/blog/${slug}${qs}`);
+    return res.post;
+  } catch {
+    return null;
+  }
+}
+
+export interface Endorsement {
+  id: string;
+  name: string;
+  role: string | null;
+  quote: string;
+  rating: number | null;
+  avatar: string | null;
+  location: string | null;
+  display_order: number;
+}
+
+export async function listEndorsements(params: { limit?: number; locale?: string } = {}) {
+  const qs = new URLSearchParams();
+  qs.set('limit', String(params.limit ?? 20));
+  if (params.locale) qs.set('locale', params.locale);
+  return storeFetch<{ endorsements: Endorsement[]; count: number }>(`/store/endorsements?${qs}`);
+}
+
+export interface FaqEntry {
+  id: string;
+  question: string;
+  answer: string;
+  category: string | null;
+  display_order: number;
+}
+
+export async function listFaqs(params: { category?: string; locale?: string; limit?: number } = {}) {
+  const qs = new URLSearchParams();
+  qs.set('limit', String(params.limit ?? 50));
+  if (params.category) qs.set('category', params.category);
+  if (params.locale) qs.set('locale', params.locale);
+  return storeFetch<{ faqs: FaqEntry[]; count: number }>(`/store/faq?${qs}`);
+}
+
+export interface HeroBanner {
+  id: string;
+  placement: string;
+  title: string;
+  subtitle: string | null;
+  cta_label: string | null;
+  cta_url: string | null;
+  image: string | null;
+  mobile_image: string | null;
+  video_url: string | null;
+  text_color: string | null;
+  display_order: number;
+}
+
+export async function listHeroBanners(placement: string, locale?: string): Promise<HeroBanner[]> {
+  try {
+    const qs = new URLSearchParams();
+    qs.set('placement', placement);
+    qs.set('limit', '10');
+    if (locale) qs.set('locale', locale);
+    const res = await storeFetch<{ banners: HeroBanner[] }>(`/store/hero?${qs}`);
+    return res.banners ?? [];
+  } catch {
+    return [];
+  }
+}
+
+export async function getHeroBanner(placement: string, locale?: string): Promise<HeroBanner | null> {
+  const banners = await listHeroBanners(placement, locale);
+  return banners[0] ?? null;
+}
+
+export interface ServiceTier {
+  label: string;
+  price_amount: number;
+  currency?: string;
+  features?: string[];
+}
+
+export interface ServiceOffering {
+  id: string;
+  slug: string;
+  name: string;
+  short_description: string | null;
+  description: string;
+  icon: string | null;
+  cover_image: string | null;
+  pricing_tiers: ServiceTier[] | null;
+  features: string[] | null;
+  display_order: number;
+  meta_title: string | null;
+  meta_description: string | null;
+}
+
+export async function listServices(locale?: string) {
+  const qs = new URLSearchParams();
+  qs.set('limit', '50');
+  if (locale) qs.set('locale', locale);
+  return storeFetch<{ services: ServiceOffering[]; count: number }>(`/store/services?${qs}`);
+}
+
+export async function getService(slug: string, locale?: string): Promise<ServiceOffering | null> {
+  try {
+    const qs = locale ? `?locale=${locale}` : '';
+    const res = await storeFetch<{ service: ServiceOffering }>(`/store/services/${slug}${qs}`);
+    return res.service;
+  } catch {
+    return null;
+  }
+}
+
+export interface FreeActivity {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  file_url: string | null;
+  thumbnail: string | null;
+  category: string | null;
+  age_range: string | null;
+  pages: number | null;
+  requires_subscription: boolean;
+  download_gated?: boolean;
+  display_order: number;
+}
+
+export async function listActivities(params: { category?: string; locale?: string; limit?: number } = {}) {
+  const qs = new URLSearchParams();
+  qs.set('limit', String(params.limit ?? 50));
+  if (params.category) qs.set('category', params.category);
+  if (params.locale) qs.set('locale', params.locale);
+  return storeFetch<{ activities: FreeActivity[]; count: number }>(`/store/activities?${qs}`);
+}
+
+export async function getActivity(slug: string, locale?: string): Promise<FreeActivity | null> {
+  try {
+    const qs = locale ? `?locale=${locale}` : '';
+    const res = await storeFetch<{ activity: FreeActivity }>(`/store/activities/${slug}${qs}`);
+    return res.activity;
+  } catch {
+    return null;
+  }
+}
+
+export interface NewsletterResult {
+  subscriber: { id: string; email: string; status: string };
+  already_subscribed?: boolean;
+  resubscribed?: boolean;
+}
+
+export async function subscribeNewsletter(payload: { email: string; name?: string; source?: string; locale?: string }): Promise<NewsletterResult> {
+  return storeFetch<NewsletterResult>('/store/newsletter', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function unsubscribeNewsletter(email: string): Promise<{ ok: boolean }> {
+  return storeFetch<{ ok: boolean }>('/store/newsletter/unsubscribe', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function submitContactForm(payload: {
+  name: string;
+  email: string;
+  phone?: string;
+  subject?: string;
+  message: string;
+  page_url?: string;
+  locale?: string;
+}) {
+  return storeFetch<{ submission: { id: string }; received: boolean }>('/store/contact', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export interface StaticPage {
+  id: string;
+  slug: string;
+  title: string;
+  body: string;
+  excerpt: string | null;
+  cover_image: string | null;
+  published_at: string | null;
+  meta_title: string | null;
+  meta_description: string | null;
+  og_image: string | null;
+}
+
+export async function getPage(slug: string, locale?: string): Promise<StaticPage | null> {
+  try {
+    const qs = locale ? `?locale=${locale}` : '';
+    const res = await storeFetch<{ page: StaticPage }>(`/store/pages/${slug}${qs}`);
+    return res.page;
+  } catch {
+    return null;
+  }
+}
+
+export interface ProductReview {
+  id: string;
+  product_id: string;
+  author_name: string;
+  rating: number;
+  title: string | null;
+  body: string;
+  helpful_count: number;
+  reply: string | null;
+  reply_at: string | null;
+  created_at: string;
+}
+
+export interface ReviewSummary {
+  count: number;
+  average: number;
+  distribution: Record<string, number>;
+}
+
+export async function listReviews(productId: string, params: { limit?: number; offset?: number } = {}) {
+  const qs = new URLSearchParams();
+  qs.set('product_id', productId);
+  qs.set('limit', String(params.limit ?? 20));
+  if (params.offset) qs.set('offset', String(params.offset));
+  return storeFetch<{ reviews: ProductReview[]; summary: ReviewSummary; limit: number; offset: number }>(`/store/reviews?${qs}`);
+}
+
+export async function submitReview(payload: {
+  product_id: string;
+  author_name: string;
+  author_email?: string;
+  rating: number;
+  title?: string;
+  body: string;
+}) {
+  return storeFetch<{ review: ProductReview; pending_moderation: boolean }>('/store/reviews', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function markReviewHelpful(reviewId: string) {
+  return storeFetch<{ id: string; helpful_count: number }>(`/store/reviews/${reviewId}/helpful`, { method: 'POST' });
+}
+
+export interface WishlistItem {
+  id: string;
+  product_id: string;
+  variant_id: string | null;
+  notes: string | null;
+  added_at: string;
+}
+
+export async function getCustomerWishlist(): Promise<WishlistItem[]> {
+  try {
+    const res = await authFetch<{ items: WishlistItem[] }>('/store/wishlist');
+    return res.items ?? [];
+  } catch (e) {
+    console.warn('getCustomerWishlist failed:', e);
+    return [];
+  }
+}
+
+export async function addToWishlist(productId: string, variantId?: string, notes?: string) {
+  return authFetch<{ item: WishlistItem; already_in_wishlist?: boolean }>('/store/wishlist', {
+    method: 'POST',
+    body: JSON.stringify({ product_id: productId, variant_id: variantId, notes }),
+  });
+}
+
+export async function removeFromWishlist(productId: string) {
+  return authFetch<{ ok: boolean; removed: boolean }>(`/store/wishlist/${productId}`, { method: 'DELETE' });
+}

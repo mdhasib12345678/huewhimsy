@@ -1,10 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Instagram, Scissors, Laptop as Pinterest, Twitter, Linkedin, Youtube, Mail } from 'lucide-react';
+import { Instagram, Scissors, Laptop as Pinterest, Twitter, Linkedin, Youtube, Mail, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { subscribeNewsletter } from '@/lib/medusa';
 
 export const Footer: React.FC = () => {
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<'idle' | 'sending' | 'ok' | 'err'>('idle');
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+    setStatus('sending');
+    try {
+      await subscribeNewsletter({ email, source: 'footer' });
+      setStatus('ok');
+      setEmail('');
+    } catch {
+      setStatus('err');
+    }
+  };
+
   const footerLinks = {
     company: [
       { name: 'Home', path: '/' },
@@ -96,15 +113,32 @@ export const Footer: React.FC = () => {
             <p className="text-[#525252] text-sm">
               Subscribe to get free activity packs and updates.
             </p>
-            <div className="flex gap-2">
+            <form onSubmit={handleSubscribe} className="flex gap-2">
               <Input
+                type="email"
+                required
                 placeholder="Email address"
-                className="bg-black/5 border-black/10 text-[#0a0a0a] placeholder:text-[#525252] rounded-full px-4"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={status === 'ok'}
+                className="bg-white border-gray-300 text-[#0a0a0a] placeholder:text-gray-400 rounded-full px-4 focus:ring-2 focus:ring-[#FFD93D]"
               />
-              <Button size="icon" className="shrink-0 bg-white hover:bg-[#F5F5F5] text-black rounded-full">
-                <Mail className="w-4 h-4" />
+              <Button
+                type="submit"
+                size="icon"
+                disabled={status === 'sending' || status === 'ok'}
+                className="shrink-0 bg-gradient-to-r from-[#FF5F6D] to-[#B067FF] text-white hover:opacity-90 rounded-full"
+                aria-label="Subscribe"
+              >
+                {status === 'ok' ? <Check className="w-4 h-4" /> : <Mail className="w-4 h-4" />}
               </Button>
-            </div>
+            </form>
+            {status === 'ok' && (
+              <p className="text-xs text-[#5BE37D] mt-2">✓ You're subscribed!</p>
+            )}
+            {status === 'err' && (
+              <p className="text-xs text-red-600 mt-2">Something went wrong. Try again.</p>
+            )}
           </div>
         </div>
 

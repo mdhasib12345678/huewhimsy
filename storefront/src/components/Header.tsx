@@ -211,9 +211,9 @@ export const Header: React.FC = () => {
             )}
           </NavLink>
 
-          <Button className="hidden md:flex ml-2 rounded-full bg-black/5 hover:bg-black/10 text-[#0a0a0a] border border-black/20 backdrop-blur-sm transition-all hover:scale-105 active:scale-95">
-            Get Free Pack
-          </Button>
+          <NavLink to="/free-activities" className="hidden md:inline-flex items-center justify-center ml-2 rounded-full bg-gradient-to-r from-[#FF5F6D] to-[#B067FF] text-white px-5 h-10 font-semibold text-sm hover:opacity-90 transition-all hover:scale-105 active:scale-95 shadow-md">
+            🎁 Get Free Pack
+          </NavLink>
 
           {/* Mobile Menu */}
           <Sheet>
