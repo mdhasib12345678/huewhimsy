@@ -7,7 +7,7 @@ FROM node:${NODE_VERSION}-alpine AS build
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 COPY package.json package-lock.json* ./
-RUN npm ci --no-audit --no-fund --progress=false
+RUN npm install --no-audit --no-fund --legacy-peer-deps --progress=false
 COPY . .
 # Vite build-time public config (baked into the bundle — only publishable, non-secret values)
 ARG VITE_MEDUSA_BACKEND_URL
