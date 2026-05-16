@@ -15,7 +15,7 @@ import {
 import { ChatBubbleLeftRight, Star } from "@medusajs/icons"
 import { useEffect, useMemo, useState } from "react"
 
-type Testimonial = {
+type Endorsement = {
   id: string
   name: string
   role: string | null
@@ -29,7 +29,7 @@ type Testimonial = {
   updated_at: string
 }
 
-const EMPTY: Partial<Testimonial> = {
+const EMPTY: Partial<Endorsement> = {
   name: "",
   role: "",
   quote: "",
@@ -40,20 +40,20 @@ const EMPTY: Partial<Testimonial> = {
   status: "draft",
 }
 
-const TestimonialsAdminPage = () => {
-  const [items, setItems] = useState<Testimonial[]>([])
+const EndorsementsAdminPage = () => {
+  const [items, setItems] = useState<Endorsement[]>([])
   const [loading, setLoading] = useState(false)
-  const [form, setForm] = useState<Partial<Testimonial>>(EMPTY)
+  const [form, setForm] = useState<Partial<Endorsement>>(EMPTY)
   const [editingId, setEditingId] = useState<string | null>(null)
 
   const refresh = async () => {
     setLoading(true)
     try {
-      const r = await fetch("/admin/testimonials?limit=500", {
+      const r = await fetch("/admin/endorsements?limit=500", {
         credentials: "include",
       })
       const json = await r.json()
-      setItems(json.testimonials ?? [])
+      setItems(json.endorsements ?? [])
     } catch {
       toast.error("Failed to load testimonials")
     } finally {
@@ -65,10 +65,10 @@ const TestimonialsAdminPage = () => {
     refresh()
   }, [])
 
-  const setField = <K extends keyof Testimonial>(k: K, v: Testimonial[K]) =>
+  const setField = <K extends keyof Endorsement>(k: K, v: Endorsement[K]) =>
     setForm((f) => ({ ...f, [k]: v }))
 
-  const startEdit = (t: Testimonial) => {
+  const startEdit = (t: Endorsement) => {
     setEditingId(t.id)
     setForm(t)
     window.scrollTo({ top: 0, behavior: "smooth" })
@@ -95,8 +95,8 @@ const TestimonialsAdminPage = () => {
     setLoading(true)
     try {
       const url = editingId
-        ? `/admin/testimonials/${editingId}`
-        : `/admin/testimonials`
+        ? `/admin/endorsements/${editingId}`
+        : `/admin/endorsements`
       const r = await fetch(url, {
         method: "POST",
         credentials: "include",
@@ -121,7 +121,7 @@ const TestimonialsAdminPage = () => {
     if (!confirm("Delete this testimonial permanently?")) return
     setLoading(true)
     try {
-      await fetch(`/admin/testimonials/${id}`, {
+      await fetch(`/admin/endorsements/${id}`, {
         method: "DELETE",
         credentials: "include",
       })
@@ -241,9 +241,7 @@ const TestimonialsAdminPage = () => {
           <Label htmlFor="status">Status</Label>
           <Select
             value={form.status ?? "draft"}
-            onValueChange={(v) =>
-              setField("status", v as Testimonial["status"])
-            }
+            onValueChange={(v) => setField("status", v as Endorsement["status"])}
           >
             <Select.Trigger id="status">
               <Select.Value placeholder="Status" />
@@ -355,4 +353,4 @@ export const config = defineRouteConfig({
   icon: ChatBubbleLeftRight,
 })
 
-export default TestimonialsAdminPage
+export default EndorsementsAdminPage

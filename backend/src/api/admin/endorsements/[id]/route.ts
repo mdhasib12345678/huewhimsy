@@ -1,27 +1,27 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { TESTIMONIALS_MODULE } from "../../../../modules/testimonials"
-import TestimonialsModuleService from "../../../../modules/testimonials/service"
+import { ENDORSEMENTS_MODULE } from "../../../../modules/endorsements"
+import EndorsementsModuleService from "../../../../modules/endorsements/service"
 
 export async function GET(
   req: MedusaRequest,
   res: MedusaResponse,
 ): Promise<void> {
-  const service: TestimonialsModuleService = req.scope.resolve(TESTIMONIALS_MODULE)
-  const testimonial = await service
-    .retrieveTestimonial(req.params.id)
+  const service: EndorsementsModuleService = req.scope.resolve(ENDORSEMENTS_MODULE)
+  const endorsement = await service
+    .retrieveEndorsement(req.params.id)
     .catch(() => null)
-  if (!testimonial) {
-    res.status(404).json({ message: "Testimonial not found" })
+  if (!endorsement) {
+    res.status(404).json({ message: "Endorsement not found" })
     return
   }
-  res.json({ testimonial })
+  res.json({ endorsement })
 }
 
 export async function POST(
   req: MedusaRequest,
   res: MedusaResponse,
 ): Promise<void> {
-  const service: TestimonialsModuleService = req.scope.resolve(TESTIMONIALS_MODULE)
+  const service: EndorsementsModuleService = req.scope.resolve(ENDORSEMENTS_MODULE)
   const update = req.body as Record<string, unknown>
 
   if (update.rating !== undefined && update.rating !== null) {
@@ -33,18 +33,18 @@ export async function POST(
     update.rating = r
   }
 
-  const testimonial = await service.updateTestimonials({
+  const endorsement = await service.updateEndorsements({
     id: req.params.id,
     ...update,
   } as any)
-  res.json({ testimonial })
+  res.json({ endorsement })
 }
 
 export async function DELETE(
   req: MedusaRequest,
   res: MedusaResponse,
 ): Promise<void> {
-  const service: TestimonialsModuleService = req.scope.resolve(TESTIMONIALS_MODULE)
-  await service.deleteTestimonials(req.params.id)
+  const service: EndorsementsModuleService = req.scope.resolve(ENDORSEMENTS_MODULE)
+  await service.deleteEndorsements(req.params.id)
   res.json({ id: req.params.id, deleted: true })
 }

@@ -1,6 +1,6 @@
 import { model } from "@medusajs/framework/utils"
 
-const Testimonial = model.define("testimonial", {
+const Endorsement = model.define("endorsement", {
   id: model.id().primaryKey(),
   name: model.text().searchable(),
   role: model.text().nullable(),
@@ -13,4 +13,4 @@ const Testimonial = model.define("testimonial", {
   translations: model.json().nullable(),
 })
 
-export default Testimonial
+export default Endorsement

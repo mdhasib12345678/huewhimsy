@@ -219,20 +219,20 @@
           "mappedType": "datetime"
         }
       },
-      "name": "testimonial",
+      "name": "endorsement",
       "schema": "public",
       "indexes": [
         {
-          "keyName": "IDX_testimonial_deleted_at",
+          "keyName": "IDX_endorsement_deleted_at",
           "columnNames": [],
           "composite": false,
           "constraint": false,
           "primary": false,
           "unique": false,
-          "expression": "CREATE INDEX IF NOT EXISTS \"IDX_testimonial_deleted_at\" ON \"testimonial\" (\"deleted_at\") WHERE deleted_at IS NULL"
+          "expression": "CREATE INDEX IF NOT EXISTS \"IDX_endorsement_deleted_at\" ON \"endorsement\" (\"deleted_at\") WHERE deleted_at IS NULL"
         },
         {
-          "keyName": "testimonial_pkey",
+          "keyName": "endorsement_pkey",
           "columnNames": [
             "id"
           ],

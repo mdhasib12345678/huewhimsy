@@ -1,6 +1,6 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { TESTIMONIALS_MODULE } from "../../../modules/testimonials"
-import TestimonialsModuleService from "../../../modules/testimonials/service"
+import { ENDORSEMENTS_MODULE } from "../../../modules/endorsements"
+import EndorsementsModuleService from "../../../modules/endorsements/service"
 
 function applyTranslation(row: any, locale?: string) {
   if (!locale || locale === "en" || !row?.translations) return row
@@ -19,12 +19,12 @@ export async function GET(
   req: MedusaRequest,
   res: MedusaResponse,
 ): Promise<void> {
-  const service: TestimonialsModuleService = req.scope.resolve(TESTIMONIALS_MODULE)
+  const service: EndorsementsModuleService = req.scope.resolve(ENDORSEMENTS_MODULE)
   const limit = Math.min(Number(req.query.limit ?? 20), 100)
   const offset = Number(req.query.offset ?? 0)
   const locale = req.query.locale as string | undefined
 
-  const [rows, count] = await service.listAndCountTestimonials(
+  const [rows, count] = await service.listAndCountEndorsements(
     { status: "published" },
     {
       take: limit,
@@ -34,7 +34,7 @@ export async function GET(
   )
 
   res.json({
-    testimonials: rows.map((r) => applyTranslation(r, locale)),
+    endorsements: rows.map((r) => applyTranslation(r, locale)),
     count,
     limit,
     offset,
