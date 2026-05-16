@@ -12,7 +12,7 @@ import {
   toast,
   Toaster,
 } from "@medusajs/ui"
-import { PictureSquare } from "@medusajs/icons"
+import { Photo } from "@medusajs/icons"
 import { useEffect, useMemo, useState } from "react"
 
 type Banner = {
@@ -397,7 +397,7 @@ const HeroAdminPage = () => {
 
 export const config = defineRouteConfig({
   label: "Hero Banners",
-  icon: PictureSquare,
+  icon: Photo,
 })
 
 export default HeroAdminPage
