@@ -54,5 +54,8 @@ module.exports = defineConfig({
     {
       resolve: './src/modules/endorsements',
     },
+    {
+      resolve: './src/modules/faq',
+    },
   ],
 })
