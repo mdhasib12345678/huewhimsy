@@ -57,5 +57,8 @@ module.exports = defineConfig({
     {
       resolve: './src/modules/faq',
     },
+    {
+      resolve: './src/modules/hero',
+    },
   ],
 })
