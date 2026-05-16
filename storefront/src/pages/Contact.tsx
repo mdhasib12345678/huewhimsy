@@ -26,8 +26,8 @@ export const Contact: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
           <div className="space-y-12">
             <div>
-              <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">Let's Connect</h1>
-              <p className="text-xl text-[#B8BEC6] leading-relaxed">
+              <h1 className="text-5xl md:text-6xl font-bold text-[#0a0a0a] mb-6">Let's Connect</h1>
+              <p className="text-xl text-[#525252] leading-relaxed">
                 Whether you have a question about our books, a suggestion for Rilo and Rivy, 
                 or just want to say hi—we'd love to hear from you.
               </p>
@@ -41,37 +41,37 @@ export const Contact: React.FC = () => {
                 { icon: MapPin, label: 'Location', val: 'Global Studio' },
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-6 group">
-                  <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <div className="w-12 h-12 rounded-2xl bg-black/5 border border-black/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <item.icon className="w-5 h-5 text-[#FFD93D]" />
                   </div>
                   <div>
-                    <p className="text-xs uppercase tracking-widest font-bold text-[#B8BEC6]">{item.label}</p>
-                    <p className="text-lg text-white font-medium">{item.val}</p>
+                    <p className="text-xs uppercase tracking-widest font-bold text-[#525252]">{item.label}</p>
+                    <p className="text-lg text-[#0a0a0a] font-medium">{item.val}</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <Card className="border-white/10 bg-white/5 backdrop-blur-3xl overflow-hidden p-8 md:p-12">
+          <Card className="border-black/10 bg-black/5 backdrop-blur-3xl overflow-hidden p-8 md:p-12">
             <div className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label className="text-white">Your Name</Label>
-                  <Input placeholder="Riffy Panda" className="bg-white/5 border-white/10 text-white h-12 rounded-xl" />
+                  <Label className="text-[#0a0a0a]">Your Name</Label>
+                  <Input placeholder="Riffy Panda" className="bg-black/5 border-black/10 text-[#0a0a0a] h-12 rounded-xl" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-white">Email Address</Label>
-                  <Input type="email" placeholder="riffy@magic.com" className="bg-white/5 border-white/10 text-white h-12 rounded-xl" />
+                  <Label className="text-[#0a0a0a]">Email Address</Label>
+                  <Input type="email" placeholder="riffy@magic.com" className="bg-black/5 border-black/10 text-[#0a0a0a] h-12 rounded-xl" />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-white">How can we help?</Label>
-                <Input placeholder="General Inquiry" className="bg-white/5 border-white/10 text-white h-12 rounded-xl" />
+                <Label className="text-[#0a0a0a]">How can we help?</Label>
+                <Input placeholder="General Inquiry" className="bg-black/5 border-black/10 text-[#0a0a0a] h-12 rounded-xl" />
               </div>
               <div className="space-y-2">
-                <Label className="text-white">Message</Label>
-                <Textarea placeholder="Tell us your story..." className="bg-white/5 border-white/10 text-white min-h-[150px] rounded-xl" />
+                <Label className="text-[#0a0a0a]">Message</Label>
+                <Textarea placeholder="Tell us your story..." className="bg-black/5 border-black/10 text-[#0a0a0a] min-h-[150px] rounded-xl" />
               </div>
               <Button className="w-full rounded-full h-14 text-lg font-bold bg-white text-black hover:bg-[#F5F5F5] transition-all hover:scale-[1.01] active:scale-[0.99]">
                 Send Message <Send className="ml-2 w-5 h-5" />

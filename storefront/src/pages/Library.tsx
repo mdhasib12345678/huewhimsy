@@ -114,7 +114,7 @@ export const Library: React.FC = () => {
         <motion.h1
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="text-4xl md:text-6xl font-bold text-white mb-6"
+          className="text-4xl md:text-6xl font-bold text-[#0a0a0a] mb-6"
         >
           The Alphabet Fun Adventure
         </motion.h1>
@@ -122,27 +122,27 @@ export const Library: React.FC = () => {
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.1 }}
-          className="text-[#B8BEC6] text-lg max-w-2xl mx-auto"
+          className="text-[#525252] text-lg max-w-2xl mx-auto"
         >
           Explore our collection of premium coloring and learning books. Designed to spark creativity and build early literacy skills with Rilo and Rivy.
         </motion.p>
       </section>
 
       {/* Filters Bar */}
-      <section className="flex flex-col lg:flex-row items-center gap-6 mb-12 p-4 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl">
+      <section className="flex flex-col lg:flex-row items-center gap-6 mb-12 p-4 rounded-3xl bg-black/5 border border-black/10 backdrop-blur-xl">
         <div className="relative flex-grow w-full">
-          <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#B8BEC6]" />
+          <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#525252]" />
           <Input
             placeholder="Search books, activities, or topics..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-11 bg-white/5 border-white/10 text-white rounded-full focus-visible:ring-[#FFD93D]"
+            className="pl-11 bg-black/5 border-black/10 text-[#0a0a0a] rounded-full focus-visible:ring-[#FFD93D]"
           />
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-2">
           <Tabs value={filter} onValueChange={setFilter} className="w-auto">
-            <TabsList className="bg-white/5 border border-white/10 p-1 h-auto rounded-full">
+            <TabsList className="bg-black/5 border border-black/10 p-1 h-auto rounded-full">
               {['all', 'age 3-4', 'age 4-6', 'age 6-8', 'available', 'coming-soon'].map((t) => (
                 <TabsTrigger
                   key={t}
@@ -161,7 +161,7 @@ export const Library: React.FC = () => {
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="aspect-[3/5] rounded-3xl bg-white/5 border border-white/10 animate-pulse" />
+            <div key={i} className="aspect-[3/5] rounded-3xl bg-black/5 border border-black/10 animate-pulse" />
           ))}
         </div>
       ) : (
@@ -176,9 +176,9 @@ export const Library: React.FC = () => {
               className="group"
             >
               <NavLink to={`/library/${book.handle}`} className="block h-full">
-                <Card className="h-full border-white/10 bg-white/5 overflow-hidden flex flex-col group-hover:border-white/20 transition-all shadow-xl group-hover:shadow-[#FFD93D]/10 text-left">
+                <Card className="h-full border-black/10 bg-black/5 overflow-hidden flex flex-col group-hover:border-black/20 transition-all shadow-xl group-hover:shadow-[#FFD93D]/10 text-left">
                   <CardContent className="p-0 flex flex-col h-full">
-                    <div className="aspect-[3/4.2] relative bg-white/5 overflow-hidden flex items-center justify-center">
+                    <div className="aspect-[3/4.2] relative bg-black/5 overflow-hidden flex items-center justify-center">
                       <div
                         className="absolute inset-0 opacity-20 transition-opacity group-hover:opacity-30"
                         style={{ backgroundColor: book.color }}
@@ -191,10 +191,10 @@ export const Library: React.FC = () => {
                         />
                       ) : (
                         <div className="relative z-10 px-8 text-center flex flex-col items-center gap-4 group-hover:scale-105 transition-transform duration-500">
-                          <BookOpen className="w-12 h-12 text-white/30" />
+                          <BookOpen className="w-12 h-12 text-[#0a0a0a]/30" />
                           <div>
-                            <h3 className="text-xl font-bold text-white mb-2 leading-tight">{book.title}</h3>
-                            <p className="text-xs text-[#B8BEC6] uppercase tracking-widest font-semibold">Alphabet Fun</p>
+                            <h3 className="text-xl font-bold text-[#0a0a0a] mb-2 leading-tight">{book.title}</h3>
+                            <p className="text-xs text-[#525252] uppercase tracking-widest font-semibold">Alphabet Fun</p>
                           </div>
                         </div>
                       )}
@@ -203,7 +203,7 @@ export const Library: React.FC = () => {
                         <Star className="w-5 h-5 text-[#FFD93D] drop-shadow-lg" />
                       </div>
 
-                      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-3">
+                      <div className="absolute inset-0 bg-white/95 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-3">
                         <Button
                           size="icon"
                           className="rounded-full bg-white text-black hover:scale-110 transition-transform"
@@ -227,13 +227,13 @@ export const Library: React.FC = () => {
                         >
                           <ShoppingCart className="w-4 h-4" />
                         </Button>
-                        <Button size="icon" variant="outline" className="rounded-full border-white/40 text-white hover:bg-white/20 hover:scale-110 transition-transform">
+                        <Button size="icon" variant="outline" className="rounded-full border-black/40 text-[#0a0a0a] hover:bg-black/10 hover:scale-110 transition-transform">
                           <Info className="w-4 h-4" />
                         </Button>
                       </div>
                     </div>
 
-                    <div className="p-6 bg-black/20 border-t border-white/10 flex-grow flex flex-col">
+                    <div className="p-6 bg-black/20 border-t border-black/10 flex-grow flex flex-col">
                       <div className="flex justify-between items-start mb-4">
                         <Badge
                           variant={book.status === 'Available Now' ? 'default' : 'secondary'}
@@ -241,22 +241,22 @@ export const Library: React.FC = () => {
                             'rounded-full px-3 py-1 text-[10px] uppercase font-bold',
                             book.status === 'Available Now'
                               ? 'bg-[#5BE37D] text-black'
-                              : 'bg-white/10 text-white',
+                              : 'bg-black/5 text-[#0a0a0a]',
                           )}
                         >
                           {book.status}
                         </Badge>
-                        <span className="text-xs text-[#B8BEC6]">Ages {book.age}</span>
+                        <span className="text-xs text-[#525252]">Ages {book.age}</span>
                       </div>
 
-                      <h4 className="text-lg font-bold text-white mb-4 line-clamp-1">{book.title}</h4>
+                      <h4 className="text-lg font-bold text-[#0a0a0a] mb-4 line-clamp-1">{book.title}</h4>
 
                       <div className="mt-auto flex items-center justify-between gap-4">
                         <div className="flex flex-col">
-                          <span className="text-[10px] text-[#B8BEC6] uppercase font-bold tracking-widest leading-none mb-1">
+                          <span className="text-[10px] text-[#525252] uppercase font-bold tracking-widest leading-none mb-1">
                             Price
                           </span>
-                          <span className="text-xl font-bold text-white">
+                          <span className="text-xl font-bold text-[#0a0a0a]">
                             {book.price > 0 ? formatPrice(book.price) : '--'}
                           </span>
                         </div>
@@ -281,7 +281,7 @@ export const Library: React.FC = () => {
                             'rounded-full px-6 flex-grow transition-all',
                             book.status === 'Available Now'
                               ? 'bg-white text-black hover:bg-[#F5F5F5]'
-                              : 'bg-white/5 text-[#B8BEC6] cursor-not-allowed',
+                              : 'bg-black/5 text-[#525252] cursor-not-allowed',
                           )}
                         >
                           {book.status === 'Available Now' ? 'Buy Now' : 'Join Waitlist'}
@@ -297,12 +297,12 @@ export const Library: React.FC = () => {
       )}
 
       {!loading && filtered.length === 0 && (
-        <div className="py-24 text-center text-[#B8BEC6]">No books match your search.</div>
+        <div className="py-24 text-center text-[#525252]">No books match your search.</div>
       )}
 
       <div className="mt-20 flex justify-center">
         <NavLink to="/shop">
-          <Button variant="outline" className="rounded-full border-white/20 text-[#B8BEC6] hover:text-white px-8 h-12">
+          <Button variant="outline" className="rounded-full border-black/20 text-[#525252] hover:text-black px-8 h-12">
             Browse the full shop →
           </Button>
         </NavLink>

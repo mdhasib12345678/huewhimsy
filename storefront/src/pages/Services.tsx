@@ -32,17 +32,17 @@ export const Services: React.FC = () => {
         animate={{ opacity: 1, scale: 1 }}
         className="container mx-auto px-4 py-32 text-center"
       >
-         <div className="max-w-xl mx-auto space-y-8 bg-white/5 p-12 rounded-[3rem] border border-white/10 backdrop-blur-3xl">
+         <div className="max-w-xl mx-auto space-y-8 bg-black/5 p-12 rounded-[3rem] border border-black/10 backdrop-blur-3xl">
             <div className="w-20 h-20 rounded-full bg-[#5BE37D]/20 flex items-center justify-center mx-auto mb-8">
                <Check className="w-10 h-10 text-[#5BE37D]" />
             </div>
-            <div className="space-y-4 text-white text-lg">
+            <div className="space-y-4 text-[#0a0a0a] text-lg">
               <p>Thank you for contacting Hue Whimsy.</p>
               <p>We have successfully received your project request.</p>
               <p>Our team will review your information and respond within 1–3 business days.</p>
               <p className="font-bold text-[#FFD93D]">We look forward to bringing your ideas to life.</p>
             </div>
-            <Button onClick={() => setIsSubmitted(false)} variant="outline" className="rounded-full border-white/20 text-white">
+            <Button onClick={() => setIsSubmitted(false)} variant="outline" className="rounded-full border-black/20 text-[#0a0a0a]">
               Send Another Request
             </Button>
          </div>
@@ -74,33 +74,33 @@ export const Services: React.FC = () => {
       className="pb-24"
     >
       {/* Hero Section - Corporate Style */}
-      <section className="relative overflow-hidden pt-32 pb-20 border-b border-white/5 bg-white/[0.02]">
+      <section className="relative overflow-hidden pt-32 pb-20 border-b border-black/5 bg-white/[0.02]">
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl">
             <motion.div 
                initial={{ x: -20, opacity: 0 }}
                animate={{ x: 0, opacity: 1 }}
-               className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-8"
+               className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/5 border border-black/10 mb-8"
             >
               <div className="w-2 h-2 rounded-full bg-[#5BE37D] animate-pulse" />
-              <span className="text-[10px] uppercase font-bold tracking-widest text-[#B8BEC6]">Premium Creative Agency</span>
+              <span className="text-[10px] uppercase font-bold tracking-widest text-[#525252]">Premium Creative Agency</span>
             </motion.div>
             
             <motion.h1 
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.1 }}
-              className="text-5xl md:text-7xl font-bold text-white mb-8 leading-[1.1]"
+              className="text-5xl md:text-7xl font-bold text-[#0a0a0a] mb-8 leading-[1.1]"
             >
               Premium Design & <br />
-              <span className="text-white/50">Next-Gen Automation</span>
+              <span className="text-[#0a0a0a]/50">Next-Gen Automation</span>
             </motion.h1>
             
             <motion.p 
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="text-xl text-[#B8BEC6] max-w-2xl mb-12 leading-relaxed"
+              className="text-xl text-[#525252] max-w-2xl mb-12 leading-relaxed"
             >
               We combine artistic whimsy with high-end technology. From custom character illustrations to sophisticated AI agents, we bring elite creative solutions to your brand.
             </motion.p>
@@ -114,7 +114,7 @@ export const Services: React.FC = () => {
               <Button size="lg" className="rounded-full bg-white text-black hover:bg-[#F5F5F5] px-8 py-7 text-lg font-semibold">
                 Start a Project
               </Button>
-              <Button size="lg" variant="outline" className="rounded-full border-white/20 text-white hover:bg-white/10 px-8 py-7 text-lg font-semibold">
+              <Button size="lg" variant="outline" className="rounded-full border-black/20 text-[#0a0a0a] hover:bg-black/5 px-8 py-7 text-lg font-semibold">
                 View Portfolio
               </Button>
             </motion.div>
@@ -125,7 +125,7 @@ export const Services: React.FC = () => {
       {/* Services Grid */}
       <section className="container mx-auto px-4 py-24">
         <div className="mb-20">
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Our Capabilities</h2>
+          <h2 className="text-3xl md:text-5xl font-bold text-[#0a0a0a] mb-6">Our Capabilities</h2>
           <div className="w-20 h-1 bg-gradient-to-r from-[#FF9A3C] to-[#B067FF] rounded-full" />
         </div>
 
@@ -140,11 +140,11 @@ export const Services: React.FC = () => {
             >
               <Card className="h-full border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.08] transition-all cursor-pointer backdrop-blur-xl group">
                 <CardContent className="p-8 flex flex-col items-center text-center">
-                  <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center mb-6 border border-white/10 group-hover:border-[#FFD93D]/30 transition-colors">
-                    <s.icon className="w-6 h-6 text-[#B8BEC6] group-hover:text-white transition-colors" />
+                  <div className="w-12 h-12 rounded-2xl bg-black/5 flex items-center justify-center mb-6 border border-black/10 group-hover:border-[#FFD93D]/30 transition-colors">
+                    <s.icon className="w-6 h-6 text-[#525252] group-hover:text-black transition-colors" />
                   </div>
-                  <h4 className="text-lg font-bold text-white mb-2 leading-tight">{s.title}</h4>
-                  <p className="text-xs text-[#B8BEC6] uppercase tracking-widest font-bold">Starts at {s.start}</p>
+                  <h4 className="text-lg font-bold text-[#0a0a0a] mb-2 leading-tight">{s.title}</h4>
+                  <p className="text-xs text-[#525252] uppercase tracking-widest font-bold">Starts at {s.start}</p>
                 </CardContent>
               </Card>
             </motion.div>
@@ -153,34 +153,34 @@ export const Services: React.FC = () => {
       </section>
 
       {/* AI Agent Pricing */}
-      <section className="bg-white/[0.02] border-y border-white/5 py-24">
+      <section className="bg-white/[0.02] border-y border-black/5 py-24">
         <div className="container mx-auto px-4">
           <div className="text-center mb-20">
             <Badge className="bg-[#B067FF] mb-4">Elite Tech Solutons</Badge>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">AI Agent & Automation</h2>
-            <p className="text-[#B8BEC6] max-w-2xl mx-auto">Future-proof your business with custom AI agents designed for efficiency, intelligence, and brand voice.</p>
+            <h2 className="text-4xl md:text-5xl font-bold text-[#0a0a0a] mb-6">AI Agent & Automation</h2>
+            <p className="text-[#525252] max-w-2xl mx-auto">Future-proof your business with custom AI agents designed for efficiency, intelligence, and brand voice.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {aiAgentPlans.map((plan, i) => (
               <Card key={plan.name} className={cn(
-                "border-white/10 bg-white/[0.03] backdrop-blur-xl overflow-hidden relative",
+                "border-black/10 bg-white/[0.03] backdrop-blur-xl overflow-hidden relative",
                 plan.highlight && "border-[#B067FF]/50 ring-1 ring-[#B067FF]/50 scale-105 z-10"
               )}>
                 {plan.highlight && (
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#B067FF] to-[#4DA8FF]" />
                 )}
                 <CardHeader className="p-8 pb-0">
-                  <CardTitle className="text-2xl font-bold text-white">{plan.name}</CardTitle>
+                  <CardTitle className="text-2xl font-bold text-[#0a0a0a]">{plan.name}</CardTitle>
                   <div className="mt-4 flex items-baseline gap-1">
-                    <span className="text-4xl font-bold text-white tracking-tight">{plan.price}</span>
-                    <span className="text-[#B8BEC6] text-sm font-medium">/ project</span>
+                    <span className="text-4xl font-bold text-[#0a0a0a] tracking-tight">{plan.price}</span>
+                    <span className="text-[#525252] text-sm font-medium">/ project</span>
                   </div>
                 </CardHeader>
                 <CardContent className="p-8">
                   <ul className="space-y-4">
                     {plan.features.map((f) => (
-                      <li key={f} className="flex items-center gap-3 text-[#B8BEC6] text-sm">
+                      <li key={f} className="flex items-center gap-3 text-[#525252] text-sm">
                         <Check className="w-4 h-4 text-[#5BE37D]" /> {f}
                       </li>
                     ))}
@@ -189,7 +189,7 @@ export const Services: React.FC = () => {
                 <CardFooter className="p-8 pt-0">
                   <Button className={cn(
                     "w-full rounded-full h-12 font-bold transition-all",
-                    plan.highlight ? "bg-white text-black hover:bg-[#F5F5F5]" : "bg-white/10 text-white hover:bg-white/20"
+                    plan.highlight ? "bg-white text-black hover:bg-[#F5F5F5]" : "bg-black/5 text-[#0a0a0a] hover:bg-black/10"
                   )}>
                     Select {plan.name}
                   </Button>
@@ -204,34 +204,34 @@ export const Services: React.FC = () => {
       <section className="container mx-auto px-4 py-24">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">Custom Project Inquiry</h2>
-            <p className="text-[#B8BEC6]">Have a unique idea? Tell us about your project and we'll bring it to life.</p>
+            <h2 className="text-4xl font-bold text-[#0a0a0a] mb-4">Custom Project Inquiry</h2>
+            <p className="text-[#525252]">Have a unique idea? Tell us about your project and we'll bring it to life.</p>
           </div>
 
-          <Card className="border-white/10 bg-white/[0.03] backdrop-blur-3xl overflow-hidden p-8 md:p-12">
+          <Card className="border-black/10 bg-white/[0.03] backdrop-blur-3xl overflow-hidden p-8 md:p-12">
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-[#F5F5F5]">Full Name</Label>
-                  <Input id="name" placeholder="John Doe" className="bg-white/5 border-white/10 text-white rounded-xl h-12 outline-none focus:ring-1 focus:ring-[#FFD93D]" required />
+                  <Label htmlFor="name" className="text-[#0a0a0a]">Full Name</Label>
+                  <Input id="name" placeholder="John Doe" className="bg-black/5 border-black/10 text-[#0a0a0a] rounded-xl h-12 outline-none focus:ring-1 focus:ring-[#FFD93D]" required />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="business" className="text-[#F5F5F5]">Business Name</Label>
-                  <Input id="business" placeholder="Your Company" className="bg-white/5 border-white/10 text-white rounded-xl h-12 outline-none focus:ring-1 focus:ring-[#FFD93D]" />
+                  <Label htmlFor="business" className="text-[#0a0a0a]">Business Name</Label>
+                  <Input id="business" placeholder="Your Company" className="bg-black/5 border-black/10 text-[#0a0a0a] rounded-xl h-12 outline-none focus:ring-1 focus:ring-[#FFD93D]" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-[#F5F5F5]">Email Address</Label>
-                  <Input id="email" type="email" placeholder="john@example.com" className="bg-white/5 border-white/10 text-white rounded-xl h-12 outline-none focus:ring-1 focus:ring-[#FFD93D]" required />
+                  <Label htmlFor="email" className="text-[#0a0a0a]">Email Address</Label>
+                  <Input id="email" type="email" placeholder="john@example.com" className="bg-black/5 border-black/10 text-[#0a0a0a] rounded-xl h-12 outline-none focus:ring-1 focus:ring-[#FFD93D]" required />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-[#F5F5F5]">Customer Mobile Number</Label>
+                  <Label htmlFor="phone" className="text-[#0a0a0a]">Customer Mobile Number</Label>
                   <div className="flex gap-2">
                     <Select defaultValue="us">
-                       <SelectTrigger className="w-28 bg-white/5 border-white/10 text-white rounded-xl h-12">
+                       <SelectTrigger className="w-28 bg-black/5 border-black/10 text-[#0a0a0a] rounded-xl h-12">
                          <SelectValue placeholder="Flag" />
                        </SelectTrigger>
-                       <SelectContent className="bg-black text-white border-white/10">
+                       <SelectContent className="bg-black text-[#0a0a0a] border-black/10">
                          <SelectItem value="us">🇺🇸 +1</SelectItem>
                          <SelectItem value="uk">🇬🇧 +44</SelectItem>
                          <SelectItem value="ca">🇨🇦 +1</SelectItem>
@@ -240,20 +240,20 @@ export const Services: React.FC = () => {
                          <SelectItem value="eu">🇪🇺 +49</SelectItem>
                        </SelectContent>
                     </Select>
-                    <Input id="phone" placeholder="555-0123" className="flex-grow bg-white/5 border-white/10 text-white rounded-xl h-12 outline-none focus:ring-1 focus:ring-[#FFD93D]" required />
+                    <Input id="phone" placeholder="555-0123" className="flex-grow bg-black/5 border-black/10 text-[#0a0a0a] rounded-xl h-12 outline-none focus:ring-1 focus:ring-[#FFD93D]" required />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="timezone" className="text-[#F5F5F5]">Country / Time Zone</Label>
-                  <Input id="timezone" placeholder="e.g. USA / EST" className="bg-white/5 border-white/10 text-white rounded-xl h-12 outline-none focus:ring-1 focus:ring-[#FFD93D]" />
+                  <Label htmlFor="timezone" className="text-[#0a0a0a]">Country / Time Zone</Label>
+                  <Input id="timezone" placeholder="e.g. USA / EST" className="bg-black/5 border-black/10 text-[#0a0a0a] rounded-xl h-12 outline-none focus:ring-1 focus:ring-[#FFD93D]" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="service" className="text-[#F5F5F5]">Service Category</Label>
+                  <Label htmlFor="service" className="text-[#0a0a0a]">Service Category</Label>
                   <Select>
-                    <SelectTrigger className="bg-white/5 border-white/10 text-white rounded-xl h-12">
+                    <SelectTrigger className="bg-black/5 border-black/10 text-[#0a0a0a] rounded-xl h-12">
                       <SelectValue placeholder="Select a service" />
                     </SelectTrigger>
-                    <SelectContent className="bg-black text-white border-white/10">
+                    <SelectContent className="bg-black text-[#0a0a0a] border-black/10">
                       {coreServices.map(s => (
                         <SelectItem key={s.title} value={s.title.toLowerCase().replace(/ /g, '-')}>{s.title}</SelectItem>
                       ))}
@@ -265,12 +265,12 @@ export const Services: React.FC = () => {
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="budget" className="text-[#F5F5F5]">Project Budget</Label>
+                  <Label htmlFor="budget" className="text-[#0a0a0a]">Project Budget</Label>
                   <Select>
-                    <SelectTrigger className="bg-white/5 border-white/10 text-white rounded-xl h-12">
+                    <SelectTrigger className="bg-black/5 border-black/10 text-[#0a0a0a] rounded-xl h-12">
                       <SelectValue placeholder="Select budget range" />
                     </SelectTrigger>
-                    <SelectContent className="bg-black text-white border-white/10">
+                    <SelectContent className="bg-black text-[#0a0a0a] border-black/10">
                       <SelectItem value="under-500">Under $500</SelectItem>
                       <SelectItem value="500-1000">$500–$1000</SelectItem>
                       <SelectItem value="1000-3000">$1000–$3000</SelectItem>
@@ -281,42 +281,42 @@ export const Services: React.FC = () => {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="timeline" className="text-[#F5F5F5]">Project Timeline</Label>
-                  <Input id="timeline" placeholder="e.g., 4 weeks" className="bg-white/5 border-white/10 text-white rounded-xl h-12 outline-none focus:ring-1 focus:ring-[#FFD93D]" />
+                  <Label htmlFor="timeline" className="text-[#0a0a0a]">Project Timeline</Label>
+                  <Input id="timeline" placeholder="e.g., 4 weeks" className="bg-black/5 border-black/10 text-[#0a0a0a] rounded-xl h-12 outline-none focus:ring-1 focus:ring-[#FFD93D]" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="website" className="text-[#F5F5F5]">Website URL</Label>
-                  <Input id="website" placeholder="https://example.com" className="bg-white/5 border-white/10 text-white rounded-xl h-12 outline-none focus:ring-1 focus:ring-[#FFD93D]" />
+                  <Label htmlFor="website" className="text-[#0a0a0a]">Website URL</Label>
+                  <Input id="website" placeholder="https://example.com" className="bg-black/5 border-black/10 text-[#0a0a0a] rounded-xl h-12 outline-none focus:ring-1 focus:ring-[#FFD93D]" />
                 </div>
                  <div className="space-y-2">
-                  <Label htmlFor="social" className="text-[#F5F5F5]">Social Media Links</Label>
-                  <Input id="social" placeholder="Instagram, Twitter, etc." className="bg-white/5 border-white/10 text-white rounded-xl h-12 outline-none focus:ring-1 focus:ring-[#FFD93D]" />
+                  <Label htmlFor="social" className="text-[#0a0a0a]">Social Media Links</Label>
+                  <Input id="social" placeholder="Instagram, Twitter, etc." className="bg-black/5 border-black/10 text-[#0a0a0a] rounded-xl h-12 outline-none focus:ring-1 focus:ring-[#FFD93D]" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="description" className="text-[#F5F5F5]">Project Description</Label>
-                  <Textarea id="description" placeholder="Briefly describe your goals..." className="bg-white/5 border-white/10 text-white rounded-xl min-h-[85px] outline-none focus:ring-1 focus:ring-[#FFD93D]" />
+                  <Label htmlFor="description" className="text-[#0a0a0a]">Project Description</Label>
+                  <Textarea id="description" placeholder="Briefly describe your goals..." className="bg-black/5 border-black/10 text-[#0a0a0a] rounded-xl min-h-[85px] outline-none focus:ring-1 focus:ring-[#FFD93D]" />
                 </div>
               </div>
             </div>
 
-            <div className="mt-8 pt-8 border-t border-white/10 space-y-6">
+            <div className="mt-8 pt-8 border-t border-black/10 space-y-6">
               <div className="flex flex-col md:flex-row gap-6">
                  <div className="flex-grow space-y-2">
-                   <Label className="text-[#F5F5F5]">Attachments (JPG, PNG, PDF, ZIP)</Label>
-                   <div className="border-2 border-dashed border-white/10 rounded-2xl p-6 flex flex-col items-center justify-center hover:bg-white/5 transition-colors cursor-pointer group">
-                      <Upload className="w-8 h-8 text-[#B8BEC6] mb-2 group-hover:text-white transition-colors" />
-                      <span className="text-sm text-[#B8BEC6]">Click or drag files to upload</span>
+                   <Label className="text-[#0a0a0a]">Attachments (JPG, PNG, PDF, ZIP)</Label>
+                   <div className="border-2 border-dashed border-black/10 rounded-2xl p-6 flex flex-col items-center justify-center hover:bg-black/5 transition-colors cursor-pointer group">
+                      <Upload className="w-8 h-8 text-[#525252] mb-2 group-hover:text-black transition-colors" />
+                      <span className="text-sm text-[#525252]">Click or drag files to upload</span>
                    </div>
                  </div>
               </div>
               
               <div className="flex flex-col gap-4">
-                <Label className="text-[#F5F5F5]">Preferred Contact Method</Label>
+                <Label className="text-[#0a0a0a]">Preferred Contact Method</Label>
                 <div className="flex flex-wrap gap-4">
                   {['Email', 'Phone Call', 'WhatsApp', 'Zoom', 'Google Meet'].map(m => (
                     <div key={m} className="flex items-center gap-2">
-                      <input type="checkbox" id={m} className="rounded border-white/20 bg-white/5" />
-                      <label htmlFor={m} className="text-sm text-[#B8BEC6]">{m}</label>
+                      <input type="checkbox" id={m} className="rounded border-black/20 bg-black/5" />
+                      <label htmlFor={m} className="text-sm text-[#525252]">{m}</label>
                     </div>
                   ))}
                 </div>
@@ -332,7 +332,7 @@ export const Services: React.FC = () => {
       </section>
 
       {/* Corporate Features */}
-      <section className="container mx-auto px-4 py-24 border-t border-white/5">
+      <section className="container mx-auto px-4 py-24 border-t border-black/5">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
            {[
              { icon: Globe, title: 'Global Delivery', text: 'Serving clients worldwide with 24/7 support.' },
@@ -341,11 +341,11 @@ export const Services: React.FC = () => {
              { icon: Mail, title: 'Direct Support', text: 'Dedicated project managers for every client.' },
            ].map((feat, i) => (
              <div key={i} className="flex flex-col gap-4">
-                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-                  <feat.icon className="w-5 h-5 text-[#B8BEC6]" />
+                <div className="w-10 h-10 rounded-xl bg-black/5 border border-black/10 flex items-center justify-center">
+                  <feat.icon className="w-5 h-5 text-[#525252]" />
                 </div>
-                <h5 className="text-white font-bold">{feat.title}</h5>
-                <p className="text-sm text-[#B8BEC6] leading-relaxed">{feat.text}</p>
+                <h5 className="text-[#0a0a0a] font-bold">{feat.title}</h5>
+                <p className="text-sm text-[#525252] leading-relaxed">{feat.text}</p>
              </div>
            ))}
         </div>

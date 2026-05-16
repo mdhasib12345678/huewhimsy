@@ -30,8 +30,8 @@ export const FreeActivities: React.FC = () => {
     >
       <section className="text-center mb-16">
         <Badge className="bg-[#FFD93D] text-black mb-4">Free Printables</Badge>
-        <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">Unleash the Magic</h1>
-        <p className="text-[#B8BEC6] text-lg max-w-2xl mx-auto">
+        <h1 className="text-4xl md:text-6xl font-bold text-[#0a0a0a] mb-6">Unleash the Magic</h1>
+        <p className="text-[#525252] text-lg max-w-2xl mx-auto">
           Download our exclusive activity packs to start your Hue Whimsy adventure today. Perfect for home or the classroom.
         </p>
       </section>
@@ -45,19 +45,19 @@ export const FreeActivities: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
           >
-            <Card className="border-white/10 bg-white/5 backdrop-blur-xl hover:bg-white/10 transition-all group cursor-pointer overflow-hidden">
+            <Card className="border-black/10 bg-black/5 backdrop-blur-xl hover:bg-black/5 transition-all group cursor-pointer overflow-hidden">
               <CardContent className="p-0 flex flex-col md:flex-row">
-                <div className="w-full md:w-48 bg-white/5 flex items-center justify-center p-8">
-                  <activity.icon className="w-16 h-16 text-[#B8BEC6] group-hover:text-[#FFD93D] transition-colors" />
+                <div className="w-full md:w-48 bg-black/5 flex items-center justify-center p-8">
+                  <activity.icon className="w-16 h-16 text-[#525252] group-hover:text-[#FFD93D] transition-colors" />
                 </div>
                 <div className="p-8 flex flex-col justify-center gap-4">
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-[10px] uppercase font-bold text-[#B8BEC6] border-white/20">
+                    <Badge variant="outline" className="text-[10px] uppercase font-bold text-[#525252] border-black/20">
                       {activity.category}
                     </Badge>
-                    <span className="text-xs text-[#B8BEC6]">{activity.pages} Pages</span>
+                    <span className="text-xs text-[#525252]">{activity.pages} Pages</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-white">{activity.title}</h3>
+                  <h3 className="text-2xl font-bold text-[#0a0a0a]">{activity.title}</h3>
                   <Button className="w-fit rounded-full bg-white text-black hover:bg-[#F5F5F5]">
                     <Download className="w-4 h-4 mr-2" /> Download PDF
                   </Button>
@@ -69,12 +69,12 @@ export const FreeActivities: React.FC = () => {
       </div>
 
       {/* Social proof / Signup */}
-      <Card className="rounded-[3rem] border-white/10 bg-black/40 backdrop-blur-3xl p-12 text-center max-w-4xl mx-auto">
-        <h2 className="text-3xl font-bold text-white mb-4">Never Miss a Packet</h2>
-        <p className="text-[#B8BEC6] mb-8">Join our newsletter to receive new free activities directly in your inbox every month.</p>
+      <Card className="rounded-[3rem] border-black/10 bg-white/95 backdrop-blur-3xl p-12 text-center max-w-4xl mx-auto">
+        <h2 className="text-3xl font-bold text-[#0a0a0a] mb-4">Never Miss a Packet</h2>
+        <p className="text-[#525252] mb-8">Join our newsletter to receive new free activities directly in your inbox every month.</p>
         <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-          <Input placeholder="Email address" className="rounded-full bg-white/5 border-white/10 text-white" />
-          <Button className="rounded-full bg-gradient-to-r from-[#FF5F6D] to-[#B067FF] text-white px-8">
+          <Input placeholder="Email address" className="rounded-full bg-black/5 border-black/10 text-[#0a0a0a]" />
+          <Button className="rounded-full bg-gradient-to-r from-[#FF5F6D] to-[#B067FF] text-[#0a0a0a] px-8">
             Join the Club
           </Button>
         </div>

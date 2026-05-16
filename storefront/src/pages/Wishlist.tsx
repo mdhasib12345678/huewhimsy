@@ -33,8 +33,8 @@ export const Wishlist: React.FC = () => {
       className="container mx-auto px-4 py-12 md:py-20 max-w-5xl"
     >
       <div className="flex items-center justify-between mb-12">
-        <h1 className="text-4xl font-bold text-white tracking-tight">Your Magic Wishlist</h1>
-        <span className="text-[#B8BEC6]">{favoriteItems.length} items saved</span>
+        <h1 className="text-4xl font-bold text-[#0a0a0a] tracking-tight">Your Magic Wishlist</h1>
+        <span className="text-[#525252]">{favoriteItems.length} items saved</span>
       </div>
 
       {favoriteItems.length > 0 ? (
@@ -47,17 +47,17 @@ export const Wishlist: React.FC = () => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
             >
-              <Card className="border-white/10 bg-white/5 overflow-hidden backdrop-blur-xl group">
+              <Card className="border-black/10 bg-black/5 overflow-hidden backdrop-blur-xl group">
                 <CardContent className="p-6 flex items-center gap-6">
-                  <div className="w-24 h-24 rounded-2xl bg-white/5 flex items-center justify-center relative overflow-hidden flex-shrink-0">
+                  <div className="w-24 h-24 rounded-2xl bg-black/5 flex items-center justify-center relative overflow-hidden flex-shrink-0">
                     <div className="absolute inset-0 opacity-10" style={{ backgroundColor: item.color }} />
-                    <span className="relative z-10 text-[10px] text-white/20 font-bold uppercase">Item</span>
+                    <span className="relative z-10 text-[10px] text-[#0a0a0a]/20 font-bold uppercase">Item</span>
                   </div>
                   
                   <div className="flex-grow">
                     <div className="text-[10px] font-bold text-[#FF9A3C] uppercase tracking-widest mb-1">{item.category}</div>
-                    <h3 className="text-xl font-bold text-white">{item.title}</h3>
-                    <p className="text-2xl font-bold text-white mt-2 font-mono">${item.price}</p>
+                    <h3 className="text-xl font-bold text-[#0a0a0a]">{item.title}</h3>
+                    <p className="text-2xl font-bold text-[#0a0a0a] mt-2 font-mono">${item.price}</p>
                   </div>
 
                   <div className="flex items-center gap-2">
@@ -71,7 +71,7 @@ export const Wishlist: React.FC = () => {
                       variant="ghost" 
                       size="icon" 
                       onClick={() => toggleWishlist(item.id)}
-                      className="rounded-full text-[#B8BEC6] hover:text-[#FF5F6D] hover:bg-[#FF5F6D]/10"
+                      className="rounded-full text-[#525252] hover:text-[#FF5F6D] hover:bg-[#FF5F6D]/10"
                     >
                       <Trash2 className="w-5 h-5" />
                     </Button>
@@ -83,18 +83,18 @@ export const Wishlist: React.FC = () => {
         </div>
       ) : (
         <div className="py-32 text-center space-y-6">
-          <div className="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-8 border border-white/10">
-            <Heart className="w-10 h-10 text-white/10" />
+          <div className="w-24 h-24 rounded-full bg-black/5 flex items-center justify-center mx-auto mb-8 border border-black/10">
+            <Heart className="w-10 h-10 text-[#0a0a0a]/10" />
           </div>
-          <h2 className="text-2xl font-bold text-white">Your wishlist is empty</h2>
-          <p className="text-[#B8BEC6] max-w-sm mx-auto">
+          <h2 className="text-2xl font-bold text-[#0a0a0a]">Your wishlist is empty</h2>
+          <p className="text-[#525252] max-w-sm mx-auto">
             Travel through our library and shop to find magical items to save for later!
           </p>
           <div className="flex justify-center gap-4 pt-4">
             <NavLink to="/shop" className={cn(buttonVariants(), "rounded-full bg-white text-black font-bold h-12 px-8")}>
               Explore Shop <ArrowRight className="ml-2 w-4 h-4 ml-2" />
             </NavLink>
-            <NavLink to="/library" className={cn(buttonVariants({ variant: "outline" }), "rounded-full text-white border-white/20 font-bold h-12 px-8")}>
+            <NavLink to="/library" className={cn(buttonVariants({ variant: "outline" }), "rounded-full text-[#0a0a0a] border-black/20 font-bold h-12 px-8")}>
               View Library
             </NavLink>
           </div>

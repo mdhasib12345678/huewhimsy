@@ -152,29 +152,29 @@ export const Shop: React.FC = () => {
     >
       {/* 🏠 SHOP HERO */}
       <div className="text-center mb-16 space-y-4">
-        <motion.h1 variants={itemVariants} className="text-4xl md:text-6xl font-bold text-white tracking-tight">
+        <motion.h1 variants={itemVariants} className="text-4xl md:text-6xl font-bold text-[#0a0a0a] tracking-tight">
           Explore the Hue Whimsy Shop
         </motion.h1>
-        <motion.p variants={itemVariants} className="max-w-2xl mx-auto text-[#B8BEC6] text-lg">
+        <motion.p variants={itemVariants} className="max-w-2xl mx-auto text-[#525252] text-lg">
           Carefully selected educational and creative products for children, families, and learning adventures.
         </motion.p>
         <motion.div variants={itemVariants} className="flex justify-center gap-4 pt-4">
           <Button className="rounded-full px-8 bg-white text-black font-bold hover:bg-[#F5F5F5] h-12">
             🛍️ Explore Products
           </Button>
-          <Button variant="outline" className="rounded-full px-8 border-white/20 text-white hover:bg-white/10 h-12">
+          <Button variant="outline" className="rounded-full px-8 border-black/20 text-[#0a0a0a] hover:bg-black/5 h-12">
             🎁 Featured Favorites
           </Button>
         </motion.div>
       </div>
 
       {/* Controls */}
-      <div className="flex flex-col md:flex-row gap-4 mb-12 items-center justify-between bg-white/5 p-4 rounded-[2rem] border border-white/10 backdrop-blur-xl">
+      <div className="flex flex-col md:flex-row gap-4 mb-12 items-center justify-between bg-black/5 p-4 rounded-[2rem] border border-black/10 backdrop-blur-xl">
         <div className="relative w-full md:w-96">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#B8BEC6]" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#525252]" />
           <Input
             placeholder="Search products..."
-            className="pl-12 bg-white/5 border-white/10 rounded-full h-12 text-white focus:ring-[#FFD93D]"
+            className="pl-12 bg-black/5 border-black/10 rounded-full h-12 text-[#0a0a0a] focus:ring-[#FFD93D]"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -182,13 +182,13 @@ export const Shop: React.FC = () => {
 
         <div className="flex gap-4 w-full md:w-auto">
           <Select value={filter} onValueChange={setFilter}>
-            <SelectTrigger className="w-full md:w-64 bg-white/5 border-white/10 rounded-full h-12 text-white">
+            <SelectTrigger className="w-full md:w-64 bg-black/5 border-black/10 rounded-full h-12 text-[#0a0a0a]">
               <div className="flex items-center gap-2">
-                <Filter className="w-4 h-4 text-[#B8BEC6]" />
+                <Filter className="w-4 h-4 text-[#525252]" />
                 <SelectValue placeholder="Category" />
               </div>
             </SelectTrigger>
-            <SelectContent className="bg-[#1a1a1a] text-white border-white/10">
+            <SelectContent className="bg-white text-[#0a0a0a] border-black/10">
               {categories.map(c => (
                 <SelectItem key={c} value={c}>{c}</SelectItem>
               ))}
@@ -201,7 +201,7 @@ export const Shop: React.FC = () => {
       {loading && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-[420px] rounded-[2rem] bg-white/5 border border-white/10 animate-pulse" />
+            <div key={i} className="h-[420px] rounded-[2rem] bg-black/5 border border-black/10 animate-pulse" />
           ))}
         </div>
       )}
@@ -212,10 +212,10 @@ export const Shop: React.FC = () => {
           {filteredProducts.map((p) => (
             <motion.div key={p.id} variants={itemVariants} whileHover={{ y: -10 }}>
               <NavLink to={`/shop/${p.handle}`} className="block h-full">
-                <Card className="h-full border-white/10 bg-white/5 overflow-hidden flex flex-col group cursor-pointer border-b-2 hover:border-[#FFD93D]/50 transition-all">
+                <Card className="h-full border-black/10 bg-black/5 overflow-hidden flex flex-col group cursor-pointer border-b-2 hover:border-[#FFD93D]/50 transition-all">
                   <CardContent className="p-0 flex flex-col h-full">
                     {/* Product Image Area */}
-                    <div className="aspect-square relative bg-white/5 overflow-hidden flex items-center justify-center">
+                    <div className="aspect-square relative bg-black/5 overflow-hidden flex items-center justify-center">
                       <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity" style={{ backgroundColor: p.color }} />
                       {p.thumbnail ? (
                         <img
@@ -225,8 +225,8 @@ export const Shop: React.FC = () => {
                           className="relative z-10 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       ) : (
-                        <div className="relative z-10 w-32 h-32 rounded-3xl bg-white/5 flex items-center justify-center border border-white/10 group-hover:scale-110 transition-transform duration-500">
-                          <span className="text-white/20 font-bold text-4xl">Image</span>
+                        <div className="relative z-10 w-32 h-32 rounded-3xl bg-black/5 flex items-center justify-center border border-black/10 group-hover:scale-110 transition-transform duration-500">
+                          <span className="text-[#0a0a0a]/20 font-bold text-4xl">Image</span>
                         </div>
                       )}
 
@@ -246,7 +246,7 @@ export const Shop: React.FC = () => {
                       </div>
 
                       {p.status && (
-                        <Badge className="absolute top-4 left-4 bg-white/10 backdrop-blur-md text-white border-white/20">
+                        <Badge className="absolute top-4 left-4 bg-black/5 backdrop-blur-md text-[#0a0a0a] border-black/20">
                           {p.status}
                         </Badge>
                       )}
@@ -258,15 +258,15 @@ export const Shop: React.FC = () => {
                         <div className="text-xs font-bold text-[#FFD93D] uppercase tracking-widest">{p.category}</div>
                         <div className="flex items-center gap-1">
                           <Star className="w-3 h-3 fill-[#FFD93D] text-[#FFD93D]" />
-                          <span className="text-xs text-white font-bold">{p.rating}</span>
+                          <span className="text-xs text-[#0a0a0a] font-bold">{p.rating}</span>
                         </div>
                       </div>
 
-                      <h3 className="text-xl font-bold text-white transition-colors">{p.title}</h3>
-                      <p className="text-[#B8BEC6] text-sm line-clamp-2">{p.desc}</p>
+                      <h3 className="text-xl font-bold text-[#0a0a0a] transition-colors">{p.title}</h3>
+                      <p className="text-[#525252] text-sm line-clamp-2">{p.desc}</p>
 
                       <div className="mt-auto pt-4 flex items-center justify-between">
-                        <span className="text-2xl font-bold text-white">{formatPrice(p.price)}</span>
+                        <span className="text-2xl font-bold text-[#0a0a0a]">{formatPrice(p.price)}</span>
                         <Button
                           onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart({ ...p, type: 'product' }); }}
                           className="rounded-full bg-white text-black hover:bg-[#F5F5F5] font-bold"
@@ -285,7 +285,7 @@ export const Shop: React.FC = () => {
 
       {!loading && filteredProducts.length === 0 && (
         <div className="py-32 text-center">
-          <p className="text-[#B8BEC6] text-xl">No products found for "{search}"</p>
+          <p className="text-[#525252] text-xl">No products found for "{search}"</p>
           <Button variant="link" className="text-[#FFD93D]" onClick={() => { setSearch(''); setFilter('All Products'); }}>
             Clear all filters
           </Button>
@@ -293,7 +293,7 @@ export const Shop: React.FC = () => {
       )}
 
       {error && (
-        <div className="mt-8 text-center text-xs text-[#B8BEC6]/60">
+        <div className="mt-8 text-center text-xs text-[#525252]/60">
           showing fallback catalog (API: {error})
         </div>
       )}

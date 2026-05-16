@@ -15,52 +15,64 @@
   --color-brand-indigo: #6C63FF;
   --color-brand-violet: #B067FF;
 
-  /* shadcn UI variables (Dark Mode by default for this app) */
-  --color-background: #0a0a0a;
-  --color-foreground: #F5F5F5;
-  --color-card: #1a1a1a;
-  --color-card-foreground: #F5F5F5;
-  --color-popover: #1a1a1a;
-  --color-popover-foreground: #F5F5F5;
-  --color-primary: #F5F5F5;
-  --color-primary-foreground: #0a0a0a;
-  --color-secondary: #262626;
-  --color-secondary-foreground: #F5F5F5;
-  --color-muted: #262626;
-  --color-muted-foreground: #B8BEC6;
-  --color-accent: #262626;
-  --color-accent-foreground: #F5F5F5;
+  /* shadcn UI variables — LIGHT MODE (white background) */
+  --color-background: #ffffff;
+  --color-foreground: #0a0a0a;
+  --color-card: #ffffff;
+  --color-card-foreground: #0a0a0a;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #0a0a0a;
+  --color-primary: #0a0a0a;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #f5f5f5;
+  --color-secondary-foreground: #0a0a0a;
+  --color-muted: #f5f5f5;
+  --color-muted-foreground: #525252;
+  --color-accent: #f5f5f5;
+  --color-accent-foreground: #0a0a0a;
   --color-destructive: #ef4444;
-  --color-destructive-foreground: #F5F5F5;
-  --color-border: #262626;
-  --color-input: #262626;
-  --color-ring: #F5F5F5;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #e5e7eb;
+  --color-input: #e5e7eb;
+  --color-ring: #0a0a0a;
   --radius: 0.75rem;
 }
 
 @layer base {
+  html, body {
+    background: #ffffff !important;
+    color-scheme: light;
+  }
+
   * {
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-sans antialiased;
-    color: #F5F5F5;
+    @apply text-foreground font-sans antialiased;
+    color: #0a0a0a;
   }
-  
+
   h1, h2, h3, h4, h5, h6 {
     @apply font-display tracking-tight;
+    color: #0a0a0a;
   }
 
   .text-secondary {
-    color: #D6D9DD;
+    color: #404040;
   }
 
   .text-muted {
-    color: #B8BEC6;
+    color: #525252;
   }
 
-  /* Glass Effects */
+  /* Force-white site override: any element that has no explicit background gets white.
+     Use sparingly — this is the visible "white site" guarantee the design asked for. */
+  main, section, article, aside, header, footer, nav {
+    background-color: transparent;
+  }
+
+  /* Glass Effects (now light) */
   .glass {
-    @apply bg-white/5 backdrop-blur-md border border-white/10;
+    @apply bg-black/5 backdrop-blur-md border border-black/10;
   }
 }
