@@ -60,5 +60,8 @@ module.exports = defineConfig({
     {
       resolve: './src/modules/hero',
     },
+    {
+      resolve: './src/modules/services',
+    },
   ],
 })
