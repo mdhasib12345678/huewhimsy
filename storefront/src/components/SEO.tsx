@@ -1,5 +1,4 @@
-import React from 'react';
-import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import { SUPPORTED_LOCALES } from '@/i18n';
 
 const SITE_URL = 'https://huewhimsy.com';
@@ -14,16 +13,6 @@ interface SEOProps {
   locale?: string;
   noindex?: boolean;
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
-}
-
-function buildAlternates(canonical: string) {
-  // For each locale produce a hreflang link. canonical is the EN version
-  // (no locale prefix). Localised URLs use /{lang}/... prefix.
-  const path = canonical.replace(SITE_URL, '').replace(/^\/+/, '/') || '/';
-  return SUPPORTED_LOCALES.map((l) => {
-    const href = l === 'en' ? `${SITE_URL}${path}` : `${SITE_URL}/${l}${path === '/' ? '' : path}`;
-    return { hreflang: l, href };
-  });
 }
 
 const ORG_JSON_LD = {
@@ -53,6 +42,45 @@ const WEBSITE_JSON_LD = {
   },
 };
 
+function upsertMeta(attr: 'name' | 'property', key: string, content: string) {
+  let el = document.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
+  if (!el) {
+    el = document.createElement('meta');
+    el.setAttribute(attr, key);
+    document.head.appendChild(el);
+  }
+  el.setAttribute('content', content);
+}
+
+function upsertLink(rel: string, href: string, attrs: Record<string, string> = {}) {
+  const selector = Object.entries(attrs)
+    .map(([k, v]) => `[${k}="${v}"]`)
+    .join('');
+  let el = document.querySelector<HTMLLinkElement>(`link[rel="${rel}"]${selector}`);
+  if (!el) {
+    el = document.createElement('link');
+    el.setAttribute('rel', rel);
+    for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+    document.head.appendChild(el);
+  }
+  el.setAttribute('href', href);
+}
+
+function upsertJsonLd(id: string, json: unknown) {
+  let el = document.getElementById(id) as HTMLScriptElement | null;
+  if (!el) {
+    el = document.createElement('script');
+    el.id = id;
+    el.type = 'application/ld+json';
+    document.head.appendChild(el);
+  }
+  el.textContent = JSON.stringify(json);
+}
+
+function removeAllAlternates() {
+  document.querySelectorAll('link[rel="alternate"][hreflang]').forEach((el) => el.remove());
+}
+
 export const SEO: React.FC<SEOProps> = ({
   title,
   description = "Cozy learning adventures with Rilo and Rivy — whimsical children's books and creative activities for ages 3 to 8.",
@@ -63,43 +91,49 @@ export const SEO: React.FC<SEOProps> = ({
   noindex = false,
   jsonLd,
 }) => {
-  const fullTitle = title ? `${title} — HueWhimsy` : 'HueWhimsy — Whimsical Books & Creative Learning';
-  const canonicalUrl = canonical ?? `${SITE_URL}${typeof window !== 'undefined' ? window.location.pathname : '/'}`;
-  const alts = buildAlternates(canonicalUrl);
+  useEffect(() => {
+    const fullTitle = title ? `${title} — HueWhimsy` : 'HueWhimsy — Whimsical Books & Creative Learning';
+    document.title = fullTitle;
 
-  return (
-    <Helmet>
-      <title>{fullTitle}</title>
-      <meta name="description" content={description} />
-      {noindex && <meta name="robots" content="noindex,nofollow" />}
+    const canonicalUrl =
+      canonical ?? `${SITE_URL}${typeof window !== 'undefined' ? window.location.pathname : '/'}`;
 
-      <link rel="canonical" href={canonicalUrl} />
-      {alts.map((a) => (
-        <link key={a.hreflang} rel="alternate" hrefLang={a.hreflang} href={a.href} />
-      ))}
-      <link rel="alternate" hrefLang="x-default" href={canonicalUrl} />
+    upsertMeta('name', 'description', description);
+    upsertMeta('name', 'robots', noindex ? 'noindex,nofollow' : 'index,follow');
 
-      <meta property="og:title" content={fullTitle} />
-      <meta property="og:description" content={description} />
-      <meta property="og:image" content={image} />
-      <meta property="og:url" content={canonicalUrl} />
-      <meta property="og:type" content={type} />
-      <meta property="og:site_name" content="HueWhimsy" />
-      <meta property="og:locale" content={locale} />
+    upsertLink('canonical', canonicalUrl);
 
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content={fullTitle} />
-      <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={image} />
+    removeAllAlternates();
+    SUPPORTED_LOCALES.forEach((l) => {
+      const path = canonicalUrl.replace(SITE_URL, '').replace(/^\/+/, '/') || '/';
+      const href = l === 'en' ? `${SITE_URL}${path}` : `${SITE_URL}/${l}${path === '/' ? '' : path}`;
+      upsertLink('alternate', href, { hreflang: l });
+    });
+    upsertLink('alternate', canonicalUrl, { hreflang: 'x-default' });
 
-      <script type="application/ld+json">{JSON.stringify(ORG_JSON_LD)}</script>
-      <script type="application/ld+json">{JSON.stringify(WEBSITE_JSON_LD)}</script>
-      {jsonLd &&
-        (Array.isArray(jsonLd) ? jsonLd : [jsonLd]).map((j, i) => (
-          <script key={i} type="application/ld+json">
-            {JSON.stringify(j)}
-          </script>
-        ))}
-    </Helmet>
-  );
+    upsertMeta('property', 'og:title', fullTitle);
+    upsertMeta('property', 'og:description', description);
+    upsertMeta('property', 'og:image', image);
+    upsertMeta('property', 'og:url', canonicalUrl);
+    upsertMeta('property', 'og:type', type);
+    upsertMeta('property', 'og:site_name', 'HueWhimsy');
+    upsertMeta('property', 'og:locale', locale);
+
+    upsertMeta('name', 'twitter:card', 'summary_large_image');
+    upsertMeta('name', 'twitter:title', fullTitle);
+    upsertMeta('name', 'twitter:description', description);
+    upsertMeta('name', 'twitter:image', image);
+
+    upsertJsonLd('jsonld-org', ORG_JSON_LD);
+    upsertJsonLd('jsonld-website', WEBSITE_JSON_LD);
+
+    if (jsonLd) {
+      const items = Array.isArray(jsonLd) ? jsonLd : [jsonLd];
+      items.forEach((j, i) => upsertJsonLd(`jsonld-page-${i}`, j));
+    } else {
+      document.querySelectorAll('script[id^="jsonld-page-"]').forEach((el) => el.remove());
+    }
+  }, [title, description, image, type, canonical, locale, noindex, jsonLd]);
+
+  return null;
 };
