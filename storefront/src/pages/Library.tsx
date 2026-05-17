@@ -187,6 +187,7 @@ export const Library: React.FC = () => {
                         <img
                           src={book.thumbnail}
                           alt={book.title}
+                          loading="lazy"
                           className="relative z-10 w-full h-full object-cover"
                         />
                       ) : (

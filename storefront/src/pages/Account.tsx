@@ -55,7 +55,13 @@ const AuthForms: React.FC<{
   login: (email: string, password: string) => Promise<void>;
   register: (p: { email: string; password: string; first_name?: string; last_name?: string }) => Promise<void>;
 }> = ({ login, register }) => {
-  const [tab, setTab] = useState<'login' | 'register'>('login');
+  // Allow ?mode=register URL hint (used by Header "Register" link)
+  const initialTab: 'login' | 'register' =
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('mode') === 'register'
+      ? 'register'
+      : 'login';
+  const [tab, setTab] = useState<'login' | 'register'>(initialTab);
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [regFirst, setRegFirst] = useState('');

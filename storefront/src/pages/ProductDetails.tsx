@@ -194,6 +194,8 @@ export const ProductDetails: React.FC = () => {
               <img
                 src={currentImage}
                 alt={product.title}
+                loading="eager"
+                fetchPriority="high"
                 className="relative z-10 w-full h-full object-cover"
               />
             ) : (

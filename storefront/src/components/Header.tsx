@@ -132,10 +132,14 @@ export const Header: React.FC = () => {
               {!user ? (
                 <>
                   <DropdownMenuItem className="focus:bg-gray-100 cursor-pointer">
-                    <LogIn className="w-4 h-4 mr-2" /> Sign In
+                    <NavLink to="/account" className="flex items-center w-full h-full">
+                      <LogIn className="w-4 h-4 mr-2" /> Sign In
+                    </NavLink>
                   </DropdownMenuItem>
                   <DropdownMenuItem className="focus:bg-gray-100 cursor-pointer">
-                    <UserPlus className="w-4 h-4 mr-2" /> Register
+                    <NavLink to="/account?mode=register" className="flex items-center w-full h-full">
+                      <UserPlus className="w-4 h-4 mr-2" /> Register
+                    </NavLink>
                   </DropdownMenuItem>
                 </>
               ) : (
@@ -184,13 +188,14 @@ export const Header: React.FC = () => {
               </DropdownMenuSub>
 
               <DropdownMenuItem className="focus:bg-gray-100 cursor-pointer">
-                <Settings className="w-4 h-4 mr-2" /> Account Settings
+                <NavLink to="/account" className="flex items-center w-full h-full">
+                  <Settings className="w-4 h-4 mr-2" /> Account Settings
+                </NavLink>
               </DropdownMenuItem>
               <DropdownMenuItem className="focus:bg-gray-100 cursor-pointer">
-                <Bell className="w-4 h-4 mr-2" /> Notifications
-              </DropdownMenuItem>
-              <DropdownMenuItem className="focus:bg-gray-100 cursor-pointer">
-                <LifeBuoy className="w-4 h-4 mr-2" /> Support
+                <NavLink to="/contact" className="flex items-center w-full h-full">
+                  <LifeBuoy className="w-4 h-4 mr-2" /> Help &amp; Support
+                </NavLink>
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-black/5" />
               {user && (
