@@ -100,7 +100,7 @@ export const Wishlist: React.FC = () => {
                   <CardContent className="p-6 flex items-center gap-6">
                     <div className="w-24 h-24 rounded-2xl bg-black/5 flex items-center justify-center overflow-hidden flex-shrink-0">
                       {item.thumbnail ? (
-                        <img src={item.thumbnail} alt={item.title} className="w-full h-full object-cover" />
+                        <img src={item.thumbnail} alt={item.title} className="w-full h-full object-cover" loading="lazy" />
                       ) : (
                         <span className="text-[10px] text-[#525252] font-bold uppercase">No image</span>
                       )}

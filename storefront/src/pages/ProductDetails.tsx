@@ -21,7 +21,12 @@ import {
   getProduct,
   productPrice,
   formatPrice,
+  listReviews,
+  submitReview,
+  markReviewHelpful,
   type MedusaProduct,
+  type ProductReview,
+  type ReviewSummary,
 } from '@/lib/medusa';
 
 const PALETTE = ['#FF5F6D', '#4DA8FF', '#FFD93D', '#5BE37D', '#FF9A3C', '#B067FF'];
@@ -342,6 +347,7 @@ export const ProductDetails: React.FC = () => {
         <TabsList className="bg-transparent border-b border-black/10 w-full justify-start rounded-none h-auto p-0 gap-8">
           <TabsTrigger value="features" className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#FFD93D] data-[state=active]:bg-transparent text-lg font-bold pb-4 transition-all">Features</TabsTrigger>
           <TabsTrigger value="specs" className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#FF9A3C] data-[state=active]:bg-transparent text-lg font-bold pb-4 transition-all">Specifications</TabsTrigger>
+          <TabsTrigger value="reviews" className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#FF5F6D] data-[state=active]:bg-transparent text-lg font-bold pb-4 transition-all">Reviews</TabsTrigger>
           <TabsTrigger value="shipping" className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#B067FF] data-[state=active]:bg-transparent text-lg font-bold pb-4 transition-all">Shipping &amp; Returns</TabsTrigger>
         </TabsList>
         <TabsContent value="features" className="mt-8 space-y-6">
@@ -383,11 +389,280 @@ export const ProductDetails: React.FC = () => {
             </div>
           </div>
         </TabsContent>
+        <TabsContent value="reviews" className="mt-8">
+          <ReviewsTab productId={product.id} />
+        </TabsContent>
         <TabsContent value="shipping" className="mt-8 space-y-4 text-[#525252]">
           <p>Free standard shipping on orders over $50. Most orders ship within 1–2 business days.</p>
           <p>Returns accepted within 30 days of delivery in original condition.</p>
         </TabsContent>
       </Tabs>
     </motion.div>
+  );
+};
+
+// ---------------------------------------------------------------------------
+// Reviews tab — fetches live reviews + summary from /store/reviews, allows
+// visitors to submit a new review (goes to "pending" until admin approves).
+// ---------------------------------------------------------------------------
+
+interface ReviewsTabProps {
+  productId: string;
+}
+
+const ReviewsTab: React.FC<ReviewsTabProps> = ({ productId }) => {
+  const [reviews, setReviews] = useState<ProductReview[]>([]);
+  const [summary, setSummary] = useState<ReviewSummary | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({
+    author_name: '',
+    author_email: '',
+    rating: 5,
+    title: '',
+    body: '',
+  });
+  const [status, setStatus] = useState<'idle' | 'sending' | 'ok' | 'err'>('idle');
+  const [errorMsg, setErrorMsg] = useState<string>('');
+
+  const refresh = async () => {
+    setLoading(true);
+    try {
+      const res = await listReviews(productId, { limit: 20 });
+      setReviews(res.reviews);
+      setSummary(res.summary);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void refresh();
+  }, [productId]);
+
+  const handleHelpful = async (id: string) => {
+    try {
+      const res = await markReviewHelpful(id);
+      setReviews((rs) => rs.map((r) => (r.id === id ? { ...r, helpful_count: res.helpful_count } : r)));
+    } catch {
+      /* noop */
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.author_name || !form.body || form.body.length < 10) {
+      setErrorMsg('Name and review (10+ chars) required.');
+      setStatus('err');
+      return;
+    }
+    setStatus('sending');
+    setErrorMsg('');
+    try {
+      await submitReview({
+        product_id: productId,
+        author_name: form.author_name,
+        author_email: form.author_email || undefined,
+        rating: Number(form.rating),
+        title: form.title || undefined,
+        body: form.body,
+      });
+      setStatus('ok');
+      setForm({ author_name: '', author_email: '', rating: 5, title: '', body: '' });
+      // Don't refresh — review is pending moderation and won't appear yet.
+    } catch (e: any) {
+      setStatus('err');
+      setErrorMsg(e?.message?.includes('409') ? 'You already reviewed this product.' : 'Failed to submit. Please try again.');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="h-32 bg-gray-100 animate-pulse rounded-2xl" />
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8">
+      {/* Summary */}
+      {summary && summary.count > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 bg-[#F9FAFB] rounded-2xl border border-black/10">
+          <div className="md:col-span-1 text-center md:border-r md:border-black/10 md:pr-6">
+            <div className="text-5xl font-bold text-[#0a0a0a] mb-2">{summary.average}</div>
+            <div className="flex justify-center gap-1 mb-1">
+              {[1, 2, 3, 4, 5].map((s) => (
+                <Star
+                  key={s}
+                  className={cn(
+                    'w-4 h-4',
+                    s <= Math.round(summary.average) ? 'fill-[#FFD93D] text-[#FFD93D]' : 'text-gray-300',
+                  )}
+                />
+              ))}
+            </div>
+            <p className="text-sm text-[#525252]">{summary.count} review{summary.count === 1 ? '' : 's'}</p>
+          </div>
+          <div className="md:col-span-2 space-y-1">
+            {[5, 4, 3, 2, 1].map((star) => {
+              const n = summary.distribution[String(star)] ?? 0;
+              const pct = summary.count ? Math.round((n / summary.count) * 100) : 0;
+              return (
+                <div key={star} className="flex items-center gap-3 text-sm">
+                  <span className="w-12 text-[#525252]">{star} star</span>
+                  <div className="flex-1 h-2 bg-white rounded-full overflow-hidden border border-black/5">
+                    <div className="h-full bg-[#FFD93D]" style={{ width: `${pct}%` }} />
+                  </div>
+                  <span className="w-8 text-right text-[#525252]">{n}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* List */}
+      {reviews.length === 0 ? (
+        <div className="py-12 text-center text-[#525252]">
+          <p className="text-lg mb-4">No reviews yet — be the first!</p>
+          {!showForm && (
+            <Button onClick={() => setShowForm(true)} className="rounded-full bg-gradient-to-r from-[#FF5F6D] to-[#B067FF] text-white">
+              Write a review
+            </Button>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xl font-bold text-[#0a0a0a]">Customer reviews</h3>
+            {!showForm && (
+              <Button onClick={() => setShowForm(true)} size="sm" className="rounded-full bg-gradient-to-r from-[#FF5F6D] to-[#B067FF] text-white">
+                Write a review
+              </Button>
+            )}
+          </div>
+          {reviews.map((r) => (
+            <div key={r.id} className="p-6 bg-white border border-black/10 rounded-2xl">
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <div className="font-bold text-[#0a0a0a]">{r.author_name}</div>
+                  <div className="flex items-center gap-2 mt-1">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star key={s} className={cn('w-3 h-3', s <= r.rating ? 'fill-[#FFD93D] text-[#FFD93D]' : 'text-gray-300')} />
+                    ))}
+                    <span className="text-xs text-[#525252] ml-2">{new Date(r.created_at).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              </div>
+              {r.title && <h4 className="font-bold text-[#0a0a0a] mb-2">{r.title}</h4>}
+              <p className="text-[#525252] whitespace-pre-wrap">{r.body}</p>
+              {r.reply && (
+                <div className="mt-4 p-4 bg-[#F9FAFB] rounded-xl border-l-4 border-[#FF5F6D]">
+                  <p className="text-xs font-bold text-[#FF5F6D] uppercase tracking-widest mb-1">HueWhimsy team replied</p>
+                  <p className="text-sm text-[#525252]">{r.reply}</p>
+                </div>
+              )}
+              <button
+                onClick={() => handleHelpful(r.id)}
+                className="mt-4 text-xs text-[#525252] hover:text-[#0a0a0a]"
+              >
+                👍 Helpful ({r.helpful_count})
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Form */}
+      {showForm && (
+        <div className="p-6 bg-[#F9FAFB] border border-black/10 rounded-2xl">
+          {status === 'ok' ? (
+            <div className="text-center py-6">
+              <CheckCircle2 className="w-12 h-12 mx-auto text-[#5BE37D] mb-3" />
+              <h4 className="font-bold text-[#0a0a0a] mb-1">Thanks for your review!</h4>
+              <p className="text-sm text-[#525252] mb-4">It'll appear here after admin approval.</p>
+              <Button onClick={() => { setShowForm(false); setStatus('idle'); }} variant="outline" className="rounded-full">
+                Close
+              </Button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <h4 className="font-bold text-lg text-[#0a0a0a]">Write a review</h4>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input
+                  required
+                  placeholder="Your name *"
+                  value={form.author_name}
+                  onChange={(e) => setForm({ ...form, author_name: e.target.value })}
+                  className="h-11 px-4 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD93D] focus:outline-none"
+                />
+                <input
+                  type="email"
+                  placeholder="Email (optional, not published)"
+                  value={form.author_email}
+                  onChange={(e) => setForm({ ...form, author_email: e.target.value })}
+                  className="h-11 px-4 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD93D] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#0a0a0a] mb-2">Rating *</label>
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setForm({ ...form, rating: s })}
+                      className="text-2xl"
+                      aria-label={`${s} star${s === 1 ? '' : 's'}`}
+                    >
+                      <Star className={cn('w-7 h-7', s <= form.rating ? 'fill-[#FFD93D] text-[#FFD93D]' : 'text-gray-300')} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <input
+                placeholder="Title (optional)"
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                className="w-full h-11 px-4 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD93D] focus:outline-none"
+              />
+
+              <textarea
+                required
+                minLength={10}
+                rows={5}
+                placeholder="Your review * (10+ characters)"
+                value={form.body}
+                onChange={(e) => setForm({ ...form, body: e.target.value })}
+                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD93D] focus:outline-none"
+              />
+
+              {status === 'err' && <p className="text-sm text-red-600">{errorMsg}</p>}
+
+              <div className="flex gap-3">
+                <Button
+                  type="submit"
+                  disabled={status === 'sending'}
+                  className="rounded-full bg-gradient-to-r from-[#FF5F6D] to-[#B067FF] text-white font-bold"
+                >
+                  {status === 'sending' ? 'Submitting...' : 'Submit review'}
+                </Button>
+                <Button type="button" onClick={() => setShowForm(false)} variant="outline" className="rounded-full">
+                  Cancel
+                </Button>
+              </div>
+
+              <p className="text-xs text-[#525252]">Reviews are moderated before appearing publicly. We'll never publish your email.</p>
+            </form>
+          )}
+        </div>
+      )}
+    </div>
   );
 };

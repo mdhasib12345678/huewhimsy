@@ -100,7 +100,7 @@ export const BlogPost: React.FC = () => {
 
       {post.cover_image && (
         <div className="aspect-video rounded-2xl overflow-hidden mb-12 bg-gray-100">
-          <img src={post.cover_image} alt={post.title} className="w-full h-full object-cover" />
+          <img src={post.cover_image} alt={post.title} className="w-full h-full object-cover" loading="lazy" />
         </div>
       )}
 
@@ -112,7 +112,7 @@ export const BlogPost: React.FC = () => {
       {post.author_name && (
         <div className="mt-16 pt-8 border-t border-black/10 flex items-center gap-4">
           {post.author_avatar ? (
-            <img src={post.author_avatar} alt={post.author_name} className="w-12 h-12 rounded-full object-cover" />
+            <img src={post.author_avatar} alt={post.author_name} className="w-12 h-12 rounded-full object-cover" loading="lazy" />
           ) : (
             <div className="w-12 h-12 rounded-full bg-[#FFD93D]/30 flex items-center justify-center font-bold">
               {post.author_name.charAt(0)}
