@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { useRainbow } from '@/components/RainbowContext';
 import { getPage, type StaticPage as StaticPageType } from '@/lib/medusa';
+import { SEO } from '@/components/SEO';
 
 interface Props {
   slug: string;
@@ -58,6 +59,11 @@ export const StaticPage: React.FC<Props> = ({ slug, fallbackTitle }) => {
       animate={{ opacity: 1, y: 0 }}
       className="container mx-auto px-4 py-20 max-w-3xl"
     >
+      <SEO
+        title={page.meta_title ?? page.title}
+        description={page.meta_description ?? page.excerpt ?? undefined}
+        image={page.og_image ?? undefined}
+      />
       <h1 className="text-4xl md:text-6xl font-bold text-[#0a0a0a] mb-8">{page.title}</h1>
       {page.published_at && (
         <p className="text-sm text-[#525252] mb-8">

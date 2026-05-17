@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Download, Lock, CheckCircle2 } from 'lucide-react';
 import { useRainbow } from '@/components/RainbowContext';
 import { listActivities, subscribeNewsletter, type FreeActivity } from '@/lib/medusa';
+import { SEO } from '@/components/SEO';
 
 export const FreeActivities: React.FC = () => {
   const { setIntensity } = useRainbow();
@@ -53,6 +54,10 @@ export const FreeActivities: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-20">
+      <SEO
+        title="Free Printable Activities"
+        description="Free coloring pages, alphabet flashcards, and drawing prompts for kids aged 3-8. Print at home, anytime."
+      />
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
         <Badge className="bg-[#FFD93D] text-[#0a0a0a] mb-4">100% FREE PRINTABLES</Badge>
         <h1 className="text-5xl md:text-7xl font-bold text-[#0a0a0a] mb-4">Free Activities</h1>

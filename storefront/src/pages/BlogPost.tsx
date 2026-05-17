@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import { Badge } from '@/components/ui/badge';
 import { useRainbow } from '@/components/RainbowContext';
 import { getBlogPost, type BlogPost as BlogPostType } from '@/lib/medusa';
+import { SEO } from '@/components/SEO';
 
 export const BlogPost: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -52,12 +53,35 @@ export const BlogPost: React.FC = () => {
     );
   }
 
+  const postJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title,
+    description: post.excerpt ?? undefined,
+    image: post.cover_image ?? undefined,
+    datePublished: post.published_at ?? undefined,
+    author: post.author_name ? { '@type': 'Person', name: post.author_name } : undefined,
+    publisher: {
+      '@type': 'Organization',
+      name: 'HueWhimsy',
+      logo: { '@type': 'ImageObject', url: 'https://huewhimsy.com/logo.png' },
+    },
+    mainEntityOfPage: `https://huewhimsy.com/blog/${post.slug}`,
+  };
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="container mx-auto px-4 py-20 max-w-3xl"
     >
+      <SEO
+        title={post.meta_title ?? post.title}
+        description={post.meta_description ?? post.excerpt ?? undefined}
+        image={post.og_image ?? post.cover_image ?? undefined}
+        type="article"
+        jsonLd={postJsonLd}
+      />
       <NavLink to="/blog" className="inline-flex items-center gap-2 text-sm text-[#525252] hover:text-[#0a0a0a] mb-8">
         <ArrowLeft className="w-4 h-4" /> Back to blog
       </NavLink>

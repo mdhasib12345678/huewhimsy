@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useRainbow } from '@/components/RainbowContext';
 import { listBlogPosts, type BlogPost } from '@/lib/medusa';
+import { SEO } from '@/components/SEO';
 
 export const Blog: React.FC = () => {
   const { setIntensity } = useRainbow();
@@ -25,6 +26,10 @@ export const Blog: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-20">
+      <SEO
+        title="The Whimsy Journal — Blog"
+        description="Phonics tips, free activities, and stories from the Rilo & Rivy creator team."
+      />
       <motion.h1
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

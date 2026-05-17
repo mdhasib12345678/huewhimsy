@@ -4,6 +4,7 @@ import { Heart, Star, Sparkles, Smile } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { useRainbow } from '@/components/RainbowContext';
 import { getPage, type StaticPage } from '@/lib/medusa';
+import { SEO } from '@/components/SEO';
 
 const VALUES = [
   { icon: Heart, title: 'Made with Love', desc: 'Hand-illustrated by our small team, never AI-generated art.', color: '#FF5F6D' },
@@ -33,6 +34,10 @@ export const About: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-20">
+      <SEO
+        title="About HueWhimsy — Whimsical Books for Children"
+        description="A small studio crafting whimsical children's books, free printables, and creative supplies. Hand-illustrated, kid-first, cozy learning."
+      />
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-20 max-w-3xl mx-auto">
         <h1 className="text-5xl md:text-7xl font-bold text-[#0a0a0a] mb-8">
           {page?.title ?? 'About Hue Whimsy'}

@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Sparkles } from 'lucide-react';
 import { useRainbow } from '@/components/RainbowContext';
 import { listServices, formatPrice, type ServiceOffering } from '@/lib/medusa';
+import { SEO } from '@/components/SEO';
 
 const ICON_PALETTE = ['#FF5F6D', '#FF9A3C', '#FFD93D', '#5BE37D', '#4DA8FF', '#6C63FF', '#B067FF'];
 
@@ -28,6 +29,10 @@ export const Services: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-20">
+      <SEO
+        title="Services — Custom Books, Illustration, Web Design"
+        description="Hire the HueWhimsy team for custom illustration, book design, website design, AI agent setup, and more. For authors, brands, and educators."
+      />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

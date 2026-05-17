@@ -18,6 +18,7 @@ import {
   type Endorsement,
   type HeroBanner,
 } from '@/lib/medusa';
+import { SEO } from '@/components/SEO';
 
 const RAINBOW = ['#FF5F6D', '#FF9A3C', '#FFD93D', '#5BE37D', '#4DA8FF', '#6C63FF', '#B067FF'];
 
@@ -92,6 +93,10 @@ export const Home: React.FC = () => {
       animate="visible"
       className="flex flex-col gap-24 relative"
     >
+      <SEO
+        title="Whimsical Books & Creative Learning for Ages 3-8"
+        description="Hand-illustrated children's books, free printable activities, and creative tools for ages 3-8. Meet Rilo and Rivy."
+      />
       {/* 🎨 HERO */}
       <section className="relative h-[90vh] flex items-center justify-center overflow-hidden pt-20">
         <div className="container mx-auto px-4 text-center z-10">

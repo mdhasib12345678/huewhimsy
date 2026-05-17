@@ -7,6 +7,7 @@ import { Mail, Phone, MapPin, MessageCircle, CheckCircle2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { useRainbow } from '@/components/RainbowContext';
 import { submitContactForm } from '@/lib/medusa';
+import { SEO } from '@/components/SEO';
 
 export const Contact: React.FC = () => {
   const { setIntensity } = useRainbow();
@@ -53,6 +54,10 @@ export const Contact: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-20">
+      <SEO
+        title="Contact Us"
+        description="Get in touch with the HueWhimsy team — questions, custom projects, partnerships welcome."
+      />
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
         <h1 className="text-5xl md:text-7xl font-bold text-[#0a0a0a] mb-4">Get in Touch</h1>
         <p className="text-xl text-[#525252] max-w-2xl mx-auto">
