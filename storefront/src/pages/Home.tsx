@@ -213,7 +213,7 @@ export const Home: React.FC = () => {
         </motion.div>
 
         {productsLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-5">
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}
@@ -230,7 +230,7 @@ export const Home: React.FC = () => {
         ) : products.length === 0 ? (
           <p className="text-center text-[#525252] py-12">No books yet — check back soon!</p>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-5">
             {products.slice(0, 8).map((book) => {
               const price = productPrice(book);
               return (
