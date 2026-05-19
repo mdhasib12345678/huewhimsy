@@ -53,40 +53,44 @@ export const Contact: React.FC = () => {
   const setField = (k: keyof typeof form, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   return (
-    <div className="container mx-auto px-4 py-20">
+    <div className="container-page section-y">
       <SEO
         title="Contact Us"
         description="Get in touch with the HueWhimsy team — questions, custom projects, partnerships welcome."
       />
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
-        <h1 className="text-5xl md:text-7xl font-bold text-[#0a0a0a] mb-4">Get in Touch</h1>
-        <p className="text-xl text-[#525252] max-w-2xl mx-auto">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center mb-10 sm:mb-14 max-w-3xl mx-auto"
+      >
+        <h1 className="fluid-h1 font-bold text-[#0a0a0a] mb-4 sm:mb-5">Get in Touch</h1>
+        <p className="fluid-lead text-[#525252]">
           Questions, custom projects, partnerships — we'd love to hear from you.
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
         {/* Contact info */}
-        <div className="space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3 sm:gap-4">
           {[
             { icon: Mail, label: 'Email', value: 'hello@huewhimsy.com', href: 'mailto:hello@huewhimsy.com', color: '#FF5F6D' },
             { icon: MessageCircle, label: 'Support', value: 'support@huewhimsy.com', href: 'mailto:support@huewhimsy.com', color: '#4DA8FF' },
             { icon: Phone, label: 'Phone', value: '+1 (555) 123-HUEW', href: 'tel:+15551234839', color: '#5BE37D' },
-            { icon: MapPin, label: 'Studio', value: 'Brooklyn, NY · USA', href: null, color: '#B067FF' },
+            { icon: MapPin, label: 'Studio', value: 'Dhaka · Bangladesh', href: null, color: '#B067FF' },
           ].map((item) => (
-            <Card key={item.label} className="p-6 border-black/10 bg-white shadow-sm">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: item.color + '20' }}>
-                  <item.icon className="w-6 h-6" style={{ color: item.color }} />
+            <Card key={item.label} className="p-4 sm:p-5 border border-black/[0.07] bg-white shadow-sm hover:shadow-md transition-shadow rounded-2xl">
+              <div className="flex items-start gap-3 sm:gap-4">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: item.color + '20' }}>
+                  <item.icon className="w-5 h-5" style={{ color: item.color }} />
                 </div>
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest text-[#525252] mb-1">{item.label}</p>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-[#525252] mb-0.5">{item.label}</p>
                   {item.href ? (
-                    <a href={item.href} className="text-[#0a0a0a] hover:text-[#FF5F6D] font-medium">
+                    <a href={item.href} className="text-[#0a0a0a] hover:text-[#FF5F6D] font-medium text-sm sm:text-base break-words">
                       {item.value}
                     </a>
                   ) : (
-                    <p className="text-[#0a0a0a] font-medium">{item.value}</p>
+                    <p className="text-[#0a0a0a] font-medium text-sm sm:text-base">{item.value}</p>
                   )}
                 </div>
               </div>
@@ -95,7 +99,7 @@ export const Contact: React.FC = () => {
         </div>
 
         {/* Form */}
-        <Card className="lg:col-span-2 p-8 md:p-10 border-black/10 bg-white shadow-sm">
+        <Card className="lg:col-span-2 p-6 sm:p-8 lg:p-10 border border-black/[0.07] bg-white shadow-sm rounded-3xl">
           {status === 'ok' ? (
             <div className="text-center py-12">
               <div className="w-20 h-20 rounded-full bg-[#5BE37D]/20 flex items-center justify-center mx-auto mb-6">
@@ -175,9 +179,9 @@ export const Contact: React.FC = () => {
               <Button
                 type="submit"
                 disabled={status === 'sending'}
-                className="w-full md:w-auto rounded-full bg-gradient-to-r from-[#FF5F6D] to-[#B067FF] text-white px-10 py-6 text-lg font-bold hover:opacity-90 transition-all shadow-md"
+                className="w-full sm:w-auto rounded-full bg-gradient-to-r from-[#FF5F6D] to-[#B067FF] text-white px-8 sm:px-10 h-12 sm:h-13 text-sm sm:text-base font-semibold hover:opacity-95 transition-all shadow-[0_8px_24px_-8px_rgba(255,95,109,0.5)]"
               >
-                {status === 'sending' ? 'Sending...' : '📩 Send Message'}
+                {status === 'sending' ? 'Sending…' : '📩 Send Message'}
               </Button>
 
               <p className="text-xs text-[#525252]">

@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'motion/react';
+import { useNavigate, NavLink } from 'react-router-dom';
 import { useRainbow } from '@/components/RainbowContext';
 import {
   ShieldCheck,
@@ -8,6 +9,7 @@ import {
   ChevronRight,
   CheckCircle2,
   Loader2,
+  Banknote,
 } from 'lucide-react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -22,35 +24,69 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { NavLink } from 'react-router-dom';
 import {
   updateCart,
   attachCustomerToCart,
   formatPrice,
+  listCartShippingOptions,
+  addShippingMethodToCart,
+  listPaymentProviders,
+  createPaymentCollection,
+  initPaymentSession,
+  completeCart,
+  getCart,
   type CartAddress,
+  type ShippingOption,
+  type PaymentProviderInfo,
 } from '@/lib/medusa';
 
-export const Checkout: React.FC = () => {
-  const { setIntensity, cartItems, cartCount, cartId, clearCart, user } = useRainbow();
-  const [step, setStep] = useState<'form' | 'success'>('form');
-  const [orderRef, setOrderRef] = useState<string>('');
+// Country picker drives both phone code and shipping country_code, so that
+// the cart lands in a region/zone that has shipping options + tax + payment.
+const COUNTRIES: { code: string; label: string; phone: string; flag: string }[] = [
+  { code: 'us', label: 'United States', phone: '+1', flag: '🇺🇸' },
+  { code: 'gb', label: 'United Kingdom', phone: '+44', flag: '🇬🇧' },
+  { code: 'ca', label: 'Canada', phone: '+1', flag: '🇨🇦' },
+  { code: 'au', label: 'Australia', phone: '+61', flag: '🇦🇺' },
+  { code: 'bd', label: 'Bangladesh', phone: '+880', flag: '🇧🇩' },
+  { code: 'in', label: 'India', phone: '+91', flag: '🇮🇳' },
+];
 
-  // Form state
+// Friendly label for known Medusa provider ids.
+function paymentLabel(id: string): { title: string; sub: string } {
+  if (id === 'pp_stripe_stripe' || id === 'stripe' || id.startsWith('pp_stripe'))
+    return { title: 'Credit / Debit Card', sub: 'Powered by Stripe — secured end-to-end' };
+  if (id === 'pp_system_default' || id === 'system_default' || id === 'manual')
+    return { title: 'Pay on delivery / bank transfer', sub: 'We will contact you to finalise payment' };
+  return { title: id.replace(/^pp_/, '').replace(/_/g, ' '), sub: 'Alternate payment method' };
+}
+
+export const Checkout: React.FC = () => {
+  const navigate = useNavigate();
+  const { setIntensity, cartItems, cartCount, cartId, clearCart, user } = useRainbow();
+  const [phase, setPhase] = useState<'form' | 'review' | 'placing'>('form');
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [phoneCountry, setPhoneCountry] = useState('us');
+  const [country, setCountry] = useState('us');
   const [phone, setPhone] = useState('');
   const [street, setStreet] = useState('');
   const [city, setCity] = useState('');
   const [province, setProvince] = useState('');
   const [postal, setPostal] = useState('');
 
+  const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
+  const [shippingOptionId, setShippingOptionId] = useState<string>('');
+  const [shippingLoading, setShippingLoading] = useState(false);
+
+  const [providers, setProviders] = useState<PaymentProviderInfo[]>([]);
+  const [providerId, setProviderId] = useState<string>('');
+
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setIntensity(0.3);
-  }, []);
+  }, [setIntensity]);
 
   useEffect(() => {
     if (user) {
@@ -59,11 +95,26 @@ export const Checkout: React.FC = () => {
     }
   }, [user]);
 
+  // Pre-fetch available providers once — they don't depend on the cart's
+  // region in most setups and let us render the payment list while the user
+  // is still filling the address form.
+  useEffect(() => {
+    void listPaymentProviders().then((rows) => {
+      const enabled = rows.filter((r) => r.is_enabled);
+      setProviders(enabled);
+      if (enabled[0]) setProviderId(enabled[0].id);
+    });
+  }, []);
+
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const shipping = subtotal > 50 ? 0 : 5.99;
+  const selectedShipping = useMemo(
+    () => shippingOptions.find((o) => o.id === shippingOptionId) ?? null,
+    [shippingOptions, shippingOptionId],
+  );
+  const shipping = selectedShipping?.amount ?? (subtotal > 50 ? 0 : 5.99);
   const total = subtotal + shipping;
 
-  const handleOrder = async (e: React.FormEvent) => {
+  const goReview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!cartId) {
       setError('No cart found. Add an item to your cart first.');
@@ -74,6 +125,7 @@ export const Checkout: React.FC = () => {
     try {
       const [first_name, ...rest] = name.trim().split(/\s+/);
       const last_name = rest.join(' ') || first_name;
+      const country_code = country.toLowerCase();
       const shipping_address: CartAddress = {
         first_name,
         last_name,
@@ -82,65 +134,88 @@ export const Checkout: React.FC = () => {
         city,
         province,
         postal_code: postal,
-        country_code: 'us',
+        country_code,
       };
 
       await updateCart(cartId, { email, shipping_address, billing_address: shipping_address });
       if (user) {
-        try {
-          await attachCustomerToCart(cartId);
-        } catch (err) {
-          console.warn('attachCustomerToCart failed (non-fatal):', err);
-        }
+        try { await attachCustomerToCart(cartId); } catch { /* non-fatal */ }
       }
-      setOrderRef(cartId.slice(-8).toUpperCase());
-      await clearCart();
-      setStep('success');
+
+      setShippingLoading(true);
+      const options = await listCartShippingOptions(cartId);
+      setShippingOptions(options);
+      if (options[0]) setShippingOptionId(options[0].id);
+      setShippingLoading(false);
+
+      setPhase('review');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Checkout failed');
+      setError(err instanceof Error ? err.message : 'Could not save your details');
     } finally {
       setBusy(false);
     }
   };
 
-  if (step === 'success') {
-    return (
-      <div className="container mx-auto px-4 py-32 text-center max-w-2xl">
-        <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
-          <div className="w-24 h-24 rounded-full bg-[#5BE37D]/20 flex items-center justify-center mx-auto mb-8">
-            <CheckCircle2 className="w-12 h-12 text-[#5BE37D]" />
-          </div>
-          <h1 className="text-4xl font-bold text-[#0a0a0a] mb-4">Magic Order Confirmed!</h1>
-          <p className="text-[#525252] text-xl mb-4">
-            Your adventure is on its way.
-          </p>
-          <p className="text-[#FFD93D] text-2xl font-mono font-bold mb-12">
-            Order #HW-{orderRef}
-          </p>
-          <p className="text-[#525252] mb-12">
-            We&apos;ve sent the details to <span className="text-[#0a0a0a]">{email}</span>.
-          </p>
-          <div className="flex gap-4 justify-center">
-            <NavLink to="/" className={cn(buttonVariants(), 'rounded-full bg-white text-black font-bold h-14 px-12')}>
-              Return Home
-            </NavLink>
-            {user && (
-              <NavLink to="/account" className={cn(buttonVariants({ variant: 'outline' }), 'rounded-full border-black/10 text-[#0a0a0a] font-bold h-14 px-12')}>
-                View My Orders
-              </NavLink>
-            )}
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
+  const placeOrder = async () => {
+    if (!cartId) return;
+    setBusy(true);
+    setError(null);
+    setPhase('placing');
+    try {
+      // 1. Attach the chosen shipping method (if any options exist).
+      if (shippingOptionId) {
+        try { await addShippingMethodToCart(cartId, shippingOptionId); }
+        catch (e) { console.warn('addShippingMethodToCart failed:', e); }
+      }
 
-  if (cartItems.length === 0) {
+      // 2. Make sure a payment collection exists for this cart.
+      let cart = await getCart(cartId);
+      const existingCollectionId = (cart as any)?.payment_collection?.id as string | undefined;
+      let collectionId = existingCollectionId;
+      if (!collectionId) {
+        const pc = await createPaymentCollection(cartId);
+        collectionId = pc?.id;
+      }
+      if (!collectionId) {
+        // Re-read the cart in case the collection was created by a parallel call.
+        cart = await getCart(cartId);
+        collectionId = (cart as any)?.payment_collection?.id;
+      }
+
+      // 3. Initialise a payment session with the chosen provider.
+      if (collectionId && providerId) {
+        try { await initPaymentSession(collectionId, providerId); }
+        catch (e) {
+          console.warn('initPaymentSession failed:', e);
+          // For Stripe, payment confirmation happens client-side before
+          // complete-cart; for manual/system_default this is enough.
+        }
+      }
+
+      // 4. Complete the cart → real order.
+      const result = await completeCart(cartId);
+      if (result.type === 'order') {
+        await clearCart();
+        navigate(`/order/${result.order.id}`);
+      } else {
+        const msg = result.error || 'Order could not be completed. Please retry.';
+        setError(msg);
+        setPhase('review');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Checkout failed');
+      setPhase('review');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (cartItems.length === 0 && phase !== 'placing') {
     return (
-      <div className="container mx-auto px-4 py-32 text-center max-w-2xl">
-        <h1 className="text-3xl font-bold text-[#0a0a0a] mb-6">Your cart is empty</h1>
-        <p className="text-[#525252] mb-8">Add an item before checking out.</p>
-        <NavLink to="/shop" className={cn(buttonVariants(), 'rounded-full bg-white text-black font-bold h-12 px-8')}>
+      <div className="container-page section-y-lg text-center max-w-2xl">
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#0a0a0a] mb-4 sm:mb-6">Your cart is empty</h1>
+        <p className="text-[#525252] mb-6 sm:mb-8 text-sm sm:text-base">Add an item before checking out.</p>
+        <NavLink to="/shop" className={cn(buttonVariants(), 'rounded-full bg-[#0a0a0a] text-white hover:bg-black font-semibold h-12 px-7')}>
           Go to Shop
         </NavLink>
       </div>
@@ -151,208 +226,332 @@ export const Checkout: React.FC = () => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="container mx-auto px-4 py-12 md:py-20 max-w-6xl"
+      className="container-page section-y max-w-6xl"
     >
-      <div className="flex items-center gap-4 mb-12">
-        <h1 className="text-4xl font-bold text-[#0a0a0a] tracking-tight">Checkout</h1>
-        <div className="flex items-center gap-2 text-[#525252] text-sm">
-          <span>Cart</span>
-          <ChevronRight className="w-4 h-4" />
-          <span className="text-[#0a0a0a]">Shipping &amp; Payment</span>
+      <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-8 sm:mb-10">
+        <h1 className="text-3xl sm:text-4xl font-bold text-[#0a0a0a] tracking-tight">Checkout</h1>
+        <div className="flex items-center gap-1.5 text-[#525252] text-xs sm:text-sm" aria-label="checkout breadcrumb">
+          <span className={phase === 'form' ? 'text-[#0a0a0a] font-medium' : ''}>1. Details</span>
+          <ChevronRight className="w-3.5 h-3.5" />
+          <span className={phase !== 'form' ? 'text-[#0a0a0a] font-medium' : ''}>2. Review &amp; Pay</span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-        {/* Form */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+        {/* LEFT */}
         <div className="lg:col-span-8">
-          <form id="checkout-form" onSubmit={handleOrder} className="space-y-12">
-            <section className="space-y-6">
-              <h2 className="text-2xl font-bold text-[#0a0a0a]">Contact Information</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label className="text-[#525252]">Full Name</Label>
-                  <Input
-                    placeholder="John Doe"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="bg-black/5 border-black/10 rounded-xl h-12 text-[#0a0a0a] focus:ring-[#FFD93D]"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[#525252]">Email Address</Label>
-                  <Input
-                    type="email"
-                    placeholder="john@example.com"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="bg-black/5 border-black/10 rounded-xl h-12 text-[#0a0a0a] focus:ring-[#FFD93D]"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[#525252]">Phone Number</Label>
-                  <div className="flex gap-2">
-                    <Select value={phoneCountry} onValueChange={setPhoneCountry}>
-                      <SelectTrigger className="w-28 bg-black/5 border-black/10 rounded-xl h-12 text-[#0a0a0a]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white text-[#0a0a0a] border-black/10">
-                        <SelectItem value="us">🇺🇸 +1</SelectItem>
-                        <SelectItem value="uk">🇬🇧 +44</SelectItem>
-                        <SelectItem value="ca">🇨🇦 +1</SelectItem>
-                        <SelectItem value="au">🇦🇺 +61</SelectItem>
-                      </SelectContent>
-                    </Select>
+          {phase === 'form' && (
+            <form id="checkout-form" onSubmit={goReview} className="space-y-8 sm:space-y-10">
+              <section className="space-y-5">
+                <h2 className="text-xl sm:text-2xl font-bold text-[#0a0a0a]">Contact Information</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="co-name" className="text-[#525252] text-xs">Full Name</Label>
                     <Input
-                      placeholder="555-0123"
+                      id="co-name"
+                      placeholder="Jane Doe"
                       required
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="flex-grow bg-black/5 border-black/10 rounded-xl h-12 text-[#0a0a0a] focus:ring-[#FFD93D]"
+                      autoComplete="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="bg-white border-black/10 rounded-xl h-12 text-[#0a0a0a] focus-visible:ring-2 focus-visible:ring-[#FFD93D]/40 focus-visible:border-[#FFD93D]"
                     />
                   </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="co-email" className="text-[#525252] text-xs">Email Address</Label>
+                    <Input
+                      id="co-email"
+                      type="email"
+                      placeholder="jane@example.com"
+                      required
+                      autoComplete="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="bg-white border-black/10 rounded-xl h-12 text-[#0a0a0a] focus-visible:ring-2 focus-visible:ring-[#FFD93D]/40 focus-visible:border-[#FFD93D]"
+                    />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="co-phone" className="text-[#525252] text-xs">Phone Number</Label>
+                    <div className="flex gap-2">
+                      <Select value={country} onValueChange={setCountry}>
+                        <SelectTrigger className="w-28 sm:w-32 bg-white border-black/10 rounded-xl h-12 text-[#0a0a0a]" aria-label="Country">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white text-[#0a0a0a] border-black/10">
+                          {COUNTRIES.map((c) => (
+                            <SelectItem key={c.code} value={c.code}>
+                              {c.flag} {c.phone}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        id="co-phone"
+                        type="tel"
+                        inputMode="tel"
+                        placeholder="555-0123"
+                        required
+                        autoComplete="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="flex-grow bg-white border-black/10 rounded-xl h-12 text-[#0a0a0a] focus-visible:ring-2 focus-visible:ring-[#FFD93D]/40 focus-visible:border-[#FFD93D]"
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </section>
+              </section>
 
-            <section className="space-y-6">
-              <h2 className="text-2xl font-bold text-[#0a0a0a]">Shipping Address</h2>
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <Label className="text-[#525252]">Street Address</Label>
-                  <Input
-                    placeholder="123 Magic Lane"
-                    required
-                    value={street}
-                    onChange={(e) => setStreet(e.target.value)}
-                    className="bg-black/5 border-black/10 rounded-xl h-12 text-[#0a0a0a] focus:ring-[#FFD93D]"
-                  />
+              <section className="space-y-5">
+                <h2 className="text-xl sm:text-2xl font-bold text-[#0a0a0a]">Shipping Address</h2>
+                <div className="space-y-4 sm:space-y-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="co-street" className="text-[#525252] text-xs">Street Address</Label>
+                    <Input
+                      id="co-street"
+                      placeholder="123 Magic Lane"
+                      required
+                      autoComplete="street-address"
+                      value={street}
+                      onChange={(e) => setStreet(e.target.value)}
+                      className="bg-white border-black/10 rounded-xl h-12 text-[#0a0a0a] focus-visible:ring-2 focus-visible:ring-[#FFD93D]/40 focus-visible:border-[#FFD93D]"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5">
+                    <div className="space-y-2 col-span-2 md:col-span-1">
+                      <Label htmlFor="co-city" className="text-[#525252] text-xs">City</Label>
+                      <Input
+                        id="co-city"
+                        placeholder="Whimsytown"
+                        required
+                        autoComplete="address-level2"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        className="bg-white border-black/10 rounded-xl h-12 text-[#0a0a0a] focus-visible:ring-2 focus-visible:ring-[#FFD93D]/40 focus-visible:border-[#FFD93D]"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="co-province" className="text-[#525252] text-xs">State / Prov.</Label>
+                      <Input
+                        id="co-province"
+                        placeholder="CA"
+                        required
+                        autoComplete="address-level1"
+                        value={province}
+                        onChange={(e) => setProvince(e.target.value)}
+                        className="bg-white border-black/10 rounded-xl h-12 text-[#0a0a0a] focus-visible:ring-2 focus-visible:ring-[#FFD93D]/40 focus-visible:border-[#FFD93D]"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="co-postal" className="text-[#525252] text-xs">Postal Code</Label>
+                      <Input
+                        id="co-postal"
+                        placeholder="12345"
+                        required
+                        autoComplete="postal-code"
+                        value={postal}
+                        onChange={(e) => setPostal(e.target.value)}
+                        className="bg-white border-black/10 rounded-xl h-12 text-[#0a0a0a] focus-visible:ring-2 focus-visible:ring-[#FFD93D]/40 focus-visible:border-[#FFD93D]"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                  <div className="space-y-2">
-                    <Label className="text-[#525252]">City</Label>
-                    <Input
-                      placeholder="Whimsytown"
-                      required
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                      className="bg-black/5 border-black/10 rounded-xl h-12 text-[#0a0a0a] focus:ring-[#FFD93D]"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[#525252]">State/Province</Label>
-                    <Input
-                      placeholder="CA"
-                      required
-                      value={province}
-                      onChange={(e) => setProvince(e.target.value)}
-                      className="bg-black/5 border-black/10 rounded-xl h-12 text-[#0a0a0a] focus:ring-[#FFD93D]"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[#525252]">Postal Code</Label>
-                    <Input
-                      placeholder="12345"
-                      required
-                      value={postal}
-                      onChange={(e) => setPostal(e.target.value)}
-                      className="bg-black/5 border-black/10 rounded-xl h-12 text-[#0a0a0a] focus:ring-[#FFD93D]"
-                    />
-                  </div>
-                </div>
-              </div>
-            </section>
+              </section>
+            </form>
+          )}
 
-            <section className="space-y-6">
-              <h2 className="text-2xl font-bold text-[#0a0a0a]">Payment Method</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-6 rounded-2xl border-2 border-[#FFD93D] bg-[#FFD93D]/10 flex items-center justify-between cursor-pointer">
-                  <div className="flex items-center gap-4">
-                    <CreditCard className="w-6 h-6 text-[#FFD93D]" />
-                    <span className="font-bold text-[#0a0a0a]">Credit Card</span>
-                  </div>
-                  <div className="w-5 h-5 rounded-full border-2 border-[#FFD93D] flex items-center justify-center p-1">
-                    <div className="w-full h-full bg-[#FFD93D] rounded-full" />
-                  </div>
+          {phase !== 'form' && (
+            <div className="space-y-8 sm:space-y-10">
+              <section className="space-y-5">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#0a0a0a]">Shipping Method</h2>
+                  <button
+                    type="button"
+                    onClick={() => setPhase('form')}
+                    className="text-xs text-[#525252] hover:text-[#0a0a0a] underline underline-offset-2"
+                  >
+                    Edit address
+                  </button>
                 </div>
-                <div className="p-6 rounded-2xl border-2 border-black/5 bg-black/5 flex items-center justify-between cursor-pointer hover:bg-black/5 transition-all opacity-50">
-                  <div className="flex items-center gap-4">
-                    <span className="font-bold text-[#0a0a0a]">Paypal</span>
+                {shippingLoading ? (
+                  <div className="flex items-center gap-2 text-sm text-[#525252]">
+                    <Loader2 className="w-4 h-4 animate-spin" /> Loading shipping options…
                   </div>
-                  <div className="w-5 h-5 rounded-full border-2 border-black/20" />
-                </div>
-              </div>
-            </section>
-          </form>
+                ) : shippingOptions.length === 0 ? (
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 text-amber-900 text-sm p-3">
+                    No shipping options are available for this address. We'll arrange shipping after the order is placed.
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {shippingOptions.map((opt) => (
+                      <label
+                        key={opt.id}
+                        className={cn(
+                          'flex items-center justify-between gap-3 rounded-2xl border-2 p-4 cursor-pointer transition',
+                          shippingOptionId === opt.id
+                            ? 'border-[#FFD93D] bg-[#FFD93D]/10'
+                            : 'border-black/5 hover:bg-black/[0.02]',
+                        )}
+                      >
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="radio"
+                            name="shipping-option"
+                            value={opt.id}
+                            checked={shippingOptionId === opt.id}
+                            onChange={() => setShippingOptionId(opt.id)}
+                            className="accent-[#FFD93D]"
+                          />
+                          <div>
+                            <div className="font-semibold text-sm text-[#0a0a0a]">{opt.name}</div>
+                            {opt.price_type === 'calculated' && (
+                              <div className="text-xs text-[#525252]">Calculated at fulfilment</div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="font-semibold text-sm text-[#0a0a0a]">
+                          {opt.amount === 0 ? 'FREE' : formatPrice(opt.amount)}
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </section>
+
+              <section className="space-y-5">
+                <h2 className="text-xl sm:text-2xl font-bold text-[#0a0a0a]">Payment Method</h2>
+                {providers.length === 0 ? (
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 text-amber-900 text-sm p-3">
+                    No online payment providers are configured. Your order will be marked
+                    "pending payment" and we'll contact you to settle it.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    {providers.map((p) => {
+                      const label = paymentLabel(p.id);
+                      const active = providerId === p.id;
+                      const isCard = /stripe/i.test(p.id);
+                      return (
+                        <label
+                          key={p.id}
+                          className={cn(
+                            'p-4 sm:p-5 rounded-2xl border-2 cursor-pointer transition flex flex-col gap-1',
+                            active
+                              ? 'border-[#FFD93D] bg-[#FFD93D]/10'
+                              : 'border-black/5 bg-black/[0.02] hover:bg-black/[0.04]',
+                          )}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              {isCard ? (
+                                <CreditCard className="w-5 h-5 text-[#FF9A3C]" />
+                              ) : (
+                                <Banknote className="w-5 h-5 text-[#4DA8FF]" />
+                              )}
+                              <span className="font-semibold text-sm sm:text-base text-[#0a0a0a]">
+                                {label.title}
+                              </span>
+                            </div>
+                            <input
+                              type="radio"
+                              name="payment-provider"
+                              value={p.id}
+                              checked={active}
+                              onChange={() => setProviderId(p.id)}
+                              className="accent-[#FFD93D]"
+                              aria-label={label.title}
+                            />
+                          </div>
+                          <p className="text-xs text-[#525252] pl-8">{label.sub}</p>
+                        </label>
+                      );
+                    })}
+                  </div>
+                )}
+                <p className="text-xs text-[#525252]">
+                  Card payments are processed by Stripe and never touch our servers. Manual options are settled after the order is placed.
+                </p>
+              </section>
+            </div>
+          )}
         </div>
 
-        {/* Sidebar */}
+        {/* RIGHT SIDEBAR */}
         <div className="lg:col-span-4">
-          <Card className="border-black/10 bg-black/5 backdrop-blur-3xl p-8 sticky top-32">
-            <h3 className="text-xl font-bold text-[#0a0a0a] mb-6">In Your Cart ({cartCount})</h3>
-            <div className="space-y-4 mb-6">
+          <Card className="border border-black/[0.07] bg-white p-5 sm:p-6 sticky top-24 rounded-2xl sm:rounded-3xl shadow-sm">
+            <h3 className="text-lg sm:text-xl font-bold text-[#0a0a0a] mb-4 sm:mb-5">In Your Cart ({cartCount})</h3>
+            <div className="space-y-2.5 mb-4">
               {cartItems.slice(0, 3).map((item) => (
                 <div key={item.id} className="flex justify-between text-sm gap-2">
-                  <span className="text-[#525252] italic leading-tight">
-                    {item.title} (x{item.quantity})
+                  <span className="text-[#525252] leading-tight line-clamp-1">
+                    {item.title} × {item.quantity}
                   </span>
-                  <span className="text-[#0a0a0a] whitespace-nowrap">
+                  <span className="text-[#0a0a0a] font-medium whitespace-nowrap">
                     {formatPrice(item.price * item.quantity)}
                   </span>
                 </div>
               ))}
               {cartItems.length > 3 && (
-                <p className="text-[10px] text-center text-[#525252]">
-                  + {cartItems.length - 3} more items
-                </p>
+                <p className="text-[11px] text-center text-[#525252]">+ {cartItems.length - 3} more items</p>
               )}
             </div>
 
-            <Separator className="bg-black/5 my-6" />
+            <Separator className="bg-black/[0.06] my-4" />
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-[#525252]">Subtotal</span>
-                <span className="text-[#0a0a0a]">{formatPrice(subtotal)}</span>
+                <span className="text-[#0a0a0a] font-medium">{formatPrice(subtotal)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-[#525252]">Shipping</span>
-                <span className={cn('font-medium', shipping === 0 ? 'text-[#5BE37D]' : 'text-[#0a0a0a]')}>
+                <span className={cn('font-medium', shipping === 0 ? 'text-[#0a8a3f]' : 'text-[#0a0a0a]')}>
                   {shipping === 0 ? 'FREE' : formatPrice(shipping)}
                 </span>
               </div>
-              <Separator className="bg-black/5 my-4" />
-              <div className="flex justify-between text-2xl font-bold text-[#0a0a0a]">
+              <Separator className="bg-black/[0.06] my-3" />
+              <div className="flex justify-between text-xl sm:text-2xl font-bold text-[#0a0a0a]">
                 <span>Total</span>
                 <span>{formatPrice(total)}</span>
               </div>
 
               {error && (
-                <div className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-xl px-4 py-3">
+                <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
                   {error}
                 </div>
               )}
 
-              <Button
-                type="submit"
-                form="checkout-form"
-                disabled={busy}
-                className="w-full rounded-full h-16 bg-white text-black font-bold text-lg hover:bg-[#F5F5F5] mt-8 transition-all"
-              >
-                {busy ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <>Complete Order <CheckCircle2 className="w-5 h-5 ml-2" /></>
-                )}
-              </Button>
+              {phase === 'form' ? (
+                <Button
+                  type="submit"
+                  form="checkout-form"
+                  disabled={busy}
+                  className="w-full rounded-full h-12 sm:h-13 bg-[#0a0a0a] text-white hover:bg-black font-semibold text-sm sm:text-base mt-4 transition-all"
+                  style={{ height: '3rem' }}
+                >
+                  {busy ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Continue to review <ChevronRight className="w-4 h-4 ml-1" /></>}
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  onClick={placeOrder}
+                  disabled={busy || phase === 'placing'}
+                  className="w-full rounded-full h-12 sm:h-13 bg-[#0a0a0a] text-white hover:bg-black font-semibold text-sm sm:text-base mt-4 transition-all"
+                  style={{ height: '3rem' }}
+                >
+                  {busy || phase === 'placing' ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <>Place order · {formatPrice(total)} <CheckCircle2 className="w-4 h-4 ml-2" /></>
+                  )}
+                </Button>
+              )}
 
-              <div className="flex flex-col gap-3 mt-8">
-                <div className="flex items-center gap-3 text-xs text-[#525252]">
-                  <ShieldCheck className="w-4 h-4 text-[#5BE37D]" /> 256-bit SSL Secure Payment
+              <div className="flex flex-col gap-2 mt-5 pt-4 border-t border-black/[0.06]">
+                <div className="flex items-center gap-2 text-[11px] text-[#525252]">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#5BE37D]" /> 256-bit SSL secure payment
                 </div>
-                <div className="flex items-center gap-3 text-xs text-[#525252]">
-                  <Truck className="w-4 h-4 text-[#4DA8FF]" /> Fast Global Fulfillment
+                <div className="flex items-center gap-2 text-[11px] text-[#525252]">
+                  <Truck className="w-3.5 h-3.5 text-[#4DA8FF]" /> Fast global fulfillment
                 </div>
               </div>
             </div>

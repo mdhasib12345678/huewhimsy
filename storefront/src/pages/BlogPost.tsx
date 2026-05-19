@@ -28,13 +28,13 @@ export const BlogPost: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-20 max-w-3xl">
-        <div className="h-10 w-32 bg-gray-100 animate-pulse rounded mb-8" />
-        <div className="h-16 bg-gray-100 animate-pulse rounded mb-4" />
-        <div className="aspect-video bg-gray-100 animate-pulse rounded-2xl mb-8" />
+      <div className="container-reading section-y">
+        <div className="h-10 w-32 bg-black/[0.04] animate-pulse rounded-full mb-8" />
+        <div className="h-12 bg-black/[0.04] animate-pulse rounded mb-4" />
+        <div className="aspect-video bg-black/[0.04] animate-pulse rounded-2xl mb-8" />
         <div className="space-y-3">
           {[...Array(8)].map((_, i) => (
-            <div key={i} className="h-4 bg-gray-100 animate-pulse rounded" />
+            <div key={i} className="h-4 bg-black/[0.04] animate-pulse rounded" />
           ))}
         </div>
       </div>
@@ -43,8 +43,8 @@ export const BlogPost: React.FC = () => {
 
   if (!post) {
     return (
-      <div className="container mx-auto px-4 py-32 text-center">
-        <h1 className="text-4xl font-bold text-[#0a0a0a] mb-4">Post not found</h1>
+      <div className="container-page section-y-lg text-center">
+        <h1 className="text-3xl sm:text-4xl font-bold text-[#0a0a0a] mb-4">Post not found</h1>
         <p className="text-[#525252] mb-8">This blog post doesn't exist or hasn't been published yet.</p>
         <NavLink to="/blog" className="text-[#FF5F6D] underline">
           Back to all posts
@@ -73,7 +73,7 @@ export const BlogPost: React.FC = () => {
     <motion.article
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="container mx-auto px-4 py-20 max-w-3xl"
+      className="container-reading section-y"
     >
       <SEO
         title={post.meta_title ?? post.title}
@@ -82,24 +82,31 @@ export const BlogPost: React.FC = () => {
         type="article"
         jsonLd={postJsonLd}
       />
-      <NavLink to="/blog" className="inline-flex items-center gap-2 text-sm text-[#525252] hover:text-[#0a0a0a] mb-8">
-        <ArrowLeft className="w-4 h-4" /> Back to blog
+      <NavLink
+        to="/blog"
+        className="inline-flex items-center gap-2 text-sm text-[#525252] hover:text-[#0a0a0a] mb-6 sm:mb-8 group"
+      >
+        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" /> Back to blog
       </NavLink>
 
-      <div className="flex items-center gap-3 mb-4 text-sm text-[#525252]">
-        {post.category && <Badge className="bg-[#FFD93D] text-[#0a0a0a]">{post.category}</Badge>}
+      <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 text-xs sm:text-sm text-[#525252] flex-wrap">
+        {post.category && (
+          <Badge className="bg-[#FFD93D]/20 text-[#0a0a0a] border border-[#FFD93D]/30 text-[10px] sm:text-xs">
+            {post.category}
+          </Badge>
+        )}
         {post.published_at && <span>{new Date(post.published_at).toLocaleDateString()}</span>}
         {post.read_time_minutes && <span>· {post.read_time_minutes} min read</span>}
       </div>
 
-      <h1 className="text-4xl md:text-6xl font-bold text-[#0a0a0a] mb-6 leading-tight">{post.title}</h1>
+      <h1 className="fluid-h1 font-bold text-[#0a0a0a] mb-5 sm:mb-6 leading-tight">{post.title}</h1>
 
       {post.excerpt && (
-        <p className="text-xl text-[#525252] mb-8 italic">{post.excerpt}</p>
+        <p className="text-lg sm:text-xl text-[#525252] mb-6 sm:mb-8 italic leading-relaxed">{post.excerpt}</p>
       )}
 
       {post.cover_image && (
-        <div className="aspect-video rounded-2xl overflow-hidden mb-12 bg-gray-100">
+        <div className="aspect-video rounded-2xl sm:rounded-3xl overflow-hidden mb-8 sm:mb-12 bg-black/[0.03]">
           <img src={post.cover_image} alt={post.title} className="w-full h-full object-cover" loading="lazy" />
         </div>
       )}

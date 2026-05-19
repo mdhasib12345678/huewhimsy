@@ -6,7 +6,7 @@
   --font-display: "Outfit", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  /* Custom UI Colors */
+  /* Brand palette */
   --color-brand-red: #FF5F6D;
   --color-brand-orange: #FF9A3C;
   --color-brand-yellow: #FFD93D;
@@ -15,7 +15,7 @@
   --color-brand-indigo: #6C63FF;
   --color-brand-violet: #B067FF;
 
-  /* shadcn UI variables — LIGHT MODE (white background) */
+  /* shadcn-style design tokens — light theme */
   --color-background: #ffffff;
   --color-foreground: #0a0a0a;
   --color-card: #ffffff;
@@ -36,43 +36,189 @@
   --color-input: #e5e7eb;
   --color-ring: #0a0a0a;
   --radius: 0.75rem;
+
+  /* Custom container — Tailwind v4 doesn't auto-cap the .container utility */
+  --container-max: 80rem;
 }
 
 @layer base {
+  html {
+    color-scheme: light;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
   html, body {
     background: #ffffff !important;
-    color-scheme: light;
+  }
+
+  body {
+    @apply text-foreground font-sans antialiased;
+    color: #0a0a0a;
+    /* Hard cap so a stray wide child can't introduce horizontal scroll on
+       any device — common cause of mobile-responsive bugs. */
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   * {
     @apply border-border;
   }
-  body {
-    @apply text-foreground font-sans antialiased;
-    color: #0a0a0a;
-  }
 
+  /* Typography — responsive heading scale tuned for clarity at every size.
+     We use clamp() so font-size flows smoothly between mobile and desktop
+     instead of jumping at breakpoints. */
   h1, h2, h3, h4, h5, h6 {
     @apply font-display tracking-tight;
     color: #0a0a0a;
+    text-wrap: balance;
   }
+  h1 { line-height: 1.05; letter-spacing: -0.02em; }
+  h2 { line-height: 1.1; letter-spacing: -0.015em; }
+  h3 { line-height: 1.2; letter-spacing: -0.01em; }
 
-  .text-secondary {
-    color: #404040;
-  }
+  p { text-wrap: pretty; }
 
-  .text-muted {
-    color: #525252;
-  }
+  .text-secondary { color: #404040; }
+  .text-muted { color: #525252; }
 
-  /* Force-white site override: any element that has no explicit background gets white.
-     Use sparingly — this is the visible "white site" guarantee the design asked for. */
+  /* Transparent sections — site-wide white background guarantee */
   main, section, article, aside, header, footer, nav {
     background-color: transparent;
   }
 
-  /* Glass Effects (now light) */
-  .glass {
-    @apply bg-black/5 backdrop-blur-md border border-black/10;
+  /* Touch targets — every interactive element needs to be tap-friendly */
+  button, a, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
+
+  /* Inputs that don't have explicit font-size become 16px on iOS so the
+     viewport doesn't zoom when the user focuses them. */
+  input, select, textarea {
+    font-size: 16px;
+  }
+  @media (min-width: 640px) {
+    input, select, textarea {
+      font-size: 0.875rem;
+    }
+  }
+
+  /* Smooth focus ring across the site */
+  :focus-visible {
+    outline: none;
+  }
+
+  /* Scrollbar polish (desktop only — mobile uses native) */
+  @media (pointer: fine) {
+    *::-webkit-scrollbar { width: 10px; height: 10px; }
+    *::-webkit-scrollbar-track { background: transparent; }
+    *::-webkit-scrollbar-thumb {
+      background: rgba(10, 10, 10, 0.18);
+      border-radius: 999px;
+      border: 2px solid #fff;
+    }
+    *::-webkit-scrollbar-thumb:hover { background: rgba(10, 10, 10, 0.32); }
+  }
+
+  /* Selection */
+  ::selection { background: #FFD93D; color: #0a0a0a; }
+
+  /* Honour reduced-motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* Page-level container — used by every page for consistent gutters
+     and a cap that scales gracefully on ultra-wide screens. */
+  .container-page {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    max-width: var(--container-max);
+  }
+  @media (min-width: 640px) {
+    .container-page { padding-left: 1.5rem; padding-right: 1.5rem; }
+  }
+  @media (min-width: 1024px) {
+    .container-page { padding-left: 2rem; padding-right: 2rem; }
+  }
+
+  /* Reading-width container for articles, terms pages, etc. */
+  .container-reading {
+    width: 100%;
+    max-width: 48rem;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  @media (min-width: 640px) {
+    .container-reading { padding-left: 1.5rem; padding-right: 1.5rem; }
+  }
+
+  /* Vertical rhythm — replaces hard-coded py-20 / py-24 sprinkled in pages.
+     section-y      → comfortable default for most pages
+     section-y-sm   → compact (cart, account, etc.)
+     section-y-lg   → expansive (home hero, big CTAs) */
+  .section-y    { padding-top: 3rem; padding-bottom: 3rem; }
+  .section-y-sm { padding-top: 2rem; padding-bottom: 2rem; }
+  .section-y-lg { padding-top: 4rem; padding-bottom: 4rem; }
+  @media (min-width: 768px) {
+    .section-y    { padding-top: 5rem; padding-bottom: 5rem; }
+    .section-y-sm { padding-top: 3rem; padding-bottom: 3rem; }
+    .section-y-lg { padding-top: 6rem; padding-bottom: 6rem; }
+  }
+  @media (min-width: 1024px) {
+    .section-y-lg { padding-top: 8rem; padding-bottom: 8rem; }
+  }
+
+  /* Smooth fluid display headings via clamp.
+     fluid-display → home hero / huge call-outs
+     fluid-h1      → page titles
+     fluid-h2      → section titles
+     fluid-h3      → card titles */
+  .fluid-display { font-size: clamp(2.25rem, 6.5vw + 0.5rem, 5.5rem); }
+  .fluid-h1      { font-size: clamp(1.875rem, 4.5vw + 0.5rem, 4rem); }
+  .fluid-h2      { font-size: clamp(1.5rem, 2.6vw + 0.6rem, 3rem); }
+  .fluid-h3      { font-size: clamp(1.125rem, 1.2vw + 0.75rem, 1.5rem); }
+
+  /* Lead paragraph (under hero) */
+  .fluid-lead { font-size: clamp(1rem, 0.7vw + 0.9rem, 1.25rem); line-height: 1.55; }
+
+  /* Glass effects (used in dropdowns/sheets) */
+  .glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  /* Premium accent surface — used by Home featured cards / promo blocks */
+  .surface-soft {
+    background: linear-gradient(180deg, #fcfcfd 0%, #f7f7f9 100%);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  /* Decorative gradient text */
+  .text-gradient-brand {
+    background-image: linear-gradient(90deg, #FF5F6D 0%, #FF9A3C 35%, #B067FF 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Hide scrollbar but keep scrollability — used on horizontal pill rows */
+  .scrollbar-hidden::-webkit-scrollbar { display: none; }
+  .scrollbar-hidden { scrollbar-width: none; }
 }

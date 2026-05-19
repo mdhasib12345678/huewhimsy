@@ -3,7 +3,19 @@ import { NavLink } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { useRainbow } from '@/components/RainbowContext';
-import { BookOpen, Palette, Sparkles, Star, ArrowRight, Laptop } from 'lucide-react';
+import {
+  BookOpen,
+  Palette,
+  Sparkles,
+  Star,
+  ArrowRight,
+  Laptop,
+  Loader2,
+  ShoppingBag,
+  PenTool,
+  Heart,
+  Send,
+} from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -20,15 +32,13 @@ import {
 } from '@/lib/medusa';
 import { SEO } from '@/components/SEO';
 
-const RAINBOW = ['#FF5F6D', '#FF9A3C', '#FFD93D', '#5BE37D', '#4DA8FF', '#6C63FF', '#B067FF'];
-
 const containerVariants = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.15, delayChildren: 0.2 } },
+  visible: { opacity: 1, transition: { staggerChildren: 0.12, delayChildren: 0.15 } },
 };
 const itemVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as any } },
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] as any } },
 };
 
 export const Home: React.FC = () => {
@@ -82,8 +92,8 @@ export const Home: React.FC = () => {
   };
 
   const heroTitle = hero?.title ?? 'Color Your World,\nShape Your Dreams';
-  const heroSubtitle = hero?.subtitle ?? 'Cozy learning adventures with Rilo and Rivy for ages 3 to 8';
-  const heroCtaLabel = hero?.cta_label ?? '🚀 Start the Adventure';
+  const heroSubtitle = hero?.subtitle ?? 'Cozy learning adventures with Rilo & Rivy for ages 3 to 8.';
+  const heroCtaLabel = hero?.cta_label ?? 'Start the Adventure';
   const heroCtaUrl = hero?.cta_url ?? '/library';
 
   return (
@@ -91,59 +101,93 @@ export const Home: React.FC = () => {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="flex flex-col gap-24 relative"
+      className="flex flex-col"
     >
       <SEO
         title="Whimsical Books & Creative Learning for Ages 3-8"
         description="Hand-illustrated children's books, free printable activities, and creative tools for ages 3-8. Meet Rilo and Rivy."
       />
-      {/* 🎨 HERO */}
-      <section className="relative h-[90vh] flex items-center justify-center overflow-hidden pt-20">
-        <div className="container mx-auto px-4 text-center z-10">
+
+      {/* HERO */}
+      <section className="relative overflow-hidden">
+        <div className="container-page section-y-lg pt-16 sm:pt-20 lg:pt-24 text-center">
+          <motion.div variants={itemVariants} className="flex justify-center mb-5">
+            <Badge className="bg-gradient-to-r from-[#FFD93D]/20 to-[#FF9A3C]/20 text-[#0a0a0a] border border-[#FFD93D]/40 rounded-full px-4 py-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-widest">
+              ✨ Hand-illustrated · ages 3–8
+            </Badge>
+          </motion.div>
           <motion.h1
             variants={itemVariants}
-            className="text-5xl md:text-8xl font-bold tracking-tight text-[#0a0a0a] mb-8 leading-[1.1] whitespace-pre-line"
+            className="fluid-display font-bold text-[#0a0a0a] mb-6 whitespace-pre-line max-w-4xl mx-auto"
           >
             {heroTitle}
           </motion.h1>
           <motion.p
             variants={itemVariants}
-            className="max-w-2xl mx-auto text-xl md:text-2xl text-[#525252] mb-12 font-medium"
+            className="fluid-lead max-w-2xl mx-auto text-[#525252] mb-8 sm:mb-10"
           >
             {heroSubtitle}
           </motion.p>
-          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <NavLink to={heroCtaUrl} className={cn(buttonVariants({ size: 'lg' }), 'rounded-full px-10 py-8 text-xl bg-white text-black border border-black/10 hover:bg-[#F5F5F5] shadow-2xl transition-all hover:scale-105 active:scale-95 group font-bold')}>
-              {heroCtaLabel} <ArrowRight className="ml-2 w-6 h-6 group-hover:translate-x-1 transition-transform" />
+          <motion.div
+            variants={itemVariants}
+            className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 max-w-md sm:max-w-none mx-auto"
+          >
+            <NavLink
+              to={heroCtaUrl}
+              className="group inline-flex items-center justify-center rounded-full bg-[#0a0a0a] text-white px-7 sm:px-9 h-13 sm:h-14 font-semibold text-base sm:text-lg hover:bg-black shadow-[0_10px_30px_-10px_rgba(0,0,0,0.45)] hover:shadow-[0_14px_32px_-10px_rgba(0,0,0,0.55)] transition-all hover:scale-[1.02] active:scale-[0.98]"
+              style={{ height: '3.25rem' }}
+            >
+              {heroCtaLabel}
+              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </NavLink>
             <NavLink
               to="/free-activities"
-              className={cn(buttonVariants({ size: 'lg', variant: 'outline' }), 'rounded-full px-10 py-8 text-xl border-black/20 bg-black/5 backdrop-blur-md text-[#0a0a0a] hover:bg-black/10 shadow-xl transition-all hover:scale-105 active:scale-95 font-bold')}
+              className="inline-flex items-center justify-center rounded-full bg-white text-[#0a0a0a] border border-black/10 px-7 sm:px-9 font-semibold text-base sm:text-lg hover:bg-black/[0.04] transition-all hover:scale-[1.02] active:scale-[0.98]"
+              style={{ height: '3.25rem' }}
             >
-              🎁 Get Free Pack
+              <Sparkles className="mr-2 w-4 h-4 text-[#FF9A3C]" /> Free Pack
             </NavLink>
+          </motion.div>
+
+          {/* Trust strip */}
+          <motion.div
+            variants={itemVariants}
+            className="mt-12 sm:mt-16 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[11px] uppercase tracking-widest font-bold text-[#525252]"
+          >
+            <span className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#5BE37D]" /> FSC-certified paper
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FFD93D]" /> Made in Bangladesh
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#4DA8FF]" /> Worldwide shipping
+            </span>
           </motion.div>
         </div>
       </section>
 
-      {/* 🧭 START SECTION (brand-themed; not from CMS) */}
-      <section className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {/* QUICK START */}
+      <section className="container-page section-y">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
           {[
-            { title: 'Meet Rilo and Rivy', icon: Star, color: '#FF5F6D', to: '/about' },
-            { title: 'Try a Fun Activity', icon: Palette, color: '#FFD93D', to: '/free-activities' },
-            { title: 'Explore Books', icon: BookOpen, color: '#4DA8FF', to: '/library' },
-          ].map((item, i) => (
-            <motion.div key={i} variants={itemVariants} whileHover={{ y: -8 }}>
-              <NavLink to={item.to}>
-                <Card className="border-black/10 bg-black/5 backdrop-blur-xl p-8 h-full flex flex-col items-center text-center group cursor-pointer">
+            { title: 'Meet Rilo & Rivy', desc: 'The curious duo behind our stories.', icon: Star, color: '#FF5F6D', to: '/about' },
+            { title: 'Try a Fun Activity', desc: 'Free printables to keep tiny hands busy.', icon: Palette, color: '#FFD93D', to: '/free-activities' },
+            { title: 'Explore the Library', desc: 'Browse every book in the catalogue.', icon: BookOpen, color: '#4DA8FF', to: '/library' },
+          ].map((item) => (
+            <motion.div key={item.title} variants={itemVariants}>
+              <NavLink to={item.to} className="block group">
+                <Card className="border-black/[0.07] bg-white p-6 sm:p-7 h-full flex flex-row sm:flex-col items-center sm:items-start text-left gap-4 sm:gap-5 hover:border-black/[0.15] hover:shadow-md transition-all">
                   <div
-                    className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 border border-black/10 group-hover:scale-110 transition-transform"
+                    className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform"
                     style={{ backgroundColor: item.color + '20' }}
                   >
-                    <item.icon className="w-8 h-8" style={{ color: item.color }} />
+                    <item.icon className="w-6 h-6 sm:w-7 sm:h-7" style={{ color: item.color }} />
                   </div>
-                  <h3 className="text-2xl font-bold text-[#0a0a0a] group-hover:text-[#FFD93D] transition-colors">{item.title}</h3>
+                  <div className="min-w-0">
+                    <h3 className="fluid-h3 font-bold text-[#0a0a0a] mb-1">{item.title}</h3>
+                    <p className="text-sm text-[#525252] hidden sm:block">{item.desc}</p>
+                  </div>
                 </Card>
               </NavLink>
             </motion.div>
@@ -151,54 +195,75 @@ export const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* 📚 BOOK SECTION (live from Medusa products) */}
-      <section className="container mx-auto px-4">
-        <motion.div variants={itemVariants} className="text-center mb-16">
-          <h2 className="text-4xl md:text-6xl font-bold text-[#0a0a0a] mb-4">Explore Our Adventures</h2>
+      {/* FROM THE LIBRARY */}
+      <section className="container-page section-y">
+        <motion.div variants={itemVariants} className="flex items-end justify-between gap-4 mb-8 sm:mb-12">
+          <div>
+            <Badge className="bg-[#5BE37D]/15 text-[#0a0a0a] border border-[#5BE37D]/40 rounded-full px-3 py-1 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest mb-3">
+              ✨ From the library
+            </Badge>
+            <h2 className="fluid-h1 font-bold text-[#0a0a0a]">Explore Our Adventures</h2>
+          </div>
+          <NavLink
+            to="/library"
+            className="hidden sm:inline-flex items-center text-sm font-semibold text-[#0a0a0a] hover:text-[#FF5F6D] gap-1 group"
+          >
+            View all <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </NavLink>
         </motion.div>
 
-        <div className="flex items-center gap-4 mb-8">
-          <Badge className="bg-[#5BE37D] text-black text-sm px-4 py-1">✨ FROM THE LIBRARY</Badge>
-          <div className="h-px flex-grow bg-gray-200" />
-        </div>
-
         {productsLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[0, 1, 2].map((i) => (
-              <div key={i} className="aspect-[3/4] rounded-2xl bg-gray-100 animate-pulse" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={i}
+                className="rounded-2xl border border-black/[0.06] bg-white overflow-hidden animate-pulse"
+              >
+                <div className="aspect-[3/4] bg-black/[0.04]" />
+                <div className="p-3 sm:p-4 space-y-2">
+                  <div className="h-4 w-4/5 bg-black/[0.06] rounded" />
+                  <div className="h-5 w-1/3 bg-black/[0.05] rounded mt-2" />
+                </div>
+              </div>
             ))}
           </div>
         ) : products.length === 0 ? (
           <p className="text-center text-[#525252] py-12">No books yet — check back soon!</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {products.slice(0, 6).map((book, i) => {
-              const color = RAINBOW[i % RAINBOW.length];
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
+            {products.slice(0, 8).map((book) => {
               const price = productPrice(book);
               return (
-                <motion.div key={book.id} variants={itemVariants} whileHover={{ y: -10 }}>
-                  <NavLink to={`/shop/${book.handle}`}>
-                    <Card className="overflow-hidden border-black/10 bg-black/5 backdrop-blur-xl h-full group cursor-pointer border-b-4" style={{ borderBottomColor: color + '60' }}>
-                      <CardContent className="p-0">
-                        <div className="aspect-[3/4] relative bg-black/5 flex items-center justify-center overflow-hidden">
-                          {book.thumbnail ? (
-                            <img src={book.thumbnail} alt={book.title} className="w-full h-full object-cover" loading="lazy" />
-                          ) : (
-                            <>
-                              <div className="absolute inset-0 opacity-20" style={{ backgroundColor: color }} />
-                              <span className="relative z-10 text-[#0a0a0a]/60 font-bold text-xl px-12 text-center">{book.title}</span>
-                            </>
-                          )}
-                        </div>
-                        <div className="p-6">
-                          <h4 className="text-xl font-bold text-[#0a0a0a] group-hover:text-[#FFD93D] transition-colors mb-2">{book.title}</h4>
-                          {price > 0 && <p className="text-sm text-[#525252] mb-4">{formatPrice(price)}</p>}
-                          <Button variant="outline" className="w-full rounded-full border-black/20 text-[#0a0a0a] group-hover:bg-white group-hover:text-black transition-all">
-                            Explore Book
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
+                <motion.div key={book.id} variants={itemVariants}>
+                  <NavLink to={`/shop/${book.handle}`} className="block h-full group">
+                    <article className="h-full rounded-2xl border border-black/[0.06] bg-white overflow-hidden flex flex-col transition-all duration-300 group-hover:border-black/[0.12] group-hover:shadow-[0_18px_40px_-22px_rgba(10,10,10,0.18)]">
+                      <div className="aspect-[3/4] relative bg-[#fafafa] overflow-hidden">
+                        {book.thumbnail ? (
+                          <img
+                            src={book.thumbnail}
+                            alt={book.title}
+                            loading="lazy"
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center px-4 text-center">
+                            <span className="text-[#0a0a0a]/30 font-semibold text-sm sm:text-base line-clamp-2 leading-tight">
+                              {book.title}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-3 sm:p-4 flex flex-col gap-1.5">
+                        <h4 className="text-sm sm:text-[15px] font-semibold text-[#0a0a0a] line-clamp-2 leading-snug group-hover:text-[#FF5F6D] transition-colors">
+                          {book.title}
+                        </h4>
+                        {price > 0 && (
+                          <p className="text-base sm:text-lg font-bold text-[#0a0a0a] tracking-tight">
+                            {formatPrice(price)}
+                          </p>
+                        )}
+                      </div>
+                    </article>
                   </NavLink>
                 </motion.div>
               );
@@ -206,35 +271,63 @@ export const Home: React.FC = () => {
           </div>
         )}
 
-        <div className="mt-16 text-center">
-          <NavLink to="/library" className={cn(buttonVariants({ variant: 'ghost' }), 'text-[#0a0a0a] hover:bg-black/5 rounded-full px-10 py-6 text-lg font-bold')}>
-            📖 View Full Library <ArrowRight className="ml-2 w-5 h-5" />
+        <div className="mt-10 sm:mt-12 flex justify-center sm:hidden">
+          <NavLink
+            to="/library"
+            className={cn(
+              buttonVariants({ variant: 'outline' }),
+              'rounded-full border-black/15 text-[#0a0a0a] hover:bg-black/[0.04] px-8 h-11 font-semibold',
+            )}
+          >
+            View Full Library <ArrowRight className="ml-2 w-4 h-4" />
           </NavLink>
         </div>
       </section>
 
-      {/* 🛍️ SHOP PREVIEW SECTION */}
-      <section className="container mx-auto px-4 py-12">
-        <motion.div variants={itemVariants} className="bg-[#F9FAFB] rounded-[4rem] p-12 md:p-24 border border-black/10 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-[#FFD93D]/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
-          <div className="flex flex-col lg:flex-row items-center gap-16 relative z-10">
-            <div className="lg:w-1/2 space-y-8 text-center lg:text-left">
-              <Badge className="bg-[#4DA8FF] text-white px-4 py-1">SHOP PREVIEW</Badge>
-              <h2 className="text-5xl md:text-6xl font-bold text-[#0a0a0a] leading-tight">Featured Categories</h2>
-              <p className="text-xl text-[#525252]">
-                Bring the magic home with our carefully selected educational toys, creative tools, and family favorites.
+      {/* SHOP PREVIEW */}
+      <section className="container-page section-y">
+        <motion.div
+          variants={itemVariants}
+          className="surface-soft rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-10 lg:p-16 relative overflow-hidden"
+        >
+          <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-[#FFD93D]/15 blur-[100px] pointer-events-none" />
+          <div className="absolute -bottom-20 -left-20 w-80 h-80 rounded-full bg-[#B067FF]/15 blur-[100px] pointer-events-none" />
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-10 lg:gap-16 relative z-10">
+            <div className="space-y-5 sm:space-y-6 text-center lg:text-left">
+              <Badge className="bg-[#4DA8FF]/15 text-[#0a0a0a] border border-[#4DA8FF]/40 rounded-full px-3 py-1 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest">
+                Shop preview
+              </Badge>
+              <h2 className="fluid-h1 font-bold text-[#0a0a0a]">Featured categories</h2>
+              <p className="fluid-lead text-[#525252] max-w-md mx-auto lg:mx-0">
+                Carefully selected educational toys, creative tools, and family favourites — all
+                designed with little hands in mind.
               </p>
-              <div className="flex flex-wrap justify-center lg:justify-start gap-4">
-                <NavLink to="/shop" className={cn(buttonVariants({ size: 'lg' }), 'rounded-full px-10 h-14 bg-white text-black border border-black/10 font-bold hover:bg-[#F5F5F5] transition-all hover:scale-105')}>
-                  🛍️ Explore Shop
+              <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+                <NavLink
+                  to="/shop"
+                  className={cn(
+                    buttonVariants(),
+                    'rounded-full px-7 h-12 sm:h-13 bg-[#0a0a0a] text-white font-semibold hover:bg-black transition-all',
+                  )}
+                  style={{ height: '3rem' }}
+                >
+                  <ShoppingBag className="w-4 h-4 mr-2" /> Explore Shop
                 </NavLink>
-                <NavLink to="/shop?sort=featured" className={cn(buttonVariants({ size: 'lg', variant: 'outline' }), 'rounded-full px-10 h-14 border-black/20 text-[#0a0a0a] hover:bg-black/5 font-bold transition-all hover:scale-105')}>
-                  ⭐ Featured Favorites
+                <NavLink
+                  to="/shop?sort=featured"
+                  className={cn(
+                    buttonVariants({ variant: 'outline' }),
+                    'rounded-full px-7 h-12 sm:h-13 border-black/15 text-[#0a0a0a] hover:bg-black/[0.04] font-semibold',
+                  )}
+                  style={{ height: '3rem' }}
+                >
+                  <Star className="w-4 h-4 mr-2 fill-[#FFD93D] text-[#FFD93D]" /> Featured
                 </NavLink>
               </div>
             </div>
 
-            <div className="lg:w-1/2 grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-3 sm:gap-4">
               {[
                 { name: 'Educational Toys', color: '#FF5F6D' },
                 { name: 'Coloring Supplies', color: '#FF9A3C' },
@@ -245,13 +338,21 @@ export const Home: React.FC = () => {
               ].map((cat) => (
                 <NavLink key={cat.name} to={`/shop?category=${encodeURIComponent(cat.name)}`}>
                   <motion.div
-                    whileHover={{ y: -5, scale: 1.05 }}
-                    className="aspect-square rounded-3xl bg-white border border-black/10 p-4 flex flex-col items-center justify-center text-center gap-3 group cursor-pointer shadow-sm hover:shadow-md transition-shadow"
+                    whileHover={{ y: -3, scale: 1.02 }}
+                    className="aspect-square rounded-2xl bg-white border border-black/[0.06] p-3 sm:p-4 flex flex-col items-center justify-center text-center gap-2 sm:gap-3 cursor-pointer hover:shadow-md transition-shadow"
                   >
-                    <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: cat.color + '20' }}>
-                      <div className="w-6 h-6 rounded-full" style={{ backgroundColor: cat.color }} />
+                    <div
+                      className="w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center shrink-0"
+                      style={{ backgroundColor: cat.color + '20' }}
+                    >
+                      <div
+                        className="w-4 h-4 sm:w-5 sm:h-5 rounded-full"
+                        style={{ backgroundColor: cat.color }}
+                      />
                     </div>
-                    <span className="text-[10px] sm:text-xs font-bold text-[#0a0a0a] uppercase tracking-wider">{cat.name}</span>
+                    <span className="text-[9px] sm:text-[10px] font-bold text-[#0a0a0a] uppercase tracking-wider leading-tight">
+                      {cat.name}
+                    </span>
                   </motion.div>
                 </NavLink>
               ))}
@@ -260,52 +361,71 @@ export const Home: React.FC = () => {
         </motion.div>
       </section>
 
-      {/* 🧠 LEARNING BENEFITS (brand promises) */}
-      <section className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+      {/* LEARNING BENEFITS */}
+      <section className="container-page section-y">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
           {[
             { title: 'Coloring', icon: Palette, color: '#FF5F6D' },
             { title: 'Phonics', icon: BookOpen, color: '#FFD93D' },
-            { title: 'Writing', icon: Sparkles, color: '#5BE37D' },
-            { title: 'Creativity', icon: Star, color: '#B067FF' },
-          ].map((item, i) => (
-            <motion.div key={i} variants={itemVariants} className="flex flex-col items-center gap-4 p-8 rounded-[2rem] bg-white border border-black/10 shadow-sm">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mb-2" style={{ backgroundColor: item.color + '20' }}>
-                <item.icon className="w-8 h-8" style={{ color: item.color }} />
+            { title: 'Writing', icon: PenTool, color: '#5BE37D' },
+            { title: 'Creativity', icon: Sparkles, color: '#B067FF' },
+          ].map((item) => (
+            <motion.div
+              key={item.title}
+              variants={itemVariants}
+              className="flex flex-col items-center gap-3 sm:gap-4 p-5 sm:p-7 rounded-3xl bg-white border border-black/[0.07] text-center hover:shadow-md transition-shadow"
+            >
+              <div
+                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: item.color + '20' }}
+              >
+                <item.icon className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: item.color }} />
               </div>
-              <span className="text-xl font-bold text-[#0a0a0a]">{item.title}</span>
+              <span className="text-sm sm:text-lg font-bold text-[#0a0a0a]">{item.title}</span>
             </motion.div>
           ))}
         </div>
       </section>
 
-      {/* 🎁 FREE SAMPLE SECTION — newsletter form (wired) */}
-      <section className="container mx-auto px-4">
-        <Card className="rounded-[4rem] overflow-hidden border-black/20 bg-gradient-to-br from-[#FF5F6D]/10 via-[#B067FF]/10 to-[#4DA8FF]/10 p-12 md:p-24 border-2">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <motion.div variants={itemVariants}>
-              <h2 className="text-4xl md:text-6xl font-bold text-[#0a0a0a] mb-6 leading-tight">Start the Fun Today for Free!</h2>
-              <p className="text-xl text-[#525252] mb-8">
-                Download our signature "Rilo &amp; Rivy Welcome Pack" with premium coloring pages and alphabet starters.
+      {/* FREE SAMPLE (newsletter) */}
+      <section className="container-page section-y">
+        <Card className="rounded-[2rem] sm:rounded-[3rem] overflow-hidden border border-black/[0.06] bg-gradient-to-br from-[#FF5F6D]/8 via-[#FFD93D]/8 to-[#4DA8FF]/8 p-6 sm:p-10 lg:p-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center">
+            <motion.div variants={itemVariants} className="space-y-5 text-center lg:text-left">
+              <Badge className="bg-white text-[#0a0a0a] border border-black/10 rounded-full px-3 py-1 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest">
+                Free welcome pack
+              </Badge>
+              <h2 className="fluid-h1 font-bold text-[#0a0a0a] leading-tight">
+                Start the fun today, on the house.
+              </h2>
+              <p className="fluid-lead text-[#525252] max-w-md mx-auto lg:mx-0">
+                12 premium coloring pages, 3 mini-books, and our alphabet starters — straight to
+                your inbox.
               </p>
-              <div className="text-xs text-[#525252] font-bold uppercase tracking-widest flex items-center gap-2">
+              <div className="flex items-center justify-center lg:justify-start gap-3 pt-1">
                 <div className="flex -space-x-2">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="w-6 h-6 rounded-full border border-[#0a0a0a] bg-black/10" />
+                  {['#FF5F6D', '#FFD93D', '#5BE37D', '#4DA8FF'].map((c) => (
+                    <div
+                      key={c}
+                      className="w-7 h-7 rounded-full border-2 border-white"
+                      style={{ backgroundColor: c + '90' }}
+                    />
                   ))}
                 </div>
-                Join families subscribing today
+                <span className="text-xs text-[#525252] font-semibold">
+                  3,400+ families already inside
+                </span>
               </div>
             </motion.div>
 
-            <motion.div variants={itemVariants} className="bg-white p-8 md:p-12 rounded-[3rem] border border-black/10 shadow-sm">
-              <form className="space-y-4" onSubmit={handleNewsletter}>
+            <motion.div variants={itemVariants} className="bg-white rounded-2xl sm:rounded-3xl border border-black/[0.07] shadow-sm p-6 sm:p-8">
+              <form className="space-y-3" onSubmit={handleNewsletter}>
                 <input
                   type="text"
                   placeholder="Your name (optional)"
                   value={newsletterName}
                   onChange={(e) => setNewsletterName(e.target.value)}
-                  className="w-full h-14 rounded-2xl bg-white border border-gray-300 px-6 text-[#0a0a0a] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FFD93D]"
+                  className="w-full h-12 rounded-xl bg-white border border-black/10 px-4 text-[#0a0a0a] placeholder:text-[#9aa0a6] focus:outline-none focus:border-[#FFD93D] focus:ring-2 focus:ring-[#FFD93D]/30 transition-all"
                 />
                 <input
                   type="email"
@@ -313,91 +433,108 @@ export const Home: React.FC = () => {
                   placeholder="Email address"
                   value={newsletterEmail}
                   onChange={(e) => setNewsletterEmail(e.target.value)}
-                  className="w-full h-14 rounded-2xl bg-white border border-gray-300 px-6 text-[#0a0a0a] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FFD93D]"
+                  className="w-full h-12 rounded-xl bg-white border border-black/10 px-4 text-[#0a0a0a] placeholder:text-[#9aa0a6] focus:outline-none focus:border-[#FFD93D] focus:ring-2 focus:ring-[#FFD93D]/30 transition-all"
                 />
                 <Button
                   type="submit"
                   disabled={newsletterStatus === 'sending' || newsletterStatus === 'ok'}
-                  className="w-full h-14 rounded-2xl bg-gradient-to-r from-[#FF5F6D] to-[#B067FF] text-white font-bold text-lg hover:opacity-90 transition-all shadow-md"
+                  className="w-full h-12 rounded-xl bg-gradient-to-r from-[#FF5F6D] via-[#FF9A3C] to-[#B067FF] text-white font-semibold hover:opacity-95 transition-all shadow-[0_8px_24px_-8px_rgba(255,95,109,0.5)]"
                 >
-                  {newsletterStatus === 'sending'
-                    ? 'Sending...'
-                    : newsletterStatus === 'ok'
-                      ? '✅ Check your inbox!'
-                      : '📩 Send My Free Pack'}
+                  {newsletterStatus === 'sending' ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Sending…
+                    </>
+                  ) : newsletterStatus === 'ok' ? (
+                    <>✅ Check your inbox</>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4 mr-2" /> Send my free pack
+                    </>
+                  )}
                 </Button>
                 {newsletterStatus === 'err' && (
-                  <p className="text-sm text-red-600 text-center">Something went wrong. Please try again.</p>
+                  <p className="text-xs text-red-600 text-center">Something went wrong. Please try again.</p>
                 )}
+                <p className="text-[11px] text-[#525252] text-center pt-1">
+                  No spam · unsubscribe with one click
+                </p>
               </form>
             </motion.div>
           </div>
         </Card>
       </section>
 
-      {/* 👦👧 CHARACTER SECTION (brand identity) */}
-      <section className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      {/* CHARACTERS */}
+      <section className="container-page section-y">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           {[
-            { name: 'Rilo', role: 'curious explorer', color: '#FF9A3C' },
-            { name: 'Rivy', role: 'supportive guide', color: '#FF5F6D' },
-          ].map((char, i) => (
-            <motion.div key={i} variants={itemVariants} whileHover={{ scale: 1.02 }} className="group">
-              <Card className="p-12 rounded-[3rem] bg-white border border-black/10 shadow-sm h-full flex flex-col items-center text-center overflow-hidden relative">
-                <div className="absolute top-0 left-0 w-full h-2" style={{ backgroundColor: char.color }} />
-                <div className="w-32 h-32 rounded-full bg-black/5 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500">
-                  <span className="text-4xl font-bold" style={{ color: char.color }}>
-                    {char.name[0]}
-                  </span>
+            { name: 'Rilo', role: 'the curious explorer', color: '#FF9A3C', icon: '🦊' },
+            { name: 'Rivy', role: 'the supportive guide', color: '#FF5F6D', icon: '🐰' },
+          ].map((char) => (
+            <motion.div key={char.name} variants={itemVariants} whileHover={{ scale: 1.01 }} className="group">
+              <Card className="p-8 sm:p-12 rounded-3xl bg-white border border-black/[0.07] h-full flex flex-col items-center text-center overflow-hidden relative hover:shadow-lg transition-shadow">
+                <div className="absolute top-0 left-0 w-full h-1.5" style={{ backgroundColor: char.color }} />
+                <div
+                  className="w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center mb-5 sm:mb-6 group-hover:scale-110 transition-transform duration-500 text-5xl"
+                  style={{ backgroundColor: char.color + '20' }}
+                >
+                  {char.icon}
                 </div>
-                <h3 className="text-4xl font-bold text-[#0a0a0a] mb-2">{char.name}</h3>
-                <p className="text-xl text-[#525252] italic">{char.role}</p>
+                <h3 className="text-2xl sm:text-3xl font-bold text-[#0a0a0a] mb-1">{char.name}</h3>
+                <p className="text-sm sm:text-base text-[#525252] italic">{char.role}</p>
               </Card>
             </motion.div>
           ))}
         </div>
       </section>
 
-      {/* 💬 TESTIMONIALS (live from /store/endorsements) */}
-      <section className="container mx-auto px-4 py-12 text-center">
-        <motion.h2 variants={itemVariants} className="text-4xl font-bold text-[#0a0a0a] mb-16">
-          Why Parents Love Hue Whimsy
-        </motion.h2>
+      {/* TESTIMONIALS */}
+      <section className="container-page section-y">
+        <motion.div variants={itemVariants} className="text-center mb-10 sm:mb-12">
+          <Badge className="bg-[#FF5F6D]/12 text-[#0a0a0a] border border-[#FF5F6D]/30 rounded-full px-3 py-1 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest mb-3">
+            <Heart className="w-3 h-3 mr-1 inline-block fill-[#FF5F6D] text-[#FF5F6D]" /> Loved by families
+          </Badge>
+          <h2 className="fluid-h1 font-bold text-[#0a0a0a]">Why parents love Hue Whimsy</h2>
+        </motion.div>
 
         {testimonialsLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             {[0, 1, 2].map((i) => (
-              <div key={i} className="h-48 rounded-2xl bg-gray-100 animate-pulse" />
+              <div key={i} className="h-48 rounded-3xl bg-black/[0.04] animate-pulse" />
             ))}
           </div>
         ) : testimonials.length === 0 ? (
-          <p className="text-[#525252]">Customer reviews coming soon.</p>
+          <p className="text-center text-[#525252]">Customer reviews coming soon.</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             {testimonials.slice(0, 3).map((t) => (
               <motion.div key={t.id} variants={itemVariants}>
-                <Card className="p-8 rounded-[2rem] bg-white border border-black/10 text-left italic relative shadow-sm">
-                  <div className="text-5xl text-[#0a0a0a]/10 absolute top-4 left-4 font-serif">&ldquo;</div>
-                  <p className="text-[#525252] mb-6 relative z-10 font-medium">{t.quote}</p>
-                  <div className="flex items-center gap-3">
+                <Card className="p-6 sm:p-7 rounded-3xl bg-white border border-black/[0.07] h-full hover:shadow-md transition-shadow text-left relative">
+                  <div className="absolute top-4 left-5 sm:top-5 sm:left-6 text-5xl sm:text-6xl leading-none text-[#FFD93D]/30 font-serif select-none">
+                    &ldquo;
+                  </div>
+                  <p className="text-[#404040] text-sm sm:text-base leading-relaxed pt-4 mb-5 sm:mb-6 italic">
+                    {t.quote}
+                  </p>
+                  <div className="flex items-center gap-3 pt-3 border-t border-black/[0.06]">
                     {t.avatar ? (
                       <img src={t.avatar} alt={t.name} className="w-10 h-10 rounded-full object-cover" loading="lazy" />
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-black/10 flex items-center justify-center font-bold text-[#525252]">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF5F6D]/20 to-[#B067FF]/20 flex items-center justify-center font-bold text-[#0a0a0a]">
                         {t.name.charAt(0)}
                       </div>
                     )}
-                    <div>
-                      <p className="text-[#0a0a0a] font-bold text-sm">{t.name}</p>
-                      {t.role && <p className="text-xs text-[#525252]">{t.role}</p>}
-                      {t.rating && (
-                        <div className="flex gap-1 mt-1">
-                          {[...Array(t.rating)].map((_, j) => (
-                            <Star key={j} className="w-3 h-3 fill-[#FFD93D] text-[#FFD93D]" />
-                          ))}
-                        </div>
-                      )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[#0a0a0a] font-bold text-sm truncate">{t.name}</p>
+                      {t.role && <p className="text-[11px] text-[#525252] truncate">{t.role}</p>}
                     </div>
+                    {t.rating && (
+                      <div className="flex gap-0.5 shrink-0">
+                        {[...Array(t.rating)].map((_, j) => (
+                          <Star key={j} className="w-3 h-3 fill-[#FFD93D] text-[#FFD93D]" />
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </Card>
               </motion.div>
@@ -406,21 +543,37 @@ export const Home: React.FC = () => {
         )}
       </section>
 
-      {/* 🧩 SERVICES PREVIEW */}
-      <section className="container mx-auto px-4 py-12">
-        <div className="bg-[#F9FAFB] rounded-[4rem] p-12 md:p-20 border border-black/10">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-12 text-center md:text-left">
-            <div className="space-y-6">
-              <h2 className="text-4xl md:text-5xl font-bold text-[#0a0a0a]">For Parents and Creators</h2>
-              <p className="text-xl text-[#525252]">We help authors and brands bring their own dreams to life.</p>
-              <NavLink to="/services" className={cn(buttonVariants({ size: 'lg' }), 'rounded-full px-10 py-7 bg-white text-black border border-black/10 font-bold h-fit transition-all hover:scale-105')}>
-                💼 Explore Services
+      {/* SERVICES PREVIEW */}
+      <section className="container-page section-y">
+        <div className="surface-soft rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-10 lg:p-16">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12">
+            <div className="flex-1 space-y-4 sm:space-y-5 text-center lg:text-left">
+              <Badge className="bg-[#B067FF]/15 text-[#B067FF] border border-[#B067FF]/30 rounded-full px-3 py-1 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest">
+                For Parents &amp; Creators
+              </Badge>
+              <h2 className="fluid-h1 font-bold text-[#0a0a0a]">For Parents and Creators</h2>
+              <p className="fluid-lead text-[#525252] max-w-md mx-auto lg:mx-0">
+                Custom illustration, book design, classroom kits — we help bring your own creative
+                dreams to life.
+              </p>
+              <NavLink
+                to="/services"
+                className={cn(
+                  buttonVariants(),
+                  'rounded-full px-7 bg-[#0a0a0a] text-white font-semibold hover:bg-black transition-all',
+                )}
+                style={{ height: '3rem' }}
+              >
+                Explore Services <ArrowRight className="ml-2 w-4 h-4" />
               </NavLink>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               {[Palette, Laptop, BookOpen, Sparkles].map((Icon, i) => (
-                <div key={i} className="w-20 h-20 rounded-3xl bg-white flex items-center justify-center border border-black/10 shadow-sm">
-                  <Icon className="w-8 h-8 text-[#525252]" />
+                <div
+                  key={i}
+                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-white flex items-center justify-center border border-black/[0.07] shadow-sm"
+                >
+                  <Icon className="w-6 h-6 sm:w-8 sm:h-8 text-[#525252]" />
                 </div>
               ))}
             </div>
@@ -428,12 +581,20 @@ export const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* 📩 FINAL CTA */}
-      <section className="container mx-auto px-4 py-24 text-center">
-        <motion.div variants={itemVariants} className="max-w-3xl mx-auto space-y-12">
-          <h2 className="text-5xl md:text-7xl font-bold text-[#0a0a0a]">Join the Hue Whimsy Learning World</h2>
-          <NavLink to="/library" className={cn(buttonVariants({ size: 'lg' }), 'rounded-full px-16 py-10 text-2xl bg-gradient-to-r from-[#FF5F6D] to-[#B067FF] text-white font-bold transition-all hover:scale-105 shadow-[0_0_50px_-12px_rgba(176,103,255,0.5)]')}>
-            🚀 Start My Adventure
+      {/* FINAL CTA */}
+      <section className="container-page section-y-lg text-center">
+        <motion.div variants={itemVariants} className="max-w-3xl mx-auto space-y-6 sm:space-y-8">
+          <h2 className="fluid-display font-bold text-[#0a0a0a]">Join the Hue Whimsy world</h2>
+          <p className="fluid-lead text-[#525252] max-w-2xl mx-auto">
+            Books that feel like a hug, free printables that feel like a gift, and a small studio
+            that answers every email.
+          </p>
+          <NavLink
+            to="/library"
+            className="inline-flex items-center justify-center rounded-full px-8 sm:px-12 font-semibold text-base sm:text-lg bg-gradient-to-r from-[#FF5F6D] via-[#FF9A3C] to-[#B067FF] text-white hover:opacity-95 transition-all shadow-[0_16px_40px_-12px_rgba(176,103,255,0.55)]"
+            style={{ height: '3.5rem' }}
+          >
+            Start the Adventure <ArrowRight className="ml-2 w-5 h-5" />
           </NavLink>
         </motion.div>
       </section>

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { SUPPORTED_LOCALES } from '@/i18n';
 
 const SITE_URL = 'https://huewhimsy.com';

@@ -53,32 +53,38 @@ export const FreeActivities: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-20">
+    <div className="container-page section-y">
       <SEO
         title="Free Printable Activities"
         description="Free coloring pages, alphabet flashcards, and drawing prompts for kids aged 3-8. Print at home, anytime."
       />
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
-        <Badge className="bg-[#FFD93D] text-[#0a0a0a] mb-4">100% FREE PRINTABLES</Badge>
-        <h1 className="text-5xl md:text-7xl font-bold text-[#0a0a0a] mb-4">Free Activities</h1>
-        <p className="text-xl text-[#525252] max-w-2xl mx-auto">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center mb-10 sm:mb-14 max-w-3xl mx-auto"
+      >
+        <Badge className="bg-[#FFD93D]/20 text-[#0a0a0a] border border-[#FFD93D]/40 rounded-full px-3 py-1 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest mb-4">
+          100% Free Printables
+        </Badge>
+        <h1 className="fluid-h1 font-bold text-[#0a0a0a] mb-4 sm:mb-5">Free Activities</h1>
+        <p className="fluid-lead text-[#525252]">
           Coloring pages, alphabet flashcards, and drawing prompts your kids will love. Print at home, anytime.
         </p>
       </motion.div>
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-16 sm:mb-20">
           {[0, 1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="h-80 rounded-2xl bg-gray-100 animate-pulse" />
+            <div key={i} className="h-72 rounded-3xl bg-black/[0.04] animate-pulse" />
           ))}
         </div>
       ) : items.length === 0 ? (
-        <div className="text-center py-20 mb-20">
-          <p className="text-2xl text-[#525252] mb-4">🎨 New activities coming soon</p>
-          <p className="text-[#525252]">Subscribe below to get notified when we publish new printables.</p>
+        <div className="text-center py-16 mb-16">
+          <p className="text-xl sm:text-2xl text-[#525252] mb-4">🎨 New activities coming soon</p>
+          <p className="text-sm text-[#525252]">Subscribe below to get notified when we publish new printables.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-16 sm:mb-20">
           {items.map((a, i) => (
             <motion.div
               key={a.id}
@@ -86,48 +92,55 @@ export const FreeActivities: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
             >
-              <Card className="overflow-hidden border-black/10 bg-white shadow-sm hover:shadow-md transition-shadow h-full flex flex-col">
+              <Card className="overflow-hidden border border-black/[0.07] bg-white shadow-sm hover:shadow-lg hover:border-black/[0.15] transition-all h-full flex flex-col rounded-3xl">
                 <CardContent className="p-0 flex-1 flex flex-col">
-                  <div className="aspect-square bg-gradient-to-br from-[#FF5F6D]/10 via-[#FFD93D]/10 to-[#4DA8FF]/10 flex items-center justify-center overflow-hidden">
+                  <div className="aspect-square bg-gradient-to-br from-[#FF5F6D]/8 via-[#FFD93D]/8 to-[#4DA8FF]/8 flex items-center justify-center overflow-hidden">
                     {a.thumbnail ? (
-                      <img src={a.thumbnail} alt={a.title} className="w-full h-full object-cover" loading="lazy" />
+                      <img
+                        src={a.thumbnail}
+                        alt={a.title}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
                     ) : (
-                      <span className="text-6xl">🎨</span>
+                      <span className="text-5xl sm:text-6xl">🎨</span>
                     )}
                   </div>
-                  <div className="p-6 flex-1 flex flex-col">
-                    <div className="flex items-center gap-2 mb-3 flex-wrap">
+                  <div className="p-4 sm:p-5 flex-1 flex flex-col">
+                    <div className="flex items-center gap-1.5 mb-2 sm:mb-3 flex-wrap">
                       {a.category && (
-                        <Badge variant="secondary" className="bg-[#F5F5F5] text-[#525252]">
+                        <Badge variant="secondary" className="bg-black/[0.04] text-[#525252] text-[10px] sm:text-xs">
                           {a.category}
                         </Badge>
                       )}
                       {a.age_range && (
-                        <Badge variant="secondary" className="bg-[#FFD93D]/20 text-[#0a0a0a]">
+                        <Badge variant="secondary" className="bg-[#FFD93D]/15 text-[#0a0a0a] border border-[#FFD93D]/30 text-[10px] sm:text-xs">
                           Age {a.age_range}
                         </Badge>
                       )}
                       {a.requires_subscription && (
-                        <Badge className="bg-[#B067FF]/20 text-[#B067FF]">
+                        <Badge className="bg-[#B067FF]/15 text-[#B067FF] border border-[#B067FF]/30 text-[10px] sm:text-xs">
                           <Lock className="w-3 h-3 mr-1" />
                           Subscribe
                         </Badge>
                       )}
                     </div>
-                    <h2 className="text-xl font-bold text-[#0a0a0a] mb-2">{a.title}</h2>
-                    {a.description && <p className="text-sm text-[#525252] mb-4 flex-1">{a.description}</p>}
-                    {a.pages && <p className="text-xs text-[#525252] mb-4">{a.pages} pages</p>}
+                    <h2 className="text-sm sm:text-base font-bold text-[#0a0a0a] mb-1 sm:mb-2 leading-tight line-clamp-2">{a.title}</h2>
+                    {a.description && (
+                      <p className="text-xs sm:text-sm text-[#525252] mb-3 sm:mb-4 line-clamp-2 sm:line-clamp-3 flex-1">{a.description}</p>
+                    )}
+                    {a.pages && <p className="text-[10px] sm:text-xs text-[#525252] mb-3">{a.pages} pages</p>}
                     <Button
                       onClick={() => handleDownload(a)}
-                      className="w-full rounded-full bg-gradient-to-r from-[#FF5F6D] to-[#B067FF] text-white font-bold hover:opacity-90"
+                      className="w-full rounded-full bg-gradient-to-r from-[#FF5F6D] to-[#B067FF] text-white font-semibold hover:opacity-95 h-10 sm:h-11 text-xs sm:text-sm shadow-[0_4px_16px_-4px_rgba(255,95,109,0.4)]"
                     >
                       {a.requires_subscription && !a.file_url ? (
                         <>
-                          <Lock className="w-4 h-4 mr-2" /> Subscribe to unlock
+                          <Lock className="w-3.5 h-3.5 mr-1.5" /> Subscribe
                         </>
                       ) : (
                         <>
-                          <Download className="w-4 h-4 mr-2" /> Download
+                          <Download className="w-3.5 h-3.5 mr-1.5" /> Download
                         </>
                       )}
                     </Button>
@@ -140,36 +153,36 @@ export const FreeActivities: React.FC = () => {
       )}
 
       {/* Subscribe gate / newsletter CTA */}
-      <Card className="rounded-[3rem] border-black/10 bg-gradient-to-br from-[#FF5F6D]/10 via-[#FFD93D]/10 to-[#4DA8FF]/10 p-12 max-w-4xl mx-auto text-center">
+      <Card className="rounded-[2rem] sm:rounded-[2.5rem] border border-black/[0.07] bg-gradient-to-br from-[#FF5F6D]/8 via-[#FFD93D]/8 to-[#4DA8FF]/8 p-6 sm:p-10 lg:p-14 max-w-4xl mx-auto text-center">
         {subStatus === 'ok' ? (
           <>
-            <CheckCircle2 className="w-16 h-16 mx-auto text-[#5BE37D] mb-4" />
-            <h2 className="text-3xl font-bold text-[#0a0a0a] mb-2">You're in!</h2>
-            <p className="text-[#525252]">Check your inbox — we'll send the welcome pack and new activities as they go live.</p>
+            <CheckCircle2 className="w-14 h-14 sm:w-16 sm:h-16 mx-auto text-[#5BE37D] mb-3 sm:mb-4" />
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#0a0a0a] mb-2">You're in!</h2>
+            <p className="text-sm sm:text-base text-[#525252]">Check your inbox — we'll send the welcome pack and new activities as they go live.</p>
           </>
         ) : (
           <>
-            <h2 className="text-3xl md:text-4xl font-bold text-[#0a0a0a] mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#0a0a0a] mb-3 sm:mb-4">
               Get free activities by email
             </h2>
-            <p className="text-[#525252] mb-8">
+            <p className="text-sm sm:text-base text-[#525252] mb-6 sm:mb-8 max-w-md mx-auto">
               One email a week. Brand new coloring pages, flashcards, and seasonal printables — never spam.
             </p>
-            <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+            <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2 sm:gap-3 max-w-md mx-auto">
               <Input
                 type="email"
                 required
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="bg-white border-gray-300 rounded-full px-6 h-14 focus:ring-2 focus:ring-[#FFD93D]"
+                className="bg-white border-black/10 rounded-full px-5 sm:px-6 h-12 sm:h-13 focus-visible:ring-2 focus-visible:ring-[#FFD93D]/40 focus-visible:border-[#FFD93D]"
               />
               <Button
                 type="submit"
                 disabled={subStatus === 'sending'}
-                className="rounded-full bg-gradient-to-r from-[#FF5F6D] to-[#B067FF] text-white px-8 h-14 font-bold whitespace-nowrap shadow-md"
+                className="rounded-full bg-gradient-to-r from-[#FF5F6D] to-[#B067FF] text-white px-6 sm:px-8 h-12 sm:h-13 font-semibold whitespace-nowrap shadow-[0_8px_24px_-8px_rgba(255,95,109,0.5)]"
               >
-                {subStatus === 'sending' ? 'Joining...' : '🎁 Send My Pack'}
+                {subStatus === 'sending' ? 'Joining…' : '🎁 Send My Pack'}
               </Button>
             </form>
             {subStatus === 'err' && (

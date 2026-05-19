@@ -56,10 +56,10 @@ export const OrderConfirmation: React.FC = () => {
   }, [id]);
 
   return (
-    <div className="container mx-auto px-4 py-20 max-w-2xl text-center">
+    <div className="container-page section-y max-w-2xl text-center">
       <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', duration: 0.8 }}>
-        <div className="w-24 h-24 rounded-full bg-[#5BE37D]/20 flex items-center justify-center mx-auto mb-8">
-          <CheckCircle2 className="w-12 h-12 text-[#5BE37D]" />
+        <div className="w-20 sm:w-24 h-20 sm:h-24 rounded-full bg-[#5BE37D]/20 flex items-center justify-center mx-auto mb-6 sm:mb-8">
+          <CheckCircle2 className="w-10 sm:w-12 h-10 sm:h-12 text-[#5BE37D]" />
         </div>
       </motion.div>
 
@@ -67,7 +67,7 @@ export const OrderConfirmation: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="text-4xl md:text-6xl font-bold text-[#0a0a0a] mb-4"
+        className="fluid-h1 font-bold text-[#0a0a0a] mb-3 sm:mb-4"
       >
         Order received! 🎉
       </motion.h1>
@@ -76,7 +76,7 @@ export const OrderConfirmation: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="text-xl text-[#525252] mb-8"
+        className="fluid-lead text-[#525252] mb-6 sm:mb-8"
       >
         Thanks for your purchase! A confirmation email is on its way.
       </motion.p>
@@ -135,13 +135,13 @@ export const OrderConfirmation: React.FC = () => {
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <NavLink
           to="/account/orders"
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#FF5F6D] to-[#B067FF] text-white px-6 py-3 font-bold hover:opacity-90 shadow-md"
+          className="inline-flex items-center justify-center gap-2 rounded-full bg-[#0a0a0a] text-white px-6 py-3 text-sm font-semibold hover:bg-black"
         >
           <Package className="w-4 h-4" /> View my orders
         </NavLink>
         <NavLink
           to="/shop"
-          className="inline-flex items-center justify-center rounded-full bg-white text-[#0a0a0a] border border-black/10 px-6 py-3 font-bold hover:bg-[#F5F5F5]"
+          className="inline-flex items-center justify-center rounded-full bg-white text-[#0a0a0a] border border-black/15 px-6 py-3 text-sm font-semibold hover:bg-black/[0.04]"
         >
           Keep shopping
         </NavLink>

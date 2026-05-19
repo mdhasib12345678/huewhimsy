@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Product page — visual preview</title>
+  <script src="https://cdn.tailwindcss.com?plugins=line-clamp"></script>
+  <style>
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; background:#fff; color:#0a0a0a; }
+    .container-page { max-width: 1280px; margin: 0 auto; padding-left:1rem; padding-right:1rem; }
+    @media (min-width: 640px) { .container-page { padding-left:1.5rem; padding-right:1.5rem; } }
+    @media (min-width: 1024px) { .container-page { padding-left:2rem; padding-right:2rem; } }
+    .section-y { padding-top: 2rem; padding-bottom: 2rem; }
+    @media (min-width: 640px) { .section-y { padding-top: 3rem; padding-bottom: 3rem; } }
+    @media (min-width: 1024px) { .section-y { padding-top: 4rem; padding-bottom: 4rem; } }
+    .fluid-h1 { font-size: clamp(1.875rem, 1.4rem + 2vw, 3rem); line-height: 1.08; }
+    .scrollbar-hidden::-webkit-scrollbar { display:none }
+    .scrollbar-hidden { scrollbar-width: none }
+    .tab[data-active="true"] { color:#0a0a0a; }
+    .tab[data-active="true"][data-color="yellow"] { border-bottom-color:#FFD93D; }
+    .tab[data-active="true"][data-color="orange"] { border-bottom-color:#FF9A3C; }
+    .tab[data-active="true"][data-color="red"] { border-bottom-color:#FF5F6D; }
+    .tab[data-active="true"][data-color="purple"] { border-bottom-color:#B067FF; }
+    .panel { display:none }
+    .panel[data-active="true"] { display:block }
+  </style>
+</head>
+<body>
+  <!-- Mock header for context -->
+  <header class="border-b border-black/[0.06] sticky top-0 bg-white/95 backdrop-blur z-50">
+    <div class="container-page flex items-center justify-between h-16">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-full" style="background:linear-gradient(135deg,#FF9A3C,#FF5F6D);"></div>
+        <span class="font-bold">Hue·Whimsy</span>
+      </div>
+      <nav class="hidden md:flex items-center gap-6 text-sm">
+        <span class="text-[#525252]">Home</span>
+        <span class="font-semibold">Library</span>
+        <span class="text-[#525252]">Shop</span>
+        <span class="text-[#525252]">Free Activities</span>
+        <span class="text-[#525252]">Blog</span>
+        <span class="text-[#525252]">About</span>
+        <span class="text-[#525252]">Services</span>
+        <span class="text-[#525252]">Contact</span>
+      </nav>
+      <button class="rounded-full text-white font-semibold text-xs px-4 h-9" style="background:linear-gradient(135deg,#FF9A3C,#FF5F6D);">✨ Free Pack</button>
+    </div>
+  </header>
+
+  <main class="container-page section-y">
+    <!-- Back + breadcrumb -->
+    <div class="flex items-center justify-between gap-4 mb-6 sm:mb-8">
+      <button class="-ml-2 inline-flex items-center gap-2 text-[#404040] hover:text-black rounded-full px-3 h-10 text-sm font-medium">
+        ← Back
+      </button>
+      <nav class="hidden md:flex items-center gap-1.5 text-xs text-[#525252]">
+        <span class="hover:text-[#0a0a0a]">Shop</span>
+        <span>/</span>
+        <span class="text-[#0a0a0a] font-medium truncate max-w-[40ch]">Rainbow Watercolor Magic Set</span>
+      </nav>
+    </div>
+
+    <!-- Main grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16">
+      <!-- Gallery -->
+      <div class="lg:col-span-7">
+        <div class="lg:sticky lg:top-24 space-y-4">
+          <div class="aspect-square rounded-2xl sm:rounded-3xl bg-[#fafafa] border border-black/[0.06] overflow-hidden relative shadow-[0_20px_60px_-30px_rgba(10,10,10,0.15)]">
+            <img src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?auto=format&fit=crop&w=900&q=80" alt="Rainbow Watercolor Magic Set" class="absolute inset-0 w-full h-full object-cover" />
+            <span class="absolute top-4 left-4 sm:top-5 sm:left-5 bg-white/95 backdrop-blur-sm text-[#0a0a0a] border border-black/[0.06] px-3 py-1 text-xs rounded-full font-semibold tracking-wide shadow-sm">New</span>
+          </div>
+          <div class="grid grid-cols-4 gap-2 sm:gap-3">
+            <button class="aspect-square rounded-xl sm:rounded-2xl bg-[#fafafa] border border-[#0a0a0a] ring-2 ring-[#0a0a0a]/10 shadow-sm overflow-hidden relative">
+              <img src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?auto=format&fit=crop&w=200&q=80" class="absolute inset-0 w-full h-full object-cover" alt="" />
+            </button>
+            <button class="aspect-square rounded-xl sm:rounded-2xl bg-[#fafafa] border border-black/[0.06] hover:border-black/15 overflow-hidden relative">
+              <img src="https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=200&q=80" class="absolute inset-0 w-full h-full object-cover" alt="" />
+            </button>
+            <button class="aspect-square rounded-xl sm:rounded-2xl bg-[#fafafa] border border-black/[0.06] opacity-40 cursor-not-allowed">
+              <span class="absolute inset-0 flex items-center justify-center text-[10px] text-[#0a0a0a]/20 font-bold">3</span>
+            </button>
+            <button class="aspect-square rounded-xl sm:rounded-2xl bg-[#fafafa] border border-black/[0.06] opacity-40 cursor-not-allowed">
+              <span class="absolute inset-0 flex items-center justify-center text-[10px] text-[#0a0a0a]/20 font-bold">4</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div class="lg:col-span-5 flex flex-col">
+        <div class="flex items-center gap-3 flex-wrap mb-3 sm:mb-4">
+          <span class="text-[10px] sm:text-[11px] font-semibold text-[#525252] uppercase tracking-[0.2em]">Art Supplies</span>
+          <span class="text-[#0a0a0a]/15">·</span>
+          <div class="flex items-center gap-1.5">
+            <div class="flex">
+              <span class="text-[#FFD93D]">★</span><span class="text-[#FFD93D]">★</span><span class="text-[#FFD93D]">★</span><span class="text-[#FFD93D]">★</span><span class="text-[#FFD93D]">★</span>
+            </div>
+            <span class="text-[11px] sm:text-xs text-[#525252]">4.8 (24)</span>
+          </div>
+        </div>
+
+        <h1 class="fluid-h1 font-bold tracking-tight mb-4 sm:mb-5">Rainbow Watercolor Magic Set</h1>
+
+        <div class="flex flex-wrap items-baseline gap-3 sm:gap-4 mb-5 sm:mb-6">
+          <span class="text-[1.875rem] sm:text-[2.5rem] font-bold tracking-tight leading-none">$29.99</span>
+          <span class="inline-flex items-center gap-1.5 text-xs sm:text-sm text-[#0a8a3f] font-semibold bg-[#5BE37D]/12 px-2.5 py-1 rounded-full">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#5BE37D]"></span> In Stock
+          </span>
+        </div>
+
+        <p class="text-base sm:text-[1.0625rem] text-[#525252] leading-relaxed mb-6 sm:mb-8 max-w-prose">
+          A premium set of 24 non-toxic, child-safe watercolors paired with two soft brushes and a thick pad — lovingly designed for tiny hands and big imaginations.
+        </p>
+
+        <div class="space-y-4 sm:space-y-5 pt-6 sm:pt-7 border-t border-black/[0.08]">
+          <div class="flex items-center gap-2 sm:gap-3">
+            <div class="flex items-center bg-black/[0.04] rounded-full h-12 px-1 border border-black/[0.07] shrink-0">
+              <button class="rounded-full hover:bg-white w-10 h-10 text-lg">−</button>
+              <span class="w-10 text-center font-semibold tabular-nums">1</span>
+              <button class="rounded-full hover:bg-white w-10 h-10 text-lg">+</button>
+            </div>
+            <div class="flex-1 hidden sm:block"></div>
+            <button class="h-12 w-12 rounded-full border border-black/[0.07] hover:bg-black/[0.04] flex items-center justify-center">
+              <span>♡</span>
+            </button>
+            <button class="h-12 w-12 rounded-full border border-black/[0.07] hover:bg-black/[0.04] flex items-center justify-center">
+              <span>↗</span>
+            </button>
+          </div>
+
+          <button class="w-full rounded-full bg-[#0a0a0a] text-white font-semibold text-base sm:text-lg shadow-[0_10px_30px_-10px_rgba(10,10,10,0.4)] h-13 flex items-center justify-center gap-2.5" style="height:3.25rem">
+            🛒 Add to Cart · $29.99
+          </button>
+
+          <p class="text-[11px] sm:text-xs text-center text-[#525252] leading-relaxed">
+            <span class="text-[#0a0a0a] font-semibold">Free shipping</span> over $50 · 30-day returns · Secure Stripe checkout
+          </p>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 sm:gap-3 mt-6 sm:mt-8">
+          <div class="flex flex-col items-center gap-1.5 sm:gap-2 px-2 py-3 sm:p-4 rounded-2xl bg-white border border-black/[0.06] text-center">
+            <span class="text-[#4DA8FF]">🚚</span>
+            <div class="text-[10px] sm:text-[11px] font-semibold leading-tight">Free shipping</div>
+          </div>
+          <div class="flex flex-col items-center gap-1.5 sm:gap-2 px-2 py-3 sm:p-4 rounded-2xl bg-white border border-black/[0.06] text-center">
+            <span class="text-[#5BE37D]">🛡️</span>
+            <div class="text-[10px] sm:text-[11px] font-semibold leading-tight">Secure pay</div>
+          </div>
+          <div class="flex flex-col items-center gap-1.5 sm:gap-2 px-2 py-3 sm:p-4 rounded-2xl bg-white border border-black/[0.06] text-center">
+            <span class="text-[#B067FF]">↻</span>
+            <div class="text-[10px] sm:text-[11px] font-semibold leading-tight">30-day return</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mt-16 sm:mt-24">
+      <div class="border-b border-black/[0.07] overflow-x-auto scrollbar-hidden -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div class="flex w-full justify-start gap-6 sm:gap-10">
+          <button class="tab relative border-b-2 border-transparent text-sm sm:text-base font-semibold pb-3 sm:pb-4 transition-all whitespace-nowrap text-[#525252]" data-color="yellow" data-active="true" onclick="setTab('features')">Features</button>
+          <button class="tab relative border-b-2 border-transparent text-sm sm:text-base font-semibold pb-3 sm:pb-4 transition-all whitespace-nowrap text-[#525252]" data-color="orange" onclick="setTab('specs')">Specifications</button>
+          <button class="tab relative border-b-2 border-transparent text-sm sm:text-base font-semibold pb-3 sm:pb-4 transition-all whitespace-nowrap text-[#525252]" data-color="red" onclick="setTab('reviews')">Reviews · 24</button>
+          <button class="tab relative border-b-2 border-transparent text-sm sm:text-base font-semibold pb-3 sm:pb-4 transition-all whitespace-nowrap text-[#525252]" data-color="purple" onclick="setTab('shipping')">Shipping &amp; Returns</button>
+        </div>
+      </div>
+
+      <div data-panel="features" data-active="true" class="panel mt-8 sm:mt-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 lg:gap-14">
+          <div class="space-y-4 sm:space-y-5">
+            <h3 class="text-xl sm:text-2xl font-bold">Why kids love it</h3>
+            <p class="text-[#525252] leading-relaxed">
+              Designed to inspire. Vibrant pigments flow smoothly and blend like magic — just like the rainbow background of our world.
+            </p>
+            <ul class="space-y-2.5">
+              <li class="flex items-start gap-2.5 text-sm sm:text-base"><span class="text-[#5BE37D] mt-0.5">✓</span><span>Non-toxic &amp; child-safe materials</span></li>
+              <li class="flex items-start gap-2.5 text-sm sm:text-base"><span class="text-[#5BE37D] mt-0.5">✓</span><span>Vibrant pigments for joyful art</span></li>
+              <li class="flex items-start gap-2.5 text-sm sm:text-base"><span class="text-[#5BE37D] mt-0.5">✓</span><span>Ergonomic design for small hands</span></li>
+              <li class="flex items-start gap-2.5 text-sm sm:text-base"><span class="text-[#5BE37D] mt-0.5">✓</span><span>Eco-friendly recyclable packaging</span></li>
+            </ul>
+          </div>
+          <div class="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-black/[0.03] to-black/[0.07] border border-black/[0.08]">
+            <h3 class="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Educational Value</h3>
+            <p class="text-sm sm:text-base text-[#525252] leading-relaxed">
+              Crafted with educators to promote fine motor skills and color recognition for ages 3–8.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div data-panel="specs" class="panel mt-8 sm:mt-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-3 max-w-3xl">
+          <div class="flex justify-between gap-4 border-b border-black/[0.08] py-3"><span class="text-[#525252] text-sm sm:text-base">SKU</span><span class="font-mono text-xs sm:text-sm">prod_01H8ZQ…</span></div>
+          <div class="flex justify-between gap-4 border-b border-black/[0.08] py-3"><span class="text-[#525252] text-sm sm:text-base">Category</span><span class="text-sm sm:text-base">Art Supplies</span></div>
+          <div class="flex justify-between gap-4 border-b border-black/[0.08] py-3"><span class="text-[#525252] text-sm sm:text-base">Handle</span><span class="font-mono text-xs sm:text-sm">rainbow-watercolor</span></div>
+          <div class="flex justify-between gap-4 border-b border-black/[0.08] py-3"><span class="text-[#525252] text-sm sm:text-base">Status</span><span class="text-sm sm:text-base">New</span></div>
+        </div>
+      </div>
+
+      <div data-panel="reviews" class="panel mt-8 sm:mt-10">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 bg-[#F9FAFB] rounded-2xl border border-black/10">
+          <div class="md:col-span-1 text-center md:border-r md:border-black/10 md:pr-6">
+            <div class="text-5xl font-bold mb-2">4.8</div>
+            <div class="flex justify-center gap-1 mb-1 text-[#FFD93D]">★★★★★</div>
+            <p class="text-sm text-[#525252]">24 reviews</p>
+          </div>
+          <div class="md:col-span-2 space-y-2">
+            <div class="flex items-center gap-3 text-sm"><span class="w-12 text-[#525252]">5 star</span><div class="flex-1 h-2 bg-white rounded-full overflow-hidden border border-black/5"><div class="h-full bg-[#FFD93D]" style="width:78%"></div></div><span class="w-8 text-right text-[#525252]">19</span></div>
+            <div class="flex items-center gap-3 text-sm"><span class="w-12 text-[#525252]">4 star</span><div class="flex-1 h-2 bg-white rounded-full overflow-hidden border border-black/5"><div class="h-full bg-[#FFD93D]" style="width:16%"></div></div><span class="w-8 text-right text-[#525252]">4</span></div>
+            <div class="flex items-center gap-3 text-sm"><span class="w-12 text-[#525252]">3 star</span><div class="flex-1 h-2 bg-white rounded-full overflow-hidden border border-black/5"><div class="h-full bg-[#FFD93D]" style="width:4%"></div></div><span class="w-8 text-right text-[#525252]">1</span></div>
+            <div class="flex items-center gap-3 text-sm"><span class="w-12 text-[#525252]">2 star</span><div class="flex-1 h-2 bg-white rounded-full overflow-hidden border border-black/5"><div class="h-full bg-[#FFD93D]" style="width:0%"></div></div><span class="w-8 text-right text-[#525252]">0</span></div>
+            <div class="flex items-center gap-3 text-sm"><span class="w-12 text-[#525252]">1 star</span><div class="flex-1 h-2 bg-white rounded-full overflow-hidden border border-black/5"><div class="h-full bg-[#FFD93D]" style="width:0%"></div></div><span class="w-8 text-right text-[#525252]">0</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div data-panel="shipping" class="panel mt-8 sm:mt-10">
+        <div class="max-w-3xl space-y-4 text-sm sm:text-base text-[#525252] leading-relaxed">
+          <p>Free standard shipping on orders over $50. Most orders ship within 1–2 business days.</p>
+          <p>Returns accepted within 30 days of delivery in original condition.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function setTab(name) {
+      document.querySelectorAll('.tab').forEach(el => {
+        el.dataset.active = (el.textContent.trim().toLowerCase().startsWith(name) || (name==='specs'&&el.textContent.startsWith('Specifications')) || (name==='shipping'&&el.textContent.startsWith('Shipping'))) ? 'true' : 'false';
+      });
+      document.querySelectorAll('.panel').forEach(el => {
+        el.dataset.active = el.dataset.panel === name ? 'true' : 'false';
+      });
+    }
+  </script>
+</body>
+</html>

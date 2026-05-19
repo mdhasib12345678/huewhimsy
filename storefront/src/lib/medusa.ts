@@ -39,6 +39,12 @@ export interface MedusaImage {
   url: string;
 }
 
+export interface MedusaProductCategory {
+  id: string;
+  name: string;
+  handle: string;
+}
+
 export interface MedusaProduct {
   id: string;
   title: string;
@@ -51,6 +57,8 @@ export interface MedusaProduct {
   collection?: { id: string; title: string; handle: string } | null;
   type?: { id: string; value: string } | null;
   tags?: { id: string; value: string }[];
+  categories?: MedusaProductCategory[];
+  metadata?: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
 }
@@ -83,7 +91,10 @@ export async function listProducts(params: {
   region_id?: string;
 } = {}): Promise<{ products: MedusaProduct[]; count: number; offset: number; limit: number }> {
   const qs = new URLSearchParams();
-  qs.set('fields', '*variants.calculated_price,*variants.prices,+images,*type,*collection,*tags');
+  qs.set(
+    'fields',
+    '*variants.calculated_price,*variants.prices,+images,*type,*collection,*tags,*categories,+metadata',
+  );
   qs.set('limit', String(params.limit ?? 50));
   if (params.offset) qs.set('offset', String(params.offset));
   if (params.q) qs.set('q', params.q);
@@ -454,6 +465,138 @@ export async function listCustomerOrders(limit = 20): Promise<MedusaOrder[]> {
     console.warn('listCustomerOrders failed:', e);
     return [];
   }
+}
+
+// ---- Checkout: shipping + payment + complete-cart ----
+
+export interface ShippingOption {
+  id: string;
+  name: string;
+  amount: number;
+  price_type?: string;
+  service_zone_id?: string;
+  shipping_profile_id?: string;
+  provider_id?: string;
+  data?: Record<string, unknown>;
+}
+
+export async function listCartShippingOptions(cartId: string): Promise<ShippingOption[]> {
+  try {
+    const res = await storeFetch<{ shipping_options: ShippingOption[] }>(
+      `/store/shipping-options?cart_id=${encodeURIComponent(cartId)}`,
+    );
+    return res.shipping_options ?? [];
+  } catch (e) {
+    console.warn('listCartShippingOptions failed:', e);
+    return [];
+  }
+}
+
+export async function addShippingMethodToCart(
+  cartId: string,
+  optionId: string,
+  data?: Record<string, unknown>,
+): Promise<MedusaCart> {
+  const res = await storeFetch<{ cart: MedusaCart }>(
+    `/store/carts/${cartId}/shipping-methods?fields=${encodeURIComponent(CART_FIELDS)}`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ option_id: optionId, ...(data ? { data } : {}) }),
+    },
+  );
+  return res.cart;
+}
+
+export interface PaymentProviderInfo {
+  id: string;
+  is_enabled: boolean;
+}
+
+export async function listPaymentProviders(regionId?: string): Promise<PaymentProviderInfo[]> {
+  try {
+    const qs = regionId ? `?region_id=${encodeURIComponent(regionId)}` : '';
+    const res = await storeFetch<{ payment_providers: PaymentProviderInfo[] }>(
+      `/store/payment-providers${qs}`,
+    );
+    return res.payment_providers ?? [];
+  } catch (e) {
+    console.warn('listPaymentProviders failed:', e);
+    return [];
+  }
+}
+
+export interface PaymentCollection {
+  id: string;
+  amount: number;
+  currency_code: string;
+  status: string;
+  payment_sessions?: { id: string; provider_id: string; status: string; data?: Record<string, unknown> }[];
+}
+
+export async function createPaymentCollection(cartId: string): Promise<PaymentCollection | null> {
+  try {
+    const res = await storeFetch<{ payment_collection: PaymentCollection }>(
+      `/store/payment-collections`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ cart_id: cartId }),
+      },
+    );
+    return res.payment_collection;
+  } catch (e) {
+    // If a payment collection already exists for the cart, Medusa returns 4xx.
+    // The caller falls back to reading it off the cart object.
+    console.warn('createPaymentCollection failed (may already exist):', e);
+    return null;
+  }
+}
+
+export async function initPaymentSession(
+  collectionId: string,
+  providerId: string,
+  data?: Record<string, unknown>,
+): Promise<PaymentCollection> {
+  const res = await storeFetch<{ payment_collection: PaymentCollection }>(
+    `/store/payment-collections/${collectionId}/payment-sessions`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ provider_id: providerId, ...(data ? { data } : {}) }),
+    },
+  );
+  return res.payment_collection;
+}
+
+export interface CompletedOrder extends MedusaOrder {
+  email?: string;
+}
+
+export async function completeCart(cartId: string): Promise<
+  | { type: 'order'; order: CompletedOrder }
+  | { type: 'cart'; cart: MedusaCart; error?: string }
+> {
+  const url = `${BASE_URL.replace(/\/$/, '')}/store/carts/${cartId}/complete`;
+  const token = getAuthToken();
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-publishable-api-key': PUBLISHABLE_KEY,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    credentials: 'include',
+  });
+  const text = await res.text();
+  let json: any = {};
+  try { json = text ? JSON.parse(text) : {}; } catch { /* keep empty */ }
+  if (!res.ok) {
+    throw new Error(json?.message || `Complete cart failed (${res.status})`);
+  }
+  if (json.type === 'order' && json.order) return { type: 'order', order: json.order };
+  if (json.type === 'cart' && json.cart) return { type: 'cart', cart: json.cart, error: json.error };
+  // Some versions return { order } directly on success.
+  if (json.order) return { type: 'order', order: json.order };
+  if (json.cart) return { type: 'cart', cart: json.cart };
+  throw new Error('Unexpected complete-cart response');
 }
 
 // =============================================================================

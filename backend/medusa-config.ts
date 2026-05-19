@@ -20,6 +20,10 @@ const r2Enabled =
   !!process.env.S3_BUCKET &&
   !process.env.S3_ACCESS_KEY_ID.includes('CHANGE_ME')
 
+// The payment module auto-registers a built-in `pp_system_default` provider
+// (offline / manual payments), so checkout never breaks when Stripe is absent.
+// We only have to push real gateway providers (e.g. Stripe) into the list when
+// they're configured.
 const paymentProviders: any[] = []
 if (stripeEnabled) {
   paymentProviders.push({
@@ -85,12 +89,11 @@ const baseModules: any[] = [
   },
 ]
 
-if (paymentProviders.length) {
-  baseModules.push({
-    resolve: '@medusajs/medusa/payment',
-    options: { providers: paymentProviders },
-  })
-}
+// Payment module is always loaded (manual fallback ensures checkout works).
+baseModules.push({
+  resolve: '@medusajs/medusa/payment',
+  options: { providers: paymentProviders },
+})
 
 if (fileProviders.length) {
   baseModules.push({

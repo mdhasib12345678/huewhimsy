@@ -24,10 +24,31 @@ import {
   listReviews,
   submitReview,
   markReviewHelpful,
+  medusaConfig,
   type MedusaProduct,
   type ProductReview,
   type ReviewSummary,
 } from '@/lib/medusa';
+
+// Lightweight summary fetch used by the product header so the rating reflects
+// real moderation-approved reviews without pulling the full review list.
+async function fetchSummary(productId: string): Promise<ReviewSummary | null> {
+  try {
+    const res = await fetch(
+      `${(medusaConfig.baseUrl ?? '').replace(/\/$/, '')}/store/reviews?product_id=${encodeURIComponent(productId)}&limit=1`,
+      {
+        headers: {
+          'x-publishable-api-key': medusaConfig.publishableKey,
+        },
+      },
+    );
+    if (!res.ok) return null;
+    const json = (await res.json()) as { summary: ReviewSummary };
+    return json.summary ?? null;
+  } catch {
+    return null;
+  }
+}
 
 const PALETTE = ['#FF5F6D', '#4DA8FF', '#FFD93D', '#5BE37D', '#FF9A3C', '#B067FF'];
 
@@ -62,12 +83,14 @@ function mapProduct(p: MedusaProduct): UiProduct {
     title: p.title,
     price: productPrice(p),
     category:
-      (p.type?.value as string | undefined) ??
-      (p.collection?.title as string | undefined) ??
-      (p.tags?.[0]?.value as string | undefined) ??
+      p.categories?.[0]?.name ??
+      (p.metadata?.category_name as string | undefined) ??
+      p.type?.value ??
+      p.collection?.title ??
+      p.tags?.[0]?.value ??
       'Featured',
-    rating: 5,
-    reviews: 24,
+    rating: 0,
+    reviews: 0,
     status: 'New',
     color: colorFromHandle(p.handle),
     desc: p.description ?? '',
@@ -107,13 +130,19 @@ export const ProductDetails: React.FC = () => {
     setActiveImage(0);
     setProduct(null);
     getProduct(handle)
-      .then((p) => {
+      .then(async (p) => {
         if (cancelled) return;
         if (!p) {
           setError('Product not found');
           return;
         }
-        setProduct(mapProduct(p));
+        const ui = mapProduct(p);
+        setProduct(ui);
+        // Update rating once the live reviews summary lands.
+        const summary = await fetchSummary(p.id);
+        if (!cancelled && summary && summary.count > 0) {
+          setProduct((prev) => prev ? { ...prev, rating: Math.round(summary.average), reviews: summary.count } : prev);
+        }
       })
       .catch((e: unknown) => {
         if (cancelled) return;
@@ -136,14 +165,14 @@ export const ProductDetails: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-12 md:py-20">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
-          <div className="aspect-square rounded-[3rem] bg-black/5 border border-black/10 animate-pulse" />
+      <div className="container-page section-y">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
+          <div className="aspect-square rounded-3xl bg-black/[0.04] animate-pulse" />
           <div className="space-y-6">
-            <div className="h-8 w-2/3 bg-black/5 rounded animate-pulse" />
-            <div className="h-12 w-full bg-black/5 rounded animate-pulse" />
-            <div className="h-32 w-full bg-black/5 rounded animate-pulse" />
-            <div className="h-14 w-full bg-black/5 rounded animate-pulse" />
+            <div className="h-6 w-2/3 bg-black/[0.04] rounded animate-pulse" />
+            <div className="h-10 w-full bg-black/[0.04] rounded animate-pulse" />
+            <div className="h-24 w-full bg-black/[0.04] rounded animate-pulse" />
+            <div className="h-12 w-full bg-black/[0.04] rounded animate-pulse" />
           </div>
         </div>
       </div>
@@ -152,13 +181,13 @@ export const ProductDetails: React.FC = () => {
 
   if (error || !product) {
     return (
-      <div className="container mx-auto px-4 py-32 text-center">
+      <div className="container-page section-y-lg text-center">
         <h1 className="text-3xl font-bold text-[#0a0a0a] mb-4">Product not found</h1>
         <p className="text-[#525252] mb-8">
           {error ? `Reason: ${error}` : "We couldn't find that product."}
         </p>
         <NavLink to="/shop">
-          <Button className="rounded-full bg-white text-black hover:bg-[#F5F5F5] font-bold">
+          <Button className="rounded-full bg-[#0a0a0a] text-white hover:bg-black font-semibold h-12 px-7">
             <ArrowLeft className="w-4 h-4 mr-2" /> Back to Shop
           </Button>
         </NavLink>
@@ -172,231 +201,327 @@ export const ProductDetails: React.FC = () => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="container mx-auto px-4 py-12 md:py-20"
+      className="container-page section-y"
     >
-      <Button
-        variant="ghost"
-        onClick={() => navigate(-1)}
-        className="mb-8 text-[#404040] hover:text-black group"
-      >
-        <ArrowLeft className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1" /> Back to Shop
-      </Button>
+      {/* Back + breadcrumb row */}
+      <div className="flex items-center justify-between gap-4 mb-6 sm:mb-8">
+        <Button
+          variant="ghost"
+          onClick={() => navigate(-1)}
+          className="-ml-2 text-[#404040] hover:text-black hover:bg-black/[0.04] group rounded-full px-3 h-10"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1" /> Back
+        </Button>
+        <nav aria-label="Breadcrumb" className="hidden md:flex items-center gap-1.5 text-xs text-[#525252] min-w-0">
+          <NavLink to="/shop" className="hover:text-[#0a0a0a]">Shop</NavLink>
+          <span aria-hidden>/</span>
+          <span className="text-[#0a0a0a] font-medium truncate max-w-[40ch]">{product.title}</span>
+        </nav>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
-        {/* Gallery */}
-        <div className="space-y-6">
-          <motion.div
-            className="aspect-square rounded-[3rem] bg-black/5 border border-black/10 overflow-hidden relative flex items-center justify-center group"
-            whileHover={{ scale: 1.02 }}
-          >
-            <div className="absolute inset-0 opacity-10" style={{ backgroundColor: product.color }} />
-            {currentImage ? (
-              <img
-                src={currentImage}
-                alt={product.title}
-                loading="eager"
-                fetchPriority="high"
-                className="relative z-10 w-full h-full object-cover"
-              />
-            ) : (
-              <div className="relative z-10 w-48 h-48 rounded-[2.5rem] bg-black/5 border border-black/10 flex items-center justify-center">
-                <span className="text-[#0a0a0a]/20 font-bold text-5xl">Image {activeImage + 1}</span>
-              </div>
-            )}
-
-            <Badge className="absolute top-8 left-8 bg-black/5 backdrop-blur-md text-[#0a0a0a] border-black/20 px-4 py-1">
-              {product.status}
-            </Badge>
-          </motion.div>
-
-          <div className="grid grid-cols-4 gap-4">
-            {gallery.map((imgUrl, idx) => (
-              <button
-                key={idx}
-                onClick={() => setActiveImage(idx)}
-                className={cn(
-                  'aspect-square rounded-2xl bg-black/5 border transition-all overflow-hidden relative flex items-center justify-center group',
-                  activeImage === idx
-                    ? 'border-[#FFD93D] ring-2 ring-[#FFD93D]/20'
-                    : 'border-black/10 hover:border-black/30',
-                )}
-              >
-                <div className="absolute inset-0 opacity-10" style={{ backgroundColor: product.color }} />
-                {imgUrl ? (
-                  <img
-                    src={imgUrl}
-                    alt={`${product.title} thumbnail ${idx + 1}`}
-                    className="relative z-10 w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="relative z-10 text-[10px] text-[#0a0a0a]/20 font-bold uppercase">
-                    View {idx + 1}
+      {/* Main grid: gallery on the left (sticky on lg+), info on the right */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16">
+        {/* Gallery — sticky on desktop so the image follows you while you read */}
+        <div className="lg:col-span-7 xl:col-span-7">
+          <div className="lg:sticky lg:top-24 space-y-4">
+            <div className="aspect-square rounded-2xl sm:rounded-3xl bg-[#fafafa] border border-black/[0.06] overflow-hidden relative shadow-[0_20px_60px_-30px_rgba(10,10,10,0.15)]">
+              {currentImage ? (
+                <img
+                  src={currentImage}
+                  alt={product.title}
+                  loading="eager"
+                  fetchPriority="high"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-[#0a0a0a]/15 font-display font-bold text-6xl sm:text-8xl">
+                    {product.title.charAt(0)}
                   </span>
-                )}
-              </button>
-            ))}
+                </div>
+              )}
+
+              {product.status && (
+                <Badge className="absolute top-4 left-4 sm:top-5 sm:left-5 bg-white/95 backdrop-blur-sm text-[#0a0a0a] border border-black/[0.06] px-3 py-1 text-[10px] sm:text-xs rounded-full font-semibold tracking-wide shadow-sm">
+                  {product.status}
+                </Badge>
+              )}
+            </div>
+
+            {/* Thumbnails — only show ones that have a real image */}
+            <div className="grid grid-cols-4 gap-2 sm:gap-3">
+              {gallery.map((imgUrl, idx) => {
+                const empty = !imgUrl;
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => !empty && setActiveImage(idx)}
+                    disabled={empty}
+                    aria-label={`View image ${idx + 1}`}
+                    aria-current={activeImage === idx ? 'true' : undefined}
+                    className={cn(
+                      'aspect-square rounded-xl sm:rounded-2xl bg-[#fafafa] border transition-all overflow-hidden relative',
+                      activeImage === idx && !empty
+                        ? 'border-[#0a0a0a] ring-2 ring-[#0a0a0a]/10 shadow-sm'
+                        : 'border-black/[0.06] hover:border-black/15',
+                      empty && 'opacity-40 cursor-not-allowed',
+                    )}
+                  >
+                    {imgUrl ? (
+                      <img
+                        src={imgUrl}
+                        alt={`${product.title} thumbnail ${idx + 1}`}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <span className="absolute inset-0 flex items-center justify-center text-[9px] sm:text-[10px] text-[#0a0a0a]/20 font-bold uppercase">
+                        {idx + 1}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
-        {/* Info */}
-        <div className="flex flex-col">
-          <div className="space-y-4 mb-8">
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-[#FFD93D] border-[#FFD93D]/30">{product.category}</Badge>
-              <div className="flex items-center gap-1 ml-auto">
-                <div className="flex">
-                  {[1, 2, 3, 4, 5].map((s) => (
-                    <Star key={s} className={cn('w-4 h-4', s <= product.rating ? 'fill-[#FFD93D] text-[#FFD93D]' : 'text-[#0a0a0a]/10')} />
-                  ))}
+        {/* Info column */}
+        <div className="lg:col-span-5 xl:col-span-5 flex flex-col">
+          {/* Category + rating row */}
+          <div className="flex items-center gap-3 flex-wrap mb-3 sm:mb-4">
+            <span className="text-[10px] sm:text-[11px] font-semibold text-[#525252] uppercase tracking-[0.2em]">
+              {product.category}
+            </span>
+            {product.reviews > 0 && (
+              <>
+                <span aria-hidden className="text-[#0a0a0a]/15">·</span>
+                <div className="flex items-center gap-1.5">
+                  <div className="flex" aria-label={`Rated ${product.rating} out of 5`}>
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star
+                        key={s}
+                        className={cn(
+                          'w-3.5 h-3.5',
+                          s <= product.rating ? 'fill-[#FFD93D] text-[#FFD93D]' : 'text-[#0a0a0a]/15',
+                        )}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-[11px] sm:text-xs text-[#525252]">
+                    {product.rating.toFixed(1)} ({product.reviews})
+                  </span>
                 </div>
-                <span className="text-sm text-[#525252] ml-1">({product.reviews} reviews)</span>
-              </div>
-            </div>
-
-            <h1 className="text-4xl md:text-5xl font-bold text-[#0a0a0a] tracking-tight leading-tight">
-              {product.title}
-            </h1>
-
-            <div className="flex items-baseline gap-4">
-              <span className="text-4xl font-bold text-[#0a0a0a]">{formatPrice(product.price)}</span>
-              <span className="text-sm text-green-400 font-medium bg-green-400/10 px-2 py-0.5 rounded-full">In Stock</span>
-            </div>
-
-            <p className="text-lg text-[#525252] leading-relaxed">
-              {product.desc || 'Lovingly designed for tiny hands and big imaginations.'}
-            </p>
+              </>
+            )}
           </div>
 
-          <div className="space-y-6 pt-6 border-t border-black/10">
-            <div className="space-y-4">
-              <Button
-                onClick={() => addToCart({ ...product, quantity, type: 'product' } as any)}
-                className="w-full rounded-full h-16 bg-white text-black hover:bg-[#F5F5F5] font-bold text-xl shadow-xl hover:shadow-white/5 transition-all"
-              >
-                <ShoppingCart className="w-6 h-6 mr-3" /> Add to Cart
-              </Button>
+          {/* Title */}
+          <h1 className="fluid-h1 font-bold text-[#0a0a0a] tracking-tight leading-[1.08] mb-4 sm:mb-5">
+            {product.title}
+          </h1>
 
-              <div className="flex gap-4">
-                <Button variant="outline" className="flex-1 rounded-full h-14 border-black/10 text-[#0a0a0a] hover:bg-black/5 transition-all">
-                  <ExternalLink className="w-4 h-4 mr-2" /> Buy on Amazon
-                </Button>
-                <Button variant="outline" className="flex-1 rounded-full h-14 border-black/10 text-[#0a0a0a] hover:bg-black/5 transition-all">
-                  <ExternalLink className="w-4 h-4 mr-2" /> Buy on Walmart
-                </Button>
-              </div>
-            </div>
+          {/* Price + stock pill */}
+          <div className="flex flex-wrap items-baseline gap-3 sm:gap-4 mb-5 sm:mb-6">
+            <span className="text-[1.875rem] sm:text-[2.5rem] font-bold text-[#0a0a0a] tracking-tight leading-none">
+              {formatPrice(product.price)}
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-[#0a8a3f] font-semibold bg-[#5BE37D]/12 px-2.5 py-1 rounded-full">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#5BE37D]" /> In Stock
+            </span>
+          </div>
 
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center bg-black/5 rounded-full h-14 px-2 border border-black/10">
+          {/* Description */}
+          <p className="text-base sm:text-[1.0625rem] text-[#525252] leading-relaxed mb-6 sm:mb-8 max-w-prose">
+            {product.desc || 'Lovingly designed for tiny hands and big imaginations.'}
+          </p>
+
+          {/* Buy-box: quantity + wishlist + share + CTA */}
+          <div className="space-y-4 sm:space-y-5 pt-6 sm:pt-7 border-t border-black/[0.08]">
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Quantity stepper */}
+              <div className="flex items-center bg-black/[0.04] rounded-full h-12 px-1 border border-black/[0.07] shrink-0">
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="rounded-full text-[#0a0a0a] hover:bg-black/5"
+                  className="rounded-full text-[#0a0a0a] hover:bg-white w-10 h-10 text-lg"
+                  aria-label="Decrease quantity"
                 >
-                  -
+                  −
                 </Button>
-                <span className="w-12 text-center text-[#0a0a0a] font-bold">{quantity}</span>
+                <span className="w-10 text-center text-[#0a0a0a] font-semibold tabular-nums">{quantity}</span>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setQuantity((q) => q + 1)}
-                  className="rounded-full text-[#0a0a0a] hover:bg-black/5"
+                  className="rounded-full text-[#0a0a0a] hover:bg-white w-10 h-10 text-lg"
+                  aria-label="Increase quantity"
                 >
                   +
                 </Button>
               </div>
 
+              {/* Spacer that pushes wishlist/share to the right on wide screens */}
+              <div className="flex-1 hidden sm:block" />
+
               <Button
                 variant="outline"
                 size="icon"
                 onClick={() => toggleWishlist(product.id)}
+                aria-label={wishlistItems.includes(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
+                aria-pressed={wishlistItems.includes(product.id)}
                 className={cn(
-                  'h-14 w-14 rounded-full border-black/10 transition-all',
-                  wishlistItems.includes(product.id) ? 'text-[#FF5F6D] bg-[#FF5F6D]/10 border-[#FF5F6D]/30' : 'text-[#0a0a0a] hover:bg-black/5',
+                  'h-12 w-12 rounded-full border-black/[0.07] transition-all shrink-0',
+                  wishlistItems.includes(product.id)
+                    ? 'text-[#FF5F6D] bg-[#FF5F6D]/10 border-[#FF5F6D]/30'
+                    : 'text-[#0a0a0a] hover:bg-black/[0.04]',
                 )}
               >
-                <Heart className={cn('w-6 h-6', wishlistItems.includes(product.id) && 'fill-current')} />
+                <Heart className={cn('w-5 h-5', wishlistItems.includes(product.id) && 'fill-current')} />
               </Button>
-              <Button variant="outline" size="icon" className="h-14 w-14 rounded-full border-black/10 text-[#0a0a0a] hover:bg-black/5">
-                <Share2 className="w-6 h-6" />
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={async () => {
+                  try {
+                    if (navigator.share) {
+                      await navigator.share({ title: product.title, url: window.location.href });
+                    } else if (navigator.clipboard) {
+                      await navigator.clipboard.writeText(window.location.href);
+                    }
+                  } catch {
+                    /* user cancelled */
+                  }
+                }}
+                aria-label="Share"
+                className="h-12 w-12 rounded-full border-black/[0.07] text-[#0a0a0a] hover:bg-black/[0.04] shrink-0"
+              >
+                <Share2 className="w-5 h-5" />
               </Button>
             </div>
+
+            <Button
+              onClick={() => addToCart({ ...product, quantity, type: 'product' } as any)}
+              className="w-full rounded-full bg-[#0a0a0a] text-white hover:bg-black font-semibold text-base sm:text-lg shadow-[0_10px_30px_-10px_rgba(10,10,10,0.4)] transition-all hover:scale-[1.01] active:scale-[0.99] h-13"
+              style={{ height: '3.25rem' }}
+            >
+              <ShoppingCart className="w-5 h-5 mr-2.5" />
+              <span className="truncate">
+                Add to Cart · {formatPrice(product.price * quantity)}
+              </span>
+            </Button>
+
+            <p className="text-[11px] sm:text-xs text-center text-[#525252] leading-relaxed">
+              <span className="text-[#0a0a0a] font-semibold">Free shipping</span> over $50 · 30-day returns · Secure Stripe checkout
+            </p>
           </div>
 
-          {/* Trust Points */}
-          <div className="grid grid-cols-2 gap-4 mt-8">
-            <div className="flex items-center gap-3 p-4 rounded-2xl bg-black/5 border border-black/10">
+          {/* Trust strip */}
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 mt-6 sm:mt-8">
+            <div className="flex flex-col items-center gap-1.5 sm:gap-2 px-2 py-3 sm:p-4 rounded-2xl bg-white border border-black/[0.06] text-center">
               <Truck className="w-5 h-5 text-[#4DA8FF]" />
-              <div className="text-xs">
-                <div className="font-bold text-[#0a0a0a]">Free Shipping</div>
-                <div className="text-[#525252]">On orders over $50</div>
-              </div>
+              <div className="text-[10px] sm:text-[11px] font-semibold text-[#0a0a0a] leading-tight">Free shipping</div>
             </div>
-            <div className="flex items-center gap-3 p-4 rounded-2xl bg-black/5 border border-black/10">
+            <div className="flex flex-col items-center gap-1.5 sm:gap-2 px-2 py-3 sm:p-4 rounded-2xl bg-white border border-black/[0.06] text-center">
               <ShieldCheck className="w-5 h-5 text-[#5BE37D]" />
-              <div className="text-xs">
-                <div className="font-bold text-[#0a0a0a]">Secure Payment</div>
-                <div className="text-[#525252]">100% Protected</div>
-              </div>
+              <div className="text-[10px] sm:text-[11px] font-semibold text-[#0a0a0a] leading-tight">Secure pay</div>
+            </div>
+            <div className="flex flex-col items-center gap-1.5 sm:gap-2 px-2 py-3 sm:p-4 rounded-2xl bg-white border border-black/[0.06] text-center">
+              <ExternalLink className="w-5 h-5 text-[#B067FF]" />
+              <div className="text-[10px] sm:text-[11px] font-semibold text-[#0a0a0a] leading-tight">30-day return</div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Tabs */}
-      <Tabs defaultValue="features" className="mt-20">
-        <TabsList className="bg-transparent border-b border-black/10 w-full justify-start rounded-none h-auto p-0 gap-8">
-          <TabsTrigger value="features" className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#FFD93D] data-[state=active]:bg-transparent text-lg font-bold pb-4 transition-all">Features</TabsTrigger>
-          <TabsTrigger value="specs" className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#FF9A3C] data-[state=active]:bg-transparent text-lg font-bold pb-4 transition-all">Specifications</TabsTrigger>
-          <TabsTrigger value="reviews" className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#FF5F6D] data-[state=active]:bg-transparent text-lg font-bold pb-4 transition-all">Reviews</TabsTrigger>
-          <TabsTrigger value="shipping" className="rounded-none border-b-2 border-transparent data-[state=active]:border-[#B067FF] data-[state=active]:bg-transparent text-lg font-bold pb-4 transition-all">Shipping &amp; Returns</TabsTrigger>
-        </TabsList>
-        <TabsContent value="features" className="mt-8 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            <div className="space-y-4">
-              <h3 className="text-2xl font-bold text-[#0a0a0a]">Why kids love it</h3>
+      {/* Tabs — full-width section below the gallery/info pair */}
+      <Tabs defaultValue="features" className="mt-16 sm:mt-24">
+        <div className="border-b border-black/[0.07] overflow-x-auto scrollbar-hidden -mx-4 px-4 sm:mx-0 sm:px-0">
+          <TabsList className="bg-transparent border-0 w-full justify-start rounded-none h-auto p-0 gap-6 sm:gap-10 inline-flex">
+            <TabsTrigger
+              value="features"
+              className="relative rounded-none border-b-2 border-transparent data-active:border-[#FFD93D] data-active:bg-transparent text-sm sm:text-base font-semibold pb-3 sm:pb-4 transition-all whitespace-nowrap text-[#525252] data-active:text-[#0a0a0a] flex-none"
+            >
+              Features
+            </TabsTrigger>
+            <TabsTrigger
+              value="specs"
+              className="relative rounded-none border-b-2 border-transparent data-active:border-[#FF9A3C] data-active:bg-transparent text-sm sm:text-base font-semibold pb-3 sm:pb-4 transition-all whitespace-nowrap text-[#525252] data-active:text-[#0a0a0a] flex-none"
+            >
+              Specifications
+            </TabsTrigger>
+            <TabsTrigger
+              value="reviews"
+              className="relative rounded-none border-b-2 border-transparent data-active:border-[#FF5F6D] data-active:bg-transparent text-sm sm:text-base font-semibold pb-3 sm:pb-4 transition-all whitespace-nowrap text-[#525252] data-active:text-[#0a0a0a] flex-none"
+            >
+              Reviews{product.reviews > 0 ? ` · ${product.reviews}` : ''}
+            </TabsTrigger>
+            <TabsTrigger
+              value="shipping"
+              className="relative rounded-none border-b-2 border-transparent data-active:border-[#B067FF] data-active:bg-transparent text-sm sm:text-base font-semibold pb-3 sm:pb-4 transition-all whitespace-nowrap text-[#525252] data-active:text-[#0a0a0a] flex-none"
+            >
+              Shipping &amp; Returns
+            </TabsTrigger>
+          </TabsList>
+        </div>
+
+        <TabsContent value="features" className="mt-8 sm:mt-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 lg:gap-14">
+            <div className="space-y-4 sm:space-y-5">
+              <h3 className="text-xl sm:text-2xl font-bold text-[#0a0a0a]">Why kids love it</h3>
               <p className="text-[#525252] leading-relaxed">
                 Designed to inspire. Vibrant pigments flow smoothly and blend like magic — just like the rainbow background of our world.
               </p>
-              <ul className="space-y-2">
+              <ul className="space-y-2.5">
                 {FEATURES.map((f, i) => (
-                  <li key={i} className="flex items-center gap-2 text-[#0a0a0a]">
-                    <CheckCircle2 className="w-4 h-4 text-[#5BE37D]" /> {f}
+                  <li key={i} className="flex items-start gap-2.5 text-sm sm:text-base text-[#0a0a0a]">
+                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-[#5BE37D] shrink-0 mt-0.5" />
+                    <span>{f}</span>
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="p-8 rounded-[2.5rem] bg-black/5 border border-black/10">
-              <h3 className="text-xl font-bold text-[#0a0a0a] mb-4">Educational Value</h3>
-              <p className="text-[#525252]">
+            <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-black/[0.03] to-black/[0.07] border border-black/[0.08]">
+              <h3 className="text-lg sm:text-xl font-bold text-[#0a0a0a] mb-3 sm:mb-4">Educational Value</h3>
+              <p className="text-sm sm:text-base text-[#525252] leading-relaxed">
                 Crafted with educators to promote fine motor skills and color recognition for ages 3–8.
               </p>
             </div>
           </div>
         </TabsContent>
-        <TabsContent value="specs" className="mt-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-[#525252]">
-            <div className="flex justify-between border-b border-black/10 pb-3">
-              <span>SKU</span><span className="text-[#0a0a0a] font-mono text-xs">{product.id}</span>
+
+        <TabsContent value="specs" className="mt-8 sm:mt-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-3 max-w-3xl">
+            <div className="flex justify-between gap-4 border-b border-black/[0.08] py-3">
+              <span className="text-[#525252] text-sm sm:text-base">SKU</span>
+              <span className="text-[#0a0a0a] font-mono text-xs sm:text-sm truncate" title={product.id}>{product.id}</span>
             </div>
-            <div className="flex justify-between border-b border-black/10 pb-3">
-              <span>Category</span><span className="text-[#0a0a0a]">{product.category}</span>
+            <div className="flex justify-between gap-4 border-b border-black/[0.08] py-3">
+              <span className="text-[#525252] text-sm sm:text-base">Category</span>
+              <span className="text-[#0a0a0a] text-sm sm:text-base">{product.category}</span>
             </div>
-            <div className="flex justify-between border-b border-black/10 pb-3">
-              <span>Handle</span><span className="text-[#0a0a0a] font-mono text-xs">{product.handle}</span>
+            <div className="flex justify-between gap-4 border-b border-black/[0.08] py-3">
+              <span className="text-[#525252] text-sm sm:text-base">Handle</span>
+              <span className="text-[#0a0a0a] font-mono text-xs sm:text-sm truncate" title={product.handle}>{product.handle}</span>
             </div>
-            <div className="flex justify-between border-b border-black/10 pb-3">
-              <span>Status</span><span className="text-[#0a0a0a]">{product.status}</span>
+            <div className="flex justify-between gap-4 border-b border-black/[0.08] py-3">
+              <span className="text-[#525252] text-sm sm:text-base">Status</span>
+              <span className="text-[#0a0a0a] text-sm sm:text-base">{product.status}</span>
             </div>
           </div>
         </TabsContent>
-        <TabsContent value="reviews" className="mt-8">
+
+        <TabsContent value="reviews" className="mt-8 sm:mt-10">
           <ReviewsTab productId={product.id} />
         </TabsContent>
-        <TabsContent value="shipping" className="mt-8 space-y-4 text-[#525252]">
-          <p>Free standard shipping on orders over $50. Most orders ship within 1–2 business days.</p>
-          <p>Returns accepted within 30 days of delivery in original condition.</p>
+
+        <TabsContent value="shipping" className="mt-8 sm:mt-10">
+          <div className="max-w-3xl space-y-4 text-sm sm:text-base text-[#525252] leading-relaxed">
+            <p>Free standard shipping on orders over $50. Most orders ship within 1–2 business days.</p>
+            <p>Returns accepted within 30 days of delivery in original condition.</p>
+          </div>
         </TabsContent>
       </Tabs>
     </motion.div>

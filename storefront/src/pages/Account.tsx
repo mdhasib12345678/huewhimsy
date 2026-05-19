@@ -35,9 +35,9 @@ export const Account: React.FC = () => {
 
   if (authLoading) {
     return (
-      <div className="container mx-auto px-4 py-32 flex flex-col items-center gap-6 text-[#525252]">
-        <Loader2 className="w-10 h-10 animate-spin text-[#FFD93D]" />
-        <p>Checking your magic credentials…</p>
+      <div className="container-page section-y-lg flex flex-col items-center gap-5 text-[#525252]">
+        <Loader2 className="w-9 h-9 animate-spin text-[#FF9A3C]" />
+        <p className="text-sm">Checking your credentials…</p>
       </div>
     );
   }
@@ -106,25 +106,25 @@ const AuthForms: React.FC<{
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="container mx-auto px-4 py-12 md:py-20 max-w-xl"
+      className="container-page section-y max-w-xl"
     >
-      <div className="text-center mb-12 space-y-3">
-        <h1 className="text-4xl font-bold text-[#0a0a0a] tracking-tight">Welcome to HueWhimsy</h1>
-        <p className="text-[#525252]">Sign in to track orders, save favorites, and pick up where you left off.</p>
+      <div className="text-center mb-8 sm:mb-10 space-y-2">
+        <h1 className="text-3xl sm:text-4xl font-bold text-[#0a0a0a] tracking-tight">Welcome to HueWhimsy</h1>
+        <p className="text-sm sm:text-base text-[#525252]">Sign in to track orders, save favorites, and pick up where you left off.</p>
       </div>
 
-      <Card className="border-black/10 bg-black/5 backdrop-blur-xl p-8 rounded-[2.5rem]">
+      <Card className="border border-black/[0.07] bg-white p-6 sm:p-8 rounded-3xl shadow-sm">
         <Tabs value={tab} onValueChange={(v) => setTab(v as 'login' | 'register')}>
-          <TabsList className="w-full grid grid-cols-2 bg-black/5 rounded-full h-12 p-1 mb-8">
+          <TabsList className="w-full grid grid-cols-2 bg-black/[0.04] rounded-full h-12 p-1 mb-6 sm:mb-8">
             <TabsTrigger
               value="login"
-              className="rounded-full data-[state=active]:bg-white data-[state=active]:text-black text-[#0a0a0a]"
+              className="rounded-full data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm text-sm font-semibold text-[#525252]"
             >
               <LogIn className="w-4 h-4 mr-2" /> Sign In
             </TabsTrigger>
             <TabsTrigger
               value="register"
-              className="rounded-full data-[state=active]:bg-white data-[state=active]:text-black text-[#0a0a0a]"
+              className="rounded-full data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm text-sm font-semibold text-[#525252]"
             >
               <UserPlus className="w-4 h-4 mr-2" /> Create Account
             </TabsTrigger>
@@ -140,7 +140,7 @@ const AuthForms: React.FC<{
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="bg-black/5 border-black/10 rounded-xl h-12 text-[#0a0a0a] focus:ring-[#FFD93D]"
+                  className="bg-white border-black/10 rounded-xl h-12 text-[#0a0a0a] focus-visible:ring-2 focus-visible:ring-[#FFD93D]/40 focus-visible:border-[#FFD93D]"
                 />
               </div>
               <div className="space-y-2">
@@ -151,7 +151,7 @@ const AuthForms: React.FC<{
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="bg-black/5 border-black/10 rounded-xl h-12 text-[#0a0a0a] focus:ring-[#FFD93D]"
+                  className="bg-white border-black/10 rounded-xl h-12 text-[#0a0a0a] focus-visible:ring-2 focus-visible:ring-[#FFD93D]/40 focus-visible:border-[#FFD93D]"
                 />
               </div>
               {error && (
@@ -162,7 +162,7 @@ const AuthForms: React.FC<{
               <Button
                 type="submit"
                 disabled={busy}
-                className="w-full rounded-full h-12 bg-white text-black font-bold hover:bg-[#F5F5F5]"
+                className="w-full rounded-full h-12 bg-[#0a0a0a] text-white hover:bg-black font-semibold"
               >
                 {busy ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Sign In'}
               </Button>
@@ -178,7 +178,7 @@ const AuthForms: React.FC<{
                     value={regFirst}
                     onChange={(e) => setRegFirst(e.target.value)}
                     placeholder="Sarah"
-                    className="bg-black/5 border-black/10 rounded-xl h-12 text-[#0a0a0a] focus:ring-[#FFD93D]"
+                    className="bg-white border-black/10 rounded-xl h-12 text-[#0a0a0a] focus-visible:ring-2 focus-visible:ring-[#FFD93D]/40 focus-visible:border-[#FFD93D]"
                   />
                 </div>
                 <div className="space-y-2">
@@ -187,7 +187,7 @@ const AuthForms: React.FC<{
                     value={regLast}
                     onChange={(e) => setRegLast(e.target.value)}
                     placeholder="Explorer"
-                    className="bg-black/5 border-black/10 rounded-xl h-12 text-[#0a0a0a] focus:ring-[#FFD93D]"
+                    className="bg-white border-black/10 rounded-xl h-12 text-[#0a0a0a] focus-visible:ring-2 focus-visible:ring-[#FFD93D]/40 focus-visible:border-[#FFD93D]"
                   />
                 </div>
               </div>
@@ -199,7 +199,7 @@ const AuthForms: React.FC<{
                   value={regEmail}
                   onChange={(e) => setRegEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="bg-black/5 border-black/10 rounded-xl h-12 text-[#0a0a0a] focus:ring-[#FFD93D]"
+                  className="bg-white border-black/10 rounded-xl h-12 text-[#0a0a0a] focus-visible:ring-2 focus-visible:ring-[#FFD93D]/40 focus-visible:border-[#FFD93D]"
                 />
               </div>
               <div className="space-y-2">
@@ -211,7 +211,7 @@ const AuthForms: React.FC<{
                   value={regPassword}
                   onChange={(e) => setRegPassword(e.target.value)}
                   placeholder="At least 8 characters"
-                  className="bg-black/5 border-black/10 rounded-xl h-12 text-[#0a0a0a] focus:ring-[#FFD93D]"
+                  className="bg-white border-black/10 rounded-xl h-12 text-[#0a0a0a] focus-visible:ring-2 focus-visible:ring-[#FFD93D]/40 focus-visible:border-[#FFD93D]"
                 />
               </div>
               {error && (
@@ -222,7 +222,7 @@ const AuthForms: React.FC<{
               <Button
                 type="submit"
                 disabled={busy}
-                className="w-full rounded-full h-12 bg-white text-black font-bold hover:bg-[#F5F5F5]"
+                className="w-full rounded-full h-12 bg-[#0a0a0a] text-white hover:bg-black font-semibold"
               >
                 {busy ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Create Account'}
               </Button>
@@ -273,86 +273,97 @@ const SignedInDashboard: React.FC<{
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="container mx-auto px-4 py-12 md:py-24"
+      className="container-page section-y"
     >
       {/* Profile Header */}
-      <section className="flex flex-col md:flex-row items-center gap-10 mb-20 bg-black/5 border border-black/10 rounded-[3rem] p-12 backdrop-blur-xl">
-        <div className="w-32 h-32 rounded-full bg-gradient-to-tr from-[#FF5F6D] to-[#B067FF] flex items-center justify-center border-4 border-black/10 shadow-2xl">
-          <User className="w-16 h-16 text-[#0a0a0a]" />
-        </div>
+      <section className="bg-white border border-black/[0.07] rounded-2xl sm:rounded-3xl p-5 sm:p-8 lg:p-10 mb-10 sm:mb-14 shadow-sm">
+        <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6 lg:gap-8">
+          {/* Avatar */}
+          <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 shrink-0 rounded-full bg-gradient-to-tr from-[#FF5F6D] via-[#FF9A3C] to-[#B067FF] flex items-center justify-center shadow-[0_10px_30px_-10px_rgba(255,95,109,0.5)]">
+            <span className="text-2xl sm:text-3xl font-bold text-white">
+              {(user.firstName?.[0] || user.email[0]).toUpperCase()}
+            </span>
+          </div>
 
-        <div className="flex-grow text-center md:text-left space-y-2">
-          <div className="flex flex-col sm:flex-row items-baseline gap-4">
-            <h1 className="text-4xl font-bold text-[#0a0a0a] tracking-tight">
-              Welcome Back, {(user.firstName || user.name).split(' ')[0]}
-            </h1>
-            <Badge className="bg-[#FFD93D] text-black">Verified Member</Badge>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm mt-4">
-            <div className="space-y-1">
-              <p className="text-[10px] uppercase font-bold tracking-widest text-[#525252]">Username</p>
-              <p className="text-[#0a0a0a] font-mono">{user.username}</p>
+          {/* Identity */}
+          <div className="flex-grow text-center lg:text-left min-w-0 w-full">
+            <div className="flex flex-col sm:flex-row sm:items-baseline justify-center lg:justify-start gap-2 sm:gap-3 mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#0a0a0a] tracking-tight truncate">
+                Welcome back, {(user.firstName || user.name).split(' ')[0]}
+              </h1>
+              <Badge className="bg-[#FFD93D]/20 text-[#0a0a0a] border border-[#FFD93D]/40 self-center sm:self-auto">
+                Verified Member
+              </Badge>
             </div>
-            <div className="space-y-1">
-              <p className="text-[10px] uppercase font-bold tracking-widest text-[#525252]">Customer ID</p>
-              <p className="text-[#FF9A3C] font-mono font-bold">{user.customerId.slice(-10)}</p>
-            </div>
-            <div className="space-y-1 sm:col-span-2">
-              <p className="text-[10px] uppercase font-bold tracking-widest text-[#525252]">Email Address</p>
-              <p className="text-[#525252]">{user.email}</p>
-            </div>
-          </div>
-          <div className="flex flex-wrap justify-center md:justify-start gap-4 mt-8">
-            <Button variant="outline" size="sm" className="rounded-full border-black/10 hover:bg-black/5 text-[#0a0a0a]">
-              Edit Profile
-            </Button>
-            <Button onClick={() => logout()} variant="outline" size="sm" className="rounded-full border-red-500/20 hover:bg-red-500/10 text-red-400">
-              <LogOut className="w-4 h-4 mr-2" /> Logout
-            </Button>
-          </div>
-        </div>
+            <p className="text-sm text-[#525252] mb-4 break-all">{user.email}</p>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-black/5 p-4 rounded-2xl border border-black/10 text-center w-32">
-            <p className="text-3xl font-bold text-[#0a0a0a]">{orders.length}</p>
-            <p className="text-[10px] uppercase font-bold tracking-widest text-[#525252]">Orders</p>
-          </div>
-          <div className="bg-black/5 p-4 rounded-2xl border border-black/10 text-center w-32">
-            <p className="text-3xl font-bold text-[#5BE37D]">0</p>
-            <p className="text-[10px] uppercase font-bold tracking-widest text-[#525252]">Downloads</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mt-5">
+              <div className="bg-black/[0.03] p-3 rounded-xl border border-black/[0.05] text-center">
+                <p className="text-xl sm:text-2xl font-bold text-[#0a0a0a]">{orders.length}</p>
+                <p className="text-[9px] sm:text-[10px] uppercase font-bold tracking-widest text-[#525252]">Orders</p>
+              </div>
+              <div className="bg-black/[0.03] p-3 rounded-xl border border-black/[0.05] text-center">
+                <p className="text-xl sm:text-2xl font-bold text-[#5BE37D]">0</p>
+                <p className="text-[9px] sm:text-[10px] uppercase font-bold tracking-widest text-[#525252]">Downloads</p>
+              </div>
+              <div className="bg-black/[0.03] p-3 rounded-xl border border-black/[0.05] text-center hidden sm:block">
+                <p className="text-xl sm:text-2xl font-bold text-[#4DA8FF]">0</p>
+                <p className="text-[9px] sm:text-[10px] uppercase font-bold tracking-widest text-[#525252]">Wishlist</p>
+              </div>
+              <div className="bg-black/[0.03] p-3 rounded-xl border border-black/[0.05] text-center hidden sm:block">
+                <p className="text-xl sm:text-2xl font-bold text-[#B067FF] font-mono">
+                  {user.customerId.slice(-6).toUpperCase()}
+                </p>
+                <p className="text-[9px] sm:text-[10px] uppercase font-bold tracking-widest text-[#525252]">ID</p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap justify-center lg:justify-start gap-2 mt-5 sm:mt-6">
+              <Button variant="outline" size="sm" className="rounded-full border-black/10 hover:bg-black/[0.04] text-[#0a0a0a] h-9 text-xs">
+                Edit Profile
+              </Button>
+              <Button
+                onClick={() => logout()}
+                variant="outline"
+                size="sm"
+                className="rounded-full border-red-200 hover:bg-red-50 text-red-500 h-9 text-xs"
+              >
+                <LogOut className="w-3.5 h-3.5 mr-1.5" /> Logout
+              </Button>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Orders */}
-      <section className="mb-20">
-        <h2 className="text-2xl font-bold text-[#0a0a0a] mb-6">Your Orders</h2>
+      <section className="mb-10 sm:mb-14">
+        <h2 className="text-xl sm:text-2xl font-bold text-[#0a0a0a] mb-4 sm:mb-5">Your Orders</h2>
         {ordersLoading ? (
-          <div className="text-[#525252] flex items-center gap-2">
+          <div className="text-[#525252] flex items-center gap-2 text-sm">
             <Loader2 className="w-4 h-4 animate-spin" /> Loading orders…
           </div>
         ) : orders.length === 0 ? (
-          <Card className="border-black/10 bg-black/5 backdrop-blur-xl p-10 text-center">
-            <Package className="w-12 h-12 text-[#0a0a0a]/10 mx-auto mb-4" />
-            <p className="text-[#525252]">No orders yet — explore the shop to start a magic adventure.</p>
+          <Card className="border border-black/[0.07] bg-white p-8 sm:p-10 text-center rounded-2xl sm:rounded-3xl">
+            <Package className="w-10 h-10 sm:w-12 sm:h-12 text-[#0a0a0a]/15 mx-auto mb-3 sm:mb-4" />
+            <p className="text-sm sm:text-base text-[#525252]">No orders yet — explore the shop to start your first adventure.</p>
           </Card>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {orders.map((o) => (
-              <Card key={o.id} className="border-black/10 bg-black/5 backdrop-blur-xl">
-                <CardContent className="p-6 flex flex-wrap items-center gap-4">
-                  <div className="flex-grow">
-                    <p className="text-[#0a0a0a] font-bold">
+              <Card key={o.id} className="border border-black/[0.07] bg-white rounded-2xl">
+                <CardContent className="p-4 sm:p-5 flex flex-wrap items-center gap-3 sm:gap-4">
+                  <div className="flex-grow min-w-0">
+                    <p className="text-[#0a0a0a] font-bold text-sm sm:text-base">
                       Order #{o.display_id ?? o.id.slice(-8)}
                     </p>
                     <p className="text-xs text-[#525252]">
                       {new Date(o.created_at).toLocaleDateString()} · {o.status}
                     </p>
                   </div>
-                  <Badge className="bg-black/5 text-[#0a0a0a] border-black/20">
+                  <Badge className="bg-black/[0.04] text-[#0a0a0a] border border-black/[0.06] text-[10px]">
                     {o.payment_status ?? 'pending'}
                   </Badge>
-                  <span className="text-[#0a0a0a] font-bold text-lg">
+                  <span className="text-[#0a0a0a] font-bold text-base sm:text-lg">
                     {formatPrice(o.total, o.currency_code?.toUpperCase() || 'USD')}
                   </span>
                 </CardContent>
@@ -363,7 +374,7 @@ const SignedInDashboard: React.FC<{
       </section>
 
       {/* Account Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {menuItems.map((item, i) => (
           <motion.div
             key={i}
@@ -371,14 +382,14 @@ const SignedInDashboard: React.FC<{
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
           >
-            <Card className="h-full border-black/10 bg-black/5 hover:bg-black/5 hover:border-black/20 transition-all cursor-pointer group">
-              <CardContent className="p-8 flex flex-col items-center text-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-black/5 flex items-center justify-center border border-black/10 group-hover:bg-[#FFD93D]/10 group-hover:border-[#FFD93D]/30 transition-all">
-                  <item.icon className="w-6 h-6 text-[#525252] group-hover:text-[#FFD93D] transition-colors" />
+            <Card className="h-full border border-black/[0.07] bg-white hover:border-black/[0.15] hover:shadow-md transition-all cursor-pointer group rounded-2xl">
+              <CardContent className="p-4 sm:p-6 flex flex-col items-center text-center gap-3 sm:gap-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-black/[0.04] flex items-center justify-center group-hover:bg-[#FFD93D]/10 transition-all">
+                  <item.icon className="w-5 h-5 sm:w-6 sm:h-6 text-[#525252] group-hover:text-[#FF9A3C] transition-colors" />
                 </div>
                 <div>
-                  <h4 className="text-lg font-bold text-[#0a0a0a] mb-2">{item.label}</h4>
-                  <p className="text-xs text-[#525252] leading-relaxed">{item.desc}</p>
+                  <h4 className="text-sm sm:text-base font-bold text-[#0a0a0a] mb-1 sm:mb-1.5">{item.label}</h4>
+                  <p className="text-[11px] sm:text-xs text-[#525252] leading-relaxed hidden sm:block">{item.desc}</p>
                 </div>
               </CardContent>
             </Card>
@@ -387,20 +398,20 @@ const SignedInDashboard: React.FC<{
       </div>
 
       {/* Security Banner */}
-      <section className="mt-20">
-        <Card className="border-black/10 bg-white shadow-sm p-12 rounded-[3rem] flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="flex items-center gap-8">
-            <div className="w-20 h-20 rounded-full bg-[#5BE37D]/10 flex items-center justify-center">
-              <ShieldCheck className="w-10 h-10 text-[#5BE37D]" />
+      <section className="mt-10 sm:mt-14">
+        <Card className="border border-black/[0.07] bg-gradient-to-br from-[#5BE37D]/8 to-[#4DA8FF]/8 shadow-sm p-6 sm:p-10 rounded-2xl sm:rounded-3xl flex flex-col lg:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-4 sm:gap-6 text-center sm:text-left">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white border border-black/[0.07] flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-7 sm:w-8 h-7 sm:h-8 text-[#5BE37D]" />
             </div>
-            <div>
-              <h3 className="text-2xl font-bold text-[#0a0a0a] mb-2">Your Data is Secure</h3>
-              <p className="text-[#525252] max-w-md">
-                We use industry-leading encryption to keep your magic adventures and personal details safe at all times.
+            <div className="text-center sm:text-left">
+              <h3 className="text-lg sm:text-xl font-bold text-[#0a0a0a] mb-1">Your data is secure</h3>
+              <p className="text-xs sm:text-sm text-[#525252] max-w-md">
+                Industry-leading encryption keeps your adventures and personal details safe.
               </p>
             </div>
           </div>
-          <Button size="lg" variant="outline" className="rounded-full border-black/20 text-[#0a0a0a] px-8">
+          <Button variant="outline" className="rounded-full border-black/15 text-[#0a0a0a] hover:bg-black/[0.04] px-6 h-11 text-sm font-semibold shrink-0">
             View Privacy Policy
           </Button>
         </Card>

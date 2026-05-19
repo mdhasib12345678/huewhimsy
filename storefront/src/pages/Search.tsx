@@ -101,26 +101,27 @@ export const Search: React.FC = () => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="container mx-auto px-4 py-12 md:py-24"
+      className="container-page section-y"
     >
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl md:text-6xl font-bold text-[#0a0a0a] mb-12">Search</h1>
+      <div className="max-w-3xl mx-auto">
+        <h1 className="fluid-h1 font-bold text-[#0a0a0a] mb-6 sm:mb-10 text-center">Search</h1>
 
-        <div className="relative mb-16">
-          <SearchIcon className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-[#525252]" />
+        <div className="relative mb-10 sm:mb-12">
+          <SearchIcon className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#525252]" />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search books, activities, or topics..."
-            className="w-full h-20 pl-16 pr-8 text-xl bg-black/5 border-black/10 text-[#0a0a0a] rounded-[2rem] focus-visible:ring-[#FFD93D] shadow-2xl"
+            placeholder="Search books, activities, or topics…"
+            className="w-full h-14 sm:h-16 pl-13 pr-6 text-base sm:text-lg bg-white border-black/10 text-[#0a0a0a] rounded-full focus-visible:ring-2 focus-visible:ring-[#FFD93D]/40 focus-visible:border-[#FFD93D] shadow-sm"
+            style={{ paddingLeft: '3.25rem' }}
           />
           {loading && (
-            <Loader2 className="absolute right-6 top-1/2 -translate-y-1/2 w-5 h-5 animate-spin text-[#FFD93D]" />
+            <Loader2 className="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 animate-spin text-[#FF9A3C]" />
           )}
         </div>
 
-        <div className="space-y-6">
-          <h2 className="text-[#525252] text-sm uppercase tracking-widest font-bold mb-4">
+        <div className="space-y-4 sm:space-y-5">
+          <h2 className="text-[#525252] text-xs uppercase tracking-widest font-bold mb-3 sm:mb-4">
             {debounced ? `Results for "${debounced}"` : 'Browse everything'}
           </h2>
 
@@ -133,39 +134,37 @@ export const Search: React.FC = () => {
           {merged.map((result, i) => (
             <motion.div
               key={result.id}
-              initial={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, x: -16 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: Math.min(i * 0.05, 0.4) }}
+              transition={{ delay: Math.min(i * 0.04, 0.3) }}
             >
               <Card
                 onClick={() => navigate(result.href)}
-                className="border-black/10 bg-black/5 hover:bg-black/5 transition-all cursor-pointer group"
+                className="border border-black/[0.07] bg-white hover:border-black/[0.15] hover:shadow-md transition-all cursor-pointer group rounded-2xl"
               >
-                <CardContent className="p-8 flex flex-col md:flex-row items-center gap-8">
-                  <div className="w-16 h-16 rounded-2xl bg-black/5 border border-black/10 flex items-center justify-center shrink-0">
-                    {result.type === 'Book' && <Book className="w-8 h-8 text-[#FF5F6D]" />}
-                    {result.type === 'Blog' && <FileText className="w-8 h-8 text-[#5BE37D]" />}
-                    {result.type === 'Activity' && <Palette className="w-8 h-8 text-[#4DA8FF]" />}
+                <CardContent className="p-4 sm:p-5 flex items-center gap-3 sm:gap-5">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-black/[0.03] border border-black/[0.07] flex items-center justify-center shrink-0">
+                    {result.type === 'Book' && <Book className="w-5 h-5 sm:w-6 sm:h-6 text-[#FF5F6D]" />}
+                    {result.type === 'Blog' && <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-[#5BE37D]" />}
+                    {result.type === 'Activity' && <Palette className="w-5 h-5 sm:w-6 sm:h-6 text-[#4DA8FF]" />}
                   </div>
 
-                  <div className="flex-grow text-center md:text-left">
-                    <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
-                      <h3 className="text-2xl font-bold text-[#0a0a0a] group-hover:text-[#FFD93D] transition-colors">
+                  <div className="flex-grow min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="text-base sm:text-lg font-bold text-[#0a0a0a] group-hover:text-[#FF5F6D] transition-colors line-clamp-1">
                         {result.title}
                       </h3>
-                      <Badge className="bg-black/5 text-[#525252] border-black/20 uppercase tracking-tighter text-[9px]">
+                      <Badge className="bg-black/[0.04] text-[#525252] border border-black/[0.06] uppercase tracking-tighter text-[9px]">
                         {result.type}
                       </Badge>
                     </div>
-                    <p className="text-[#525252] line-clamp-2">{result.desc}</p>
+                    <p className="text-xs sm:text-sm text-[#525252] line-clamp-2">{result.desc}</p>
                     {typeof result.price === 'number' && result.price > 0 && (
-                      <p className="text-[#0a0a0a] font-bold mt-2">{formatPrice(result.price)}</p>
+                      <p className="text-sm text-[#0a0a0a] font-bold mt-1.5">{formatPrice(result.price)}</p>
                     )}
                   </div>
 
-                  <Button variant="ghost" className="rounded-full text-[#0a0a0a] hover:bg-black/5 group">
-                    View <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </Button>
+                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-[#525252] group-hover:text-[#0a0a0a] group-hover:translate-x-1 transition-all shrink-0" />
                 </CardContent>
               </Card>
             </motion.div>
